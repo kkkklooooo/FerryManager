@@ -101,7 +101,7 @@ void Plant::Reproduce()
 void Plant::Step()
 {
     
-    std::printf("Plant %d is at (%d, %d) with energy %f\n", id, Pos.first, Pos.second, energy);
+    // std::printf("Plant %d is at (%d, %d) with energy %f\n", id, Pos.first, Pos.second, energy);
 }
 
 void World::Update()
