@@ -92,4 +92,3 @@ World& World::GetWorld()
     static World Instance(len,weight);
     return Instance;
 }
-

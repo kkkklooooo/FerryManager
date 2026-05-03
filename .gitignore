@@ -2,3 +2,4 @@ modules
 *.exe
 .vscode
 .vs
+*.obj

@@ -1,17 +1,18 @@
 #pragma once
-#include"Registry.h"
-#include"Organism.h"
+#include "Registry.h"
+#include "Organism.h"
 #include <utility>
 const float EnvironmentEnergyAbsorbRate=0.01;
 const float PlantAbsortRate = 0.2;
 
-class Environment {//环境大类
+class Environment
+{ // 环境大类
 
 public:
 	Environment(std::pair<int, int> pos,
-		float en,
-		EnvironmentType na,
-		int mp);
+				float en,
+				EnvironmentType na,
+				int mp);
 	std::pair<int, int> Pos;
 	float energy;
 	OrganismType type;
@@ -24,10 +25,11 @@ public:
 	virtual void Update(Weather)=0;//更新
 };
 
-class Water : public Environment {
+class Water : public Environment
+{
 public:
 	Water(std::pair<int, int> pos, float en, int mp, float V);
-	float Valum;//水的多少
+	float Valum; // 水的多少
 	void Update(Weather) override;
 };
 
@@ -38,5 +40,3 @@ public:
 		int maxPlant);
 	void Update(Weather)override;
 };
-
-
