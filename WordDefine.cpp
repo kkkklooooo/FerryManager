@@ -3,6 +3,16 @@
 #include"Environment.h"
 #include<algorithm>
 
+World::World(int len, int weigth) {
+    Reproducas.push_back(new Plant(id++, 5, 5, 3));
+    Reproducas.push_back(new Plant(id++, 4, 5, 3));
+    for (int i = 0; i <len; i++) {
+        for (int j = 0; j < weight; j++) {
+            Environments.push_back(new GressLand(std::make_pair(i, j), 10, 2));
+        }
+    }
+}
+
 void World::Update()
 {
     //杀死死了的东西
@@ -19,14 +29,14 @@ void World::Update()
     }
     //排序
     std::sort(Reproducas.begin(), Reproducas.end(), [](Reproducable* a, Reproducable* b) {
-        return ((a->Pos.first == b->Pos.first) ?
-            (a->Pos.second >= b->Pos.second) :
-            (a->Pos.first >= b->Pos.first));
+        if (a->Pos.first != b->Pos.first)
+            return a->Pos.first < b->Pos.first;
+        return a->Pos.second < b->Pos.second;
         });
 
     //植物和环境交互
     for (auto i : Reproducas) {
-        Environments[i->Pos.first][i->Pos.second].EnergyExchange(i);
+        Environments[i->Pos.first*weight+i->Pos.second]->EnergyExchange(i);
     }
     //捕食和生孩子
     for (auto i = Reproducas.begin(); i != Reproducas.end(); i++) {
@@ -54,9 +64,14 @@ void World::Reproduce()
  * @brief 向世界添加一个繁殖请求
  * @param request 繁殖请求结构体
  */
-void World::AddReproduceRequest(const ReproduceRequest& request)
+bool  World::AddReproduceRequest(const ReproduceRequest& request)
 {
-    reproduce_requests.push_back(request);
+    //能生
+    if (Environments[request.pos.first * len + request.pos.second]->canPlant(request)) {
+        reproduce_requests.push_back(request);
+        return true;
+    }
+    return false;
 }
 
 /**
@@ -74,7 +89,7 @@ void World::RemoveDeadOrganisms()
  */
 World& World::GetWorld()
 {
-    static World Instance;
+    static World Instance(len,weight);
     return Instance;
 }
 

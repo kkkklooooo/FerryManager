@@ -11,7 +11,7 @@ int id = 0;
 //工厂函数 根据request返回对应指针
 Reproducable* ReprodueNewOrganism(ReproduceRequest request) {
     if (request.type == PLANT) {
-        return new Plant(id, request.pos.first, request.pos.second, request.radius);
+        return new Plant(id++, request.pos.first, request.pos.second, request.radius);
     }
     else//TODO 动物和资源的实现
     {
@@ -101,11 +101,11 @@ Reproducable::Reproducable(float energy_threshold, float energy_cost, int radius
  */
 
 Plant::Plant(int id, int x, int y, int radius)
-    : Reproducable(0.5, 0.1, radius, 0.01, PLANT)
+    : Reproducable(0.5, 1, radius, 1, PLANT)
 {
     this->id = id;
     Pos = std::make_pair(x, y);
-    reproduce_able = true;            // 植物始终可以繁殖（只要能量足够）
+    reproduce_able = (id%2)?true:false;            // 植物始终可以繁殖（只要能量足够）
 }
 
 /**
@@ -114,21 +114,26 @@ Plant::Plant(int id, int x, int y, int radius)
 
 void Plant::Reproduce()
 {
-    if (!active) {//死了就不能活着
+    if (!active || !reproduce_able) {//死了就不能活着
         return;
     }
+    if (energy < reproduce_energy_threshold) { 
+
+        return; 
+    }
+    energy -= reproduce_energy_cost;
     int x = Pos.first;
     int y = Pos.second;
     // 在 [-reproduce_radius, +reproduce_radius] 范围内随机偏移
     int x_new = x + std::rand() % (2 * reproduce_radius + 1) - reproduce_radius;
     int y_new = y + std::rand() % (2 * reproduce_radius + 1) - reproduce_radius;
-    // 确保新位置在有效世界边界内（假设世界大小为100x100）
-    if (x_new >= 0 && x_new < 100 && y_new >= 0 && y_new < 100)
+    // 确保新位置在有效世界边界内
+    if (x_new >= 0 && x_new < len && y_new >= 0 && y_new < weight)
     {
         // 子代植物的半径在父半径的[0.25,2.0]倍之间随机，并取整
         int r = reproduce_radius * std::min(2.0, std::max(0.25, (double)std::rand() / RAND_MAX));
-        World::GetWorld().AddReproduceRequest({PLANT,Plant_Name, std::make_pair(x_new, y_new), r});
-        std::printf("Plant request at (%d, %d)\n", x_new, y_new);
+        if(World::GetWorld().AddReproduceRequest({PLANT,Plant_Name, std::make_pair(x_new, y_new), r}))
+        std::printf("Plant request at (%d, %d) %id\n", x_new, y_new,id);
     }
 }
 

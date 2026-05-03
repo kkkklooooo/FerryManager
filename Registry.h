@@ -9,7 +9,7 @@ enum OrganismType {//大类用于工厂函数
 enum EnvironmentType {
     WATER,
     FOREST,
-    GRASSLEND,
+    GRESSLEND,
     MOUTAN,
 };
 

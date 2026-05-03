@@ -13,7 +13,23 @@ Environment::Environment(std::pair<int, int> pos,
 	,type(ENVIRONMENT)
 	,name(na)
 	,maxPlant(mp)
+	,havePlant(0)
 {}
+bool Environment::canPlant(ReproduceRequest a) {
+	if (havePlant < maxPlant) {
+		if (std::find(CanLiveIn.begin(), CanLiveIn.end(), a.name) != CanLiveIn.end()) {
+			havePlant++;
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	return false;
+
+}
 
 void Environment::EnergyExchange(Reproducable* on) {
 	energy += on->step_energy_cost * EnvironmentEnergyAbsorbRate*lossRate;//土地吸收粪便或者尸体 cost已经在step去除了
@@ -38,14 +54,16 @@ void Water::Update(Weather sky) {
 	}
 }
 
-GlassLand::GlassLand(std::pair<int, int> pos,float en,int mp) 
-	:Environment(pos, en, GRASSLEND, mp)
-{}
+GressLand::GressLand(std::pair<int, int> pos,float en,int mp) 
+	:Environment(pos, en, GRESSLEND, mp)
+{
+	CanLiveIn.push_back(Plant_Name);
+}
 
-void GlassLand::Update(Weather sky) {
+void GressLand::Update(Weather sky) {
 	switch (sky) {
 	case SUN:
-		energy += 1;
+		energy += 0.05;
 		break;
 	default:
 		break;
