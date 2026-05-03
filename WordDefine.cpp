@@ -66,7 +66,7 @@ void World::AddReproduceRequest(const ReproduceRequest& request)
 void World::RemoveDeadOrganisms()
 {
     // 移除能量为0的生物
-    Reproducas.erase(std::remove_if(Reproducas.begin(), Reproducas.end(), [](Reproducable* organism) { return !organism->energy>0; }), Reproducas.end());
+    Reproducas.erase(std::remove_if(Reproducas.begin(), Reproducas.end(), [](Reproducable* organism) { return !(organism->energy>0); }), Reproducas.end());
 }
 
 /**
