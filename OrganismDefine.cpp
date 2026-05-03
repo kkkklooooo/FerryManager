@@ -138,7 +138,7 @@ void Plant::Reproduce()
             energy += reproduce_energy_cost;
             return;
         }
-        std::printf("Plant request at (%d, %d) %id\n", x_new, y_new,id);
+        // std::printf("Plant request at (%d, %d) %id\n", x_new, y_new,id);
     }
 }
 
