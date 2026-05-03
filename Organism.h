@@ -55,7 +55,7 @@ class Reproducable : public Organism
 {
 public:
     // 构造函数：传入繁殖阈值、消耗、半径，以及每步能量消耗和获得、类型
-    Reproducable(float energy_threshold, float energy_cost, int radius, float sec, float seg, OrganismType type);
+    Reproducable(float energy_threshold, float energy_cost, int radius, float sec, OrganismType type);
     virtual ~Reproducable() = default;
     std::vector<EnvironmentType> live_environment;
     std::vector<OrganismName>diet;

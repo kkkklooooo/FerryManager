@@ -15,6 +15,7 @@ Reproducable* ReprodueNewOrganism(ReproduceRequest request) {
     }
     else//TODO 动物和资源的实现
     {
+        return nullptr;
     }
 }
 
@@ -78,8 +79,8 @@ void Organism::Step()
  * @param seg               每步能量增益
  * @param type              生物类型
  */
-Reproducable::Reproducable(float energy_threshold, float energy_cost, int radius, float sec, float seg, OrganismType type)
-    : Organism(sec, seg, type)
+Reproducable::Reproducable(float energy_threshold, float energy_cost, int radius, float sec, OrganismType type)
+    : Organism(sec, type)
 {
     reproduce_energy_threshold = energy_threshold;
     reproduce_energy_cost = energy_cost;
@@ -100,7 +101,7 @@ Reproducable::Reproducable(float energy_threshold, float energy_cost, int radius
  */
 
 Plant::Plant(int id, int x, int y, int radius)
-    : Reproducable(0.5, 0.1, radius, 0.01, 0.02, PLANT)
+    : Reproducable(0.5, 0.1, radius, 0.01, PLANT)
 {
     this->id = id;
     Pos = std::make_pair(x, y);
