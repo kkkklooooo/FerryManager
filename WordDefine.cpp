@@ -1,4 +1,3 @@
-#pragma once
 #include"Word.h"
 #include"Organism.h"
 #include"Environment.h"
