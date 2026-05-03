@@ -6,8 +6,6 @@
 #include <thread>
 #include <vector>
 
-#include "main.h"
-
 // 匿名命名空间：内部使用的常量、辅助函数和数据结构，避免外部链接
 namespace
 {

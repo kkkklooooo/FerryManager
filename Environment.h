@@ -1,0 +1,40 @@
+#pragma once
+#include"Registry.h"
+#include"Organism.h"
+#include <utility>
+const int EnvironmentEnergyAbsorbRate=0.01;
+const int PlantAbsortRate = 0.2;
+
+class Environment {//环境大类
+
+public:
+	Environment(std::pair<int, int> pos,
+		float en,
+		EnvironmentType na,
+		int mp);
+	std::pair<int, int> Pos;
+	float energy;
+	OrganismType type;
+	EnvironmentType name;
+	std::vector<OrganismName> CanLiveIn;//能活着
+	int maxPlant;//草最多有多少
+	void EnergyExchange(Reproducable* on);//能量交换
+	virtual void Update(Weather)=0;//更新
+};
+
+class Water : public Environment {
+public:
+	Water(std::pair<int, int> pos, float en, int mp, float V);
+	float Valum;//水的多少
+	void Update(Weather) override;
+};
+
+class GlassLand :public Environment {
+public:
+	GlassLand(std::pair<int, int> pos,
+		float en,
+		int maxPlant);
+	void Update(Weather)override;
+};
+
+
