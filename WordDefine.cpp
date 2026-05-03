@@ -8,7 +8,7 @@ World::World(int len, int weigth) {
     Reproducas.push_back(new Plant(id++, 4, 5, 3));
     for (int i = 0; i <len; i++) {
         for (int j = 0; j < weight; j++) {
-            Environments.push_back(new GressLand(std::make_pair(i, j), 10, 2));
+            Environments.push_back(new GressLand(std::make_pair(i, j), 2, 2));
         }
     }
 }
@@ -80,7 +80,15 @@ bool  World::AddReproduceRequest(const ReproduceRequest& request)
 void World::RemoveDeadOrganisms()
 {
     // 移除能量为0的生物
-    Reproducas.erase(std::remove_if(Reproducas.begin(), Reproducas.end(), [](Reproducable* organism) { return !(organism->energy>0); }), Reproducas.end());
+    Reproducas.erase(std::remove_if(Reproducas.begin(), Reproducas.end(), [&](Reproducable* organism) { 
+        if (!(organism->energy>0)){
+            Environments[organism->Pos.first*len+organism->Pos.second]->havePlant--;
+            return true;
+        }else{
+            return false;
+        }
+        //return !(organism->energy>0); 
+    }), Reproducas.end());
 }
 
 /**

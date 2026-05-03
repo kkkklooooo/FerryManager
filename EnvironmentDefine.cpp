@@ -64,7 +64,7 @@ GressLand::GressLand(std::pair<int, int> pos,float en,int mp)
 void GressLand::Update(Weather sky) {
 	switch (sky) {
 	case SUN:
-		energy += 0.05;
+		energy += 2;
 		break;
 	default:
 		break;

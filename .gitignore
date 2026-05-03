@@ -4,3 +4,4 @@ modules
 .vs
 *.obj
 out
+build

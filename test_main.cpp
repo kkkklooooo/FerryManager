@@ -9,6 +9,8 @@
 #include <conio.h>
 #include <sstream>
 #include <string>
+#include <cfloat>
+#include <algorithm>
 
 void clearScreen() {
     std::cout << "\033[2J\033[H";
@@ -47,6 +49,132 @@ void drawWorld(const World& world) {
             std::cout << grid[y][x];
         std::cout << '\n';
     }
+}
+
+void drawEnergyMap(const World& world) {
+    const auto& envs = world.GetEnvironments();
+    int w = world.GetWidth();
+    int h = world.GetHeight();
+
+    // Find min and max energy for normalization
+    float minEnergy = FLT_MAX, maxEnergy = FLT_MIN;
+    for (size_t i = 0; i < envs.size(); ++i) {
+        float e = envs[i]->energy;
+        if (e < minEnergy) minEnergy = e;
+        if (e > maxEnergy) maxEnergy = e;
+    }
+
+    // Energy character mapping (low to high)
+    const char* energyChars = " .-:+*#@";
+    int numLevels = 7;
+
+    std::cout << "\n--- Energy Map (Heatmap) ---\n";
+    std::cout << "Energy range: [" << std::fixed << std::setprecision(2)
+              << minEnergy << " - " << maxEnergy << "]\n";
+
+    for (int y = 0; y < h; ++y) {
+        std::cout << std::setw(2) << y << " ";
+        for (int x = 0; x < w; ++x) {
+            int idx = y * w + x;
+            if (idx < (int)envs.size()) {
+                float e = envs[idx]->energy;
+                int level = 0;
+                if (maxEnergy > minEnergy) {
+                    level = static_cast<int>((e - minEnergy) / (maxEnergy - minEnergy) * (numLevels - 1));
+                    level = std::max(0, std::min(level, numLevels - 1));
+                }
+                std::cout << energyChars[level];
+            } else {
+                std::cout << '?';
+            }
+        }
+        std::cout << " " << std::setw(2) << y << "\n";
+    }
+
+    // Print legend
+    std::cout << "   ";
+    for (int i = 0; i < numLevels; ++i) {
+        std::cout << energyChars[i];
+    }
+    std::cout << " (low to high energy)\n";
+    std::cout << "-----------------------------\n";
+}
+
+void printEnergyGrid(const World& world) {
+    const auto& envs = world.GetEnvironments();
+    int w = world.GetWidth();
+    int h = world.GetHeight();
+
+    std::cout << "\n--- Energy Grid (Numeric) ---\n";
+    std::cout << "     ";
+    for (int x = 0; x < w; ++x) {
+        std::cout << std::setw(5) << x;
+    }
+    std::cout << "\n     " << std::string(w * 5, '-') << "\n";
+
+    for (int y = 0; y < h; ++y) {
+        std::cout << std::setw(3) << y << " |";
+        for (int x = 0; x < w; ++x) {
+            int idx = y * w + x;
+            if (idx < (int)envs.size()) {
+                std::cout << std::setw(5) << std::fixed << std::setprecision(1) << envs[idx]->energy;
+            } else {
+                std::cout << std::setw(5) << "?";
+            }
+        }
+        std::cout << " | " << std::setw(3) << y << "\n";
+    }
+    std::cout << "     " << std::string(w * 5, '-') << "\n";
+    std::cout << "     ";
+    for (int x = 0; x < w; ++x) {
+        std::cout << std::setw(5) << x;
+    }
+    std::cout << "\n---------------------------------\n";
+}
+
+void printEnergyHistogram(const World& world) {
+    const auto& envs = world.GetEnvironments();
+    int w = world.GetWidth();
+    int h = world.GetHeight();
+
+    // Create histogram buckets
+    const int numBuckets = 20;
+    float minEnergy = FLT_MAX, maxEnergy = FLT_MIN;
+    for (size_t i = 0; i < envs.size(); ++i) {
+        float e = envs[i]->energy;
+        if (e < minEnergy) minEnergy = e;
+        if (e > maxEnergy) maxEnergy = e;
+    }
+
+    std::vector<int> buckets(numBuckets, 0);
+    for (size_t i = 0; i < envs.size(); ++i) {
+        float e = envs[i]->energy;
+        int bucket = 0;
+        if (maxEnergy > minEnergy) {
+            bucket = static_cast<int>((e - minEnergy) / (maxEnergy - minEnergy) * (numBuckets - 1));
+            bucket = std::max(0, std::min(bucket, numBuckets - 1));
+        }
+        buckets[bucket]++;
+    }
+
+    // Find max bucket value for scaling
+    int maxBucket = *std::max_element(buckets.begin(), buckets.end());
+    const int barWidth = 30;
+
+    std::cout << "\n--- Energy Distribution Histogram ---\n";
+    for (int i = 0; i < numBuckets; ++i) {
+        float low = minEnergy + (maxEnergy - minEnergy) * i / numBuckets;
+        float high = minEnergy + (maxEnergy - minEnergy) * (i + 1) / numBuckets;
+        int barLen = (maxBucket > 0) ? (buckets[i] * barWidth / maxBucket) : 0;
+
+        std::cout << std::fixed << std::setprecision(2)
+                  << std::setw(6) << low << "-"
+                  << std::setw(6) << high << " |";
+        for (int j = 0; j < barLen; ++j) std::cout << "#";
+        std::cout << " " << buckets[i] << "\n";
+    }
+    std::cout << "Total cells: " << envs.size() << "\n";
+    std::cout << "-------------------------------------\n";
 }
 
 void printPlantDetails(const World& world) {
@@ -121,8 +249,8 @@ int main() {
     World& world = World::GetWorld();
     world.CurrentWeather = SUN;
 
-    const int totalFrames = 300;
-    const int frameDelayMs = 600;
+    const int totalFrames = 3000;
+    const int frameDelayMs = 1;
 
     bool paused = false;
     int frame = 0;
@@ -209,6 +337,9 @@ int main() {
             << " / " << totalFrames << " =====\n";
 
         drawWorld(world);
+        drawEnergyMap(world);
+        printEnergyGrid(world);
+        // printEnergyHistogram(world);
         printPlantDetails(world);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(frameDelayMs));
@@ -217,6 +348,9 @@ int main() {
     clearScreen();
     std::cout << "===== Simulation Finished =====\n";
     drawWorld(world);
+    drawEnergyMap(world);
+    printEnergyGrid(world);
+    // printEnergyHistogram(world);
     printPlantDetails(world);
     return 0;
 }
