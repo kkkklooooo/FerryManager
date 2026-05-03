@@ -11,7 +11,7 @@ int id = 0;
 //工厂函数 根据request返回对应指针
 Reproducable* ReprodueNewOrganism(ReproduceRequest request) {
     if (request.type == PLANT) {
-        return new Plant(id, request.pos.first, request.pos.second, request.radius);
+        return new Plant(id++, request.pos.first, request.pos.second, request.radius);
     }
     else//TODO 动物和资源的实现
     {

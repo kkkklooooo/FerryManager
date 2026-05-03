@@ -1,4 +1,3 @@
-#pragma once
 #include"Word.h"
 #include"Organism.h"
 #include"Environment.h"
@@ -78,4 +77,3 @@ World& World::GetWorld()
     static World Instance;
     return Instance;
 }
-
