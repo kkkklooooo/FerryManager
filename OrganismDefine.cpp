@@ -121,7 +121,6 @@ void Plant::Reproduce()
 
         return; 
     }
-    energy -= reproduce_energy_cost;
     int x = Pos.first;
     int y = Pos.second;
     // 在 [-reproduce_radius, +reproduce_radius] 范围内随机偏移
@@ -132,8 +131,10 @@ void Plant::Reproduce()
     {
         // 子代植物的半径在父半径的[0.25,2.0]倍之间随机，并取整
         int r = reproduce_radius * std::min(2.0, std::max(0.25, (double)std::rand() / RAND_MAX));
-        if(World::GetWorld().AddReproduceRequest({PLANT,Plant_Name, std::make_pair(x_new, y_new), r}))
-        std::printf("Plant request at (%d, %d) %id\n", x_new, y_new,id);
+        if (World::GetWorld().AddReproduceRequest({ PLANT,Plant_Name, std::make_pair(x_new, y_new), r })) {
+            energy -= reproduce_energy_cost;
+            std::printf("Plant request at (%d, %d) %id\n", x_new, y_new, id);
+        }
     }
 }
 

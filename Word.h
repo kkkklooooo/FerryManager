@@ -2,8 +2,8 @@
 #include"Registry.h"
 #include"Organism.h"
 #include"Environment.h"
-const int len = 10;
-const int weight = 10;
+const int len = 100;
+const int weight = 100;
 class World
 {
     // 待处理的繁殖请求列表
