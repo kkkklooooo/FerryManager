@@ -9,7 +9,8 @@ extern int id;
 enum OrganismType
 {
     PLANT,
-    ANIMAL;
+    ANIMAL，
+    SOURCE;
 };
 
 enum EnvironmentType {
@@ -90,8 +91,8 @@ class Reproducable : public Organism
 public:
     Reproducable(float energy_threshold, float energy_cost, int radius, float sec, float seg, OrganismType type);
     virtual ~Reproducable() = default;
-    std::vector<EnvironmentType>;
-    std::vector<OrganismName>;
+    std::vector<EnvironmentType> live_environment;
+    std::vector<OrganismName>diet;
     float reproduce_energy_threshold;
     float reproduce_energy_cost;
     int reproduce_radius;
