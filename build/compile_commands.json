@@ -1,0 +1,26 @@
+[
+{
+  "directory": "D:/Projects/FerryManager/build",
+  "command": "D:\\mingw64\\bin\\g++.exe  @CMakeFiles/ecosim.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\ecosim.dir\\OrganismDefine.cpp.obj -c D:\\Projects\\FerryManager\\OrganismDefine.cpp",
+  "file": "D:/Projects/FerryManager/OrganismDefine.cpp",
+  "output": "CMakeFiles/ecosim.dir/OrganismDefine.cpp.obj"
+},
+{
+  "directory": "D:/Projects/FerryManager/build",
+  "command": "D:\\mingw64\\bin\\g++.exe  @CMakeFiles/ecosim.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\ecosim.dir\\EnvironmentDefine.cpp.obj -c D:\\Projects\\FerryManager\\EnvironmentDefine.cpp",
+  "file": "D:/Projects/FerryManager/EnvironmentDefine.cpp",
+  "output": "CMakeFiles/ecosim.dir/EnvironmentDefine.cpp.obj"
+},
+{
+  "directory": "D:/Projects/FerryManager/build",
+  "command": "D:\\mingw64\\bin\\g++.exe  @CMakeFiles/ecosim.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\ecosim.dir\\WordDefine.cpp.obj -c D:\\Projects\\FerryManager\\WordDefine.cpp",
+  "file": "D:/Projects/FerryManager/WordDefine.cpp",
+  "output": "CMakeFiles/ecosim.dir/WordDefine.cpp.obj"
+},
+{
+  "directory": "D:/Projects/FerryManager/build",
+  "command": "D:\\mingw64\\bin\\g++.exe  @CMakeFiles/ecosim.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\ecosim.dir\\test_main.cpp.obj -c D:\\Projects\\FerryManager\\test_main.cpp",
+  "file": "D:/Projects/FerryManager/test_main.cpp",
+  "output": "CMakeFiles/ecosim.dir/test_main.cpp.obj"
+}
+]

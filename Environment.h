@@ -14,7 +14,7 @@ public:
 				EnvironmentType na,
 				int mp);
 	std::pair<int, int> Pos;
-	float energy;
+	float energy;//初始能量
 	OrganismType type;
 	EnvironmentType name;
 	std::vector<OrganismName> CanLiveIn;//能活着

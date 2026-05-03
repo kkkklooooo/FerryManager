@@ -132,7 +132,10 @@ void Plant::Reproduce()
     {
         // 子代植物的半径在父半径的[0.25,2.0]倍之间随机，并取整
         int r = reproduce_radius * std::min(2.0, std::max(0.25, (double)std::rand() / RAND_MAX));
-        if(World::GetWorld().AddReproduceRequest({PLANT,Plant_Name, std::make_pair(x_new, y_new), r}))
+        if(!( World::GetWorld().AddReproduceRequest({PLANT,Plant_Name, std::make_pair(x_new, y_new), r}) )){
+            energy += reproduce_energy_cost;
+            return;
+        }
         std::printf("Plant request at (%d, %d) %id\n", x_new, y_new,id);
     }
 }
@@ -154,6 +157,9 @@ bool isNaber(Organism* a, Organism* b) {//指针方便多态
 
 void PredationOrFuck(Reproducable* a, Reproducable* b) {
     //怀孕判断
+    if(a->type==PLANT&&a->reproduce_able){
+        a->Reproduce();
+    }
     if (a->name == b->name) {
         if (a->reproduce_able && !b->reproduce_able) {
             a->Reproduce();

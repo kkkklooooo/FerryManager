@@ -5,13 +5,15 @@
 #include <thread>
 #include <chrono>
 #include <vector>
-#include <iomanip>   // 用于格式化输出
+#include <iomanip>
+#include <conio.h>
+#include <sstream>
+#include <string>
 
 void clearScreen() {
-    std::cout << "\033[2J\033[H";  // ANSI 清屏（兼容绝大多数现代终端）
+    std::cout << "\033[2J\033[H";
 }
 
-// 绘制世界网格
 void drawWorld(const World& world) {
     const auto& orgs = world.GetReproducas();
     const auto& envs = world.GetEnvironments();
@@ -20,7 +22,6 @@ void drawWorld(const World& world) {
 
     std::vector<std::vector<char>> grid(h, std::vector<char>(w, ' '));
 
-    // 先绘制环境底色
     for (size_t i = 0; i < envs.size(); ++i) {
         int x = i % w;
         int y = i / w;
@@ -33,7 +34,6 @@ void drawWorld(const World& world) {
         }
     }
 
-    // 生物覆盖
     for (auto org : orgs) {
         int x = org->Pos.first;
         int y = org->Pos.second;
@@ -42,7 +42,6 @@ void drawWorld(const World& world) {
         }
     }
 
-    // 打印网格
     for (int y = 0; y < h; ++y) {
         for (int x = 0; x < w; ++x)
             std::cout << grid[y][x];
@@ -50,14 +49,12 @@ void drawWorld(const World& world) {
     }
 }
 
-// 统计植物数量并输出每株植物的详细信息
 void printPlantDetails(const World& world) {
     const auto& orgs = world.GetReproducas();
     int plantCount = 0;
     std::cout << "\n--- Plant Details ---\n";
     for (const auto* org : orgs) {
         if (org->type == PLANT) {
-            // 注意：这里假设所有 PLANT 类型的对象都是 Plant 类实例，向下转型是安全的
             const Plant* plant = static_cast<const Plant*>(org);
             std::cout << "Plant #" << std::setw(3) << plant->id
                 << "  Pos: (" << std::setw(3) << org->Pos.first << ","
@@ -65,7 +62,6 @@ void printPlantDetails(const World& world) {
                 << "  Energy: " << std::fixed << std::setprecision(2) << org->energy
                 << "\n";
             ++plantCount;
-            // 为了避免输出过长，可限制显示前 20 株（如果需要看全部可注释掉这一行）
             if (plantCount >= 20) {
                 std::cout << "... (showing first 20 of " << (orgs.size()) << " plants)\n";
                 break;
@@ -75,18 +71,141 @@ void printPlantDetails(const World& world) {
     std::cout << "Total plants: " << plantCount << "\n";
 }
 
+void queryPosition(const World& world, int x, int y) {
+    const auto& orgs = world.GetReproducas();
+    const auto& envs = world.GetEnvironments();
+    int w = world.GetWidth();
+    int h = world.GetHeight();
+
+    std::cout << "\n--- Position (" << x << ", " << y << ") Info ---\n";
+
+    if (x < 0 || x >= w || y < 0 || y >= h) {
+        std::cout << "Coordinates out of bounds!\n";
+        return;
+    }
+
+    int envIdx = y * w + x;
+    if (envIdx >= 0 && envIdx < (int)envs.size()) {
+        std::cout << "Environment: ";
+        switch (envs[envIdx]->name) {
+        case GRESSLEND: std::cout << "GRASSLAND"; break;
+        case WATER:     std::cout << "WATER"; break;
+        case FOREST:    std::cout << "FOREST"; break;
+        case MOUTAN:    std::cout << "MOUNTAIN"; break;
+        default:        std::cout << "UNKNOWN"; break;
+        }
+        std::cout << "\n";
+    }
+
+    int found = 0;
+    for (const auto* org : orgs) {
+        if (org->Pos.first == x && org->Pos.second == y) {
+            if (org->type == PLANT) {
+                const Plant* plant = static_cast<const Plant*>(org);
+                std::cout << "Organism #" << plant->id;
+            } else {
+                std::cout << "Organism [animal]";
+            }
+            std::cout << "  Type: " << (org->type == PLANT ? "PLANT" : "ANIMAL")
+                << "  Energy: " << std::fixed << std::setprecision(2) << org->energy << "\n";
+            ++found;
+        }
+    }
+    if (found == 0) {
+        std::cout << "No organism at this position.\n";
+    }
+    std::cout << "--------------------------\n";
+}
+
 int main() {
     World& world = World::GetWorld();
     world.CurrentWeather = SUN;
 
-    const int totalFrames = 30;
+    const int totalFrames = 300;
     const int frameDelayMs = 600;
 
-    for (int frame = 0; frame < totalFrames; ++frame) {
+    bool paused = false;
+    int frame = 0;
+
+    std::cout << "\n=== Debug Controls ===\n";
+    std::cout << "Space: Pause/Resume\n";
+    std::cout << "[while paused] Enter 'x y' to query position\n";
+    std::cout << "n: Step (single frame)\n";
+    std::cout << "s: Continue simulation (auto mode)\n";
+    std::cout << "q: Quit\n";
+    std::cout << "====================\n\n";
+
+    while (frame < totalFrames) {
+        if (_kbhit()) {
+            int ch = _getch();
+
+            if (ch == ' ') {
+                paused = !paused;
+                std::cout << (paused ? "\n[PAUSED] Enter 'n' step, 's' auto, 'q' quit, or type 'x y': " : "[RESUMED]\n");
+            }
+            else if (ch == 's' || ch == 'S') {
+                paused = false;
+                std::cout << "[AUTO MODE]\n";
+            }
+            else if (ch == 'n' || ch == 'N') {
+                world.Update();
+                ++frame;
+                clearScreen();
+                std::cout << "===== Eco Simulation Frame " << (frame)
+                    << " / " << totalFrames << " =====\n";
+                drawWorld(world);
+                printPlantDetails(world);
+                std::cout << "\n[STEP] Enter 's' auto, 'n' next, 'q' quit, or type 'x y': ";
+            }
+            else if (ch == 'q' || ch == 'Q') {
+                std::cout << "\n===== Simulation Ended =====\n";
+                break;
+            }
+            else if (paused && ch >= '0' && ch <= '9') {
+                std::string line;
+                line += ch;
+                while (_kbhit()) {
+                    int ch2 = _getch();
+                    if (ch2 == '\r' || ch2 == '\n') break;
+                    if (ch2 == ' ') {
+                        line += ' ';
+                        while (_kbhit()) {
+                            int ch3 = _getch();
+                            if (ch3 == '\r' || ch3 == '\n') break;
+                            line += ch3;
+                        }
+                        break;
+                    }
+                    line += ch2;
+                }
+                std::istringstream iss(line);
+                int x = -1, y = -1;
+                char space;
+                if (iss >> x >> space >> y) {
+                    queryPosition(world, x, y);
+                } else {
+                    iss.clear();
+                    iss.str(line);
+                    if (iss >> x >> y) {
+                        queryPosition(world, x, y);
+                    } else {
+                        std::cout << "Invalid input. Use format: 'x y' (e.g., '5 10')\n";
+                    }
+                }
+                std::cout << "\n[PAUSED] Enter 'n' step, 's' auto, 'q' quit, or type 'x y': ";
+            }
+        }
+
+        if (paused) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            continue;
+        }
+
         world.Update();
+        ++frame;
 
         clearScreen();
-        std::cout << "===== Eco Simulation Frame " << (frame + 1)
+        std::cout << "===== Eco Simulation Frame " << (frame)
             << " / " << totalFrames << " =====\n";
 
         drawWorld(world);
@@ -95,7 +214,6 @@ int main() {
         std::this_thread::sleep_for(std::chrono::milliseconds(frameDelayMs));
     }
 
-    // 最终画面
     clearScreen();
     std::cout << "===== Simulation Finished =====\n";
     drawWorld(world);

@@ -40,7 +40,7 @@ void World::Update()
     }
     //捕食和生孩子
     for (auto i = Reproducas.begin(); i != Reproducas.end(); i++) {
-        for (auto j = i + 1; j != Reproducas.end(); j++) {
+        for (auto j = i + 0; j != Reproducas.end(); j++) {
             if (isNaber(*i, *j)) {
                 PredationOrFuck(*i, *j);
             }

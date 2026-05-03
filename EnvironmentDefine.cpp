@@ -2,6 +2,7 @@
 #include "Registry.h"
 #include"Word.h"
 #include"Environment.h"
+#include<algorithm>
 
 
 Environment::Environment(std::pair<int, int> pos,
@@ -47,7 +48,7 @@ void Water::Update(Weather sky) {
 	switch (sky) {
 		case SUN:
 			Valum -= 0.1;
-			energy += 0.5;
+			energy += 0.1;
 			break;
 		default:
 			break;
