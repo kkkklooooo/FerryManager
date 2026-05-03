@@ -9,13 +9,21 @@ extern int id;
 enum OrganismType
 {
     PLANT,
-    PREY,
-    PREDATOR
+    ANIMAL;
 };
+
+enum EnvironmentType {
+
+};
+
+enum OrganismName {
+
+};
+
 class Organism;
 class Plant;
-class Prey;
-class Predator;
+class Reproducable;
+
 
 struct ReproduceRequest
 {
@@ -38,7 +46,7 @@ public:
     static World &GetWorld();
 };
 
-class Reproducable;
+
 
 /**
  * Reproduce manager 管理生殖相关
@@ -82,7 +90,8 @@ class Reproducable : public Organism
 public:
     Reproducable(float energy_threshold, float energy_cost, int radius, float sec, float seg, OrganismType type);
     virtual ~Reproducable() = default;
-
+    std::vector<EnvironmentType>;
+    std::vector<OrganismName>;
     float reproduce_energy_threshold;
     float reproduce_energy_cost;
     int reproduce_radius;
@@ -90,6 +99,8 @@ public:
 
     virtual void Reproduce();
 };
+
+
 
 class Plant : public Reproducable
 {
@@ -102,5 +113,7 @@ public:
     // void check_energy() override;
     void Step();
 };
+
+
 
 #endif
