@@ -36,7 +36,7 @@ void World::Update()
 
     //植物和环境交互
     for (auto i : Reproducas) {
-        Environments[i->Pos.first*weight+i->Pos.second]->EnergyExchange(i);
+        Environments[i->Pos.second*weight+i->Pos.first]->EnergyExchange(i);
     }
     //捕食和生孩子
     for (auto i = Reproducas.begin(); i != Reproducas.end(); i++) {
@@ -67,7 +67,7 @@ void World::Reproduce()
 bool  World::AddReproduceRequest(const ReproduceRequest& request)
 {
     //能生
-    if (Environments[request.pos.first * len + request.pos.second]->canPlant(request)) {
+    if (Environments[request.pos.first * weight + request.pos.second]->canPlant(request)) {
         reproduce_requests.push_back(request);
         return true;
     }
@@ -82,7 +82,7 @@ void World::RemoveDeadOrganisms()
     // 移除能量为0的生物
     Reproducas.erase(std::remove_if(Reproducas.begin(), Reproducas.end(), [&](Reproducable* organism) { 
         if (!(organism->energy>0)){
-            Environments[organism->Pos.first*len+organism->Pos.second]->havePlant--;
+            Environments[organism->Pos.second*weight+organism->Pos.first]->havePlant--;
             return true;
         }else{
             return false;
