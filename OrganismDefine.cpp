@@ -134,7 +134,7 @@ void Plant::Reproduce()
         float r = reproduce_radius * std::min(2.0, std::max(0.25, (double)std::rand() / RAND_MAX));
         int r_int=std::max(1, (int)r); 
         if(!( World::GetWorld().AddReproduceRequest({PLANT,Plant_Name, std::make_pair(x_new, y_new), r_int}) )){
-            energy += reproduce_energy_cost;
+            energy -= reproduce_energy_cost;
             return;
         }
         // std::printf("Plant request at (%d, %d) %id\n", x_new, y_new,id);

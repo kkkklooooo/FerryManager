@@ -39,7 +39,6 @@ void Environment::EnergyExchange(Reproducable* on) {
 		float abs=std::min( PlantAbsortRate * energy,StepMaxAbsorb/lossRate);
 		abs=abs*lossRate;
 		on->energy +=abs;
-		assert(abs<=StepMaxAbsorb)	;
 		energy -= abs;
 	}
 }
