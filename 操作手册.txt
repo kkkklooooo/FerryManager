@@ -1,21 +1,81 @@
 1."Registry.h" 是包含所有的枚举类型的头文件以便于后面类型变多占用空间
- 1)
- 2)
+ 1) OrganismType: PLANT(植物), ANIMAL(动物), ENVIRONMENT(环境)
+ 2) EnvironmentType: WATER(水), FOREST(森林), GRESSLEND(草地), MOUTAN(山地)
+ 3) OrganismName: 生物具体名称(暂占位)
+ 4) Weather: SUN(晴天), RAIN(雨天)
 
 2."Organism.h" 是包含了生命体和他的子类的引用 Define包含了具体的定义
- 1)展开了繁殖管理器并加上新方法并直接调用Reproduce
- 2）生物有两种死亡方法 一个是被吃 一个是自然死亡（能量耗尽）
+ 1) Organism(基类): energy初始=5, step_energy_cost每步消耗, active存活标记
+    - check_active(): 能量<=0时标记死亡, 并将残余能量提交给环境(LeftEnergyRequest)
+    - Step():消耗能量并检查生死
+ 2) Reproducable(可繁殖生物): 继承Organism, 增加繁殖阈值/消耗/半径/食谱等属性
+ 3) Plant(植物): 继承Reproducable
+    - Reproduce(): 在半径内随机位置生成子代, 环境容量满时返还繁殖消耗
+    - Step(): 叠加拥挤成本(overlay)后消耗能量
+    - calculate_overlay_cost(): 根据8邻域植物密度计算额外消耗系数(密度越接近1.4倍最大容量消耗越大)
+ 4) LeftEnergyRequest: 死亡生物能量传递结构体{pos, energy}
+ 5) PredationOrFuck(): 相邻生物间捕食/繁殖逻辑, 捕食时打印红色提示
+ 6) 生物有两种死亡方法: 被捕食 和 自然死亡(能量耗尽)
 
 3."Word.h" 包含世界的引用 Define包含了具体的定义
- 1）所有生物统一管理 同时只清除能量为0的生物（模拟腐烂或者食腐生物）
- 2）利用函数类成员和多态实现复杂的捕食的统一调用
- 3）在UpDate中先移动 后更具
+ 1) 世界大小: 50x50 (len=50, weight=50)
+ 2) 所有生物统一管理(Reproducas列表), 清除时检查energy>0
+ 3) Update()执行顺序: RemoveDeadOrganisms → 所有生物Step → 环境Update → 按坐标排序 → 能量交换 → 捕食/繁殖 → 处理繁殖请求
+ 4) AddLeftEnergyRequest(): 将死亡生物能量加到对应环境的deadOrganismEnergy
+ 5) calculate_overlay(pos): 计算某位置8邻域的植物密度(归一化到0~1), 边界外按maxPlant估算
+ 6) 注意: 所有索引计算使用 y*weight + x (之前有xy反了的bug已修复)
 
-4. "Envoronment"包含环境的引用 Define包含了具体的定义
- 1)和环境的交互统一在环境的UpDate处理生物的Step只处理移动的消耗和位置的变化等信息
- 2)记得加锁
+4. "Environment"包含环境的引用 Define包含了具体的定义
+ 1) 基类Environment新增:
+    - deadOrganismEnergy: 死亡生物残留能量
+    - Update(Weather): 不再是纯虚函数, 基类实现将deadOrganismEnergy*lossRate加入环境能量
+ 2) 能量吸收上限:
+    - StepMaxAbsorb=2: 植物每步最多吸收能量上限
+    - SingleEnvironmentMaxEnergy=50: 环境能量上限
+ 3) EnergyExchange(): 植物从环境吸收能量(上限StepMaxAbsorb/lossRate), 环境能量有上限
+ 4) Water::Update(): 晴天蒸发Valum, 能量增加受上限约束, 调用基类Update
+ 5) GressLand::Update(): 晴天+2能量受上限约束, 调用基类Update
 
-5.常数含义 有环境吸收吸收 植物吸收系数 动物吸收系数 和一个总体损耗（简单点） ..到时候常数太多就整个新文件夹
+5.常数含义
+ 1) lossRate=0.9: 总体损耗系数
+ 2) EnvironmentEnergyAbsorbRate=0.01: 环境吸收率
+ 3) PlantAbsortRate=0.4: 植物吸收率
+ 4) AnimalAbsorbRate=0.5: 动物吸收率
+ 5) StepMaxAbsorb=2: 植物每步最大吸收量
+ 6) SingleEnvironmentMaxEnergy=50: 单个格子环境能量上限
+ 7) 植物初始能量=5, 繁殖阈值=25, 繁殖消耗=10
 
+6.GUI界面 (基于ImGui + OpenGL, test_main.cpp)
+ 1) 窗口标题"Eco Simulation", 默认1280x800
+ 2) 菜单栏 View:
+    - Plants: 植物列表面板(默认开启), 显示ID/X/Y/Energy, 最多50条, 能量>5绿色否则橙色
+    - Heatmap: 能量热力图, RGB着色(红=高能量, 蓝=低能量), 显示能量范围
+    - Query Panel: 坐标查询面板, 输入X/Y查看地形/能量/生物信息
+ 3) Controls面板:
+    - Run/Pause: 运行/暂停
+    - Step: 单步执行
+    - Speed: 速度滑块(0.1x ~ 10x, 默认1x)
+ 4) Stats统计栏: 当前帧/总帧 | 植物数 | 动物数 | 植物总能量 | 动物总能量 | 环境总能量
+ 5) World世界视图:
+    - 每个格子按地形类型和能量级别着色
+    - 植物显示为绿色圆圈, 动物显示为红色圆圈
+    - 鼠标悬停显示Tooltip: 坐标/地形/能量/生物信息
+ 6) 模拟总帧数: 3000帧
 
+7.构建说明
+ 1) CMake项目, C++17标准
+ 2) 依赖: imgui(已内置), OpenGL, Win32
+ 3) 链接库: opengl32, gdi32, dwmapi
+ 4) 源文件: OrganismDefine.cpp, EnvironmentDefine.cpp, WordDefine.cpp, test_main.cpp + imgui/*.cpp + 两个backend
 
+8.关键改动记录 (自ce67777之后)
+ 1) 界面从控制台字符画改为ImGui+OpenGL图形窗口
+ 2) 新增植物拥挤成本(overlay cost)机制
+ 3) 死亡生物能量回归环境(deadOrganismEnergy)
+ 4) 环境能量上限(SingleEnvironmentMaxEnergy=50)
+ 5) 植物吸收上限(StepMaxAbsorb=2)
+ 6) 世界从100x100缩小到50x50
+ 7) 修复多处xy坐标索引反了的bug
+ 8) 修复植物繁殖能量计算bug(+=改为-=)
+ 9) 生物初始能量从1改为5
+10) 捕食行为增加控制台红色日志输出
