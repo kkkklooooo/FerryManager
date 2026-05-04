@@ -121,7 +121,6 @@ void Plant::Reproduce()
 
         return; 
     }
-    energy -= reproduce_energy_cost;
     int x = Pos.first;
     int y = Pos.second;
     // 在 [-reproduce_radius, +reproduce_radius] 范围内随机偏移
