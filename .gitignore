@@ -5,3 +5,5 @@ modules
 *.obj
 out
 build
+*.make
+*.a

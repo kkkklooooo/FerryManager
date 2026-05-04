@@ -1,4 +1,5 @@
 #include"Organism.h"
+#include<cassert>
 #include "Registry.h"
 #include"Word.h"
 #include"Environment.h"
@@ -35,8 +36,11 @@ bool Environment::canPlant(ReproduceRequest a) {
 void Environment::EnergyExchange(Reproducable* on) {
 	energy += on->step_energy_cost * EnvironmentEnergyAbsorbRate*lossRate;//土地吸收粪便或者尸体 cost已经在step去除了
 	if (on->type == PLANT) {//植物吸收土地
-		on->energy += PlantAbsortRate * energy*lossRate;
-		energy -= PlantAbsortRate * energy;
+		float abs=std::min( PlantAbsortRate * energy,StepMaxAbsorb/lossRate);
+		abs=abs*lossRate;
+		on->energy +=abs;
+		assert(abs<=StepMaxAbsorb)	;
+		energy -= abs;
 	}
 }
 

@@ -4,6 +4,7 @@
 #include <utility>
 const float EnvironmentEnergyAbsorbRate=0.01;
 const float PlantAbsortRate = 0.4;
+const float StepMaxAbsorb = 2;
 
 class Environment
 { // 环境大类

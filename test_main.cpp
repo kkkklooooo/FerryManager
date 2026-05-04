@@ -250,7 +250,7 @@ int main() {
     world.CurrentWeather = SUN;
 
     const int totalFrames = 3000;
-    const int frameDelayMs = 1;
+    const int frameDelayMs = 100;
 
     bool paused = false;
     int frame = 0;
