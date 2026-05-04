@@ -1,356 +1,437 @@
 #include "Word.h"
 #include "Organism.h"
 #include "Environment.h"
-#include <iostream>
-#include <thread>
-#include <chrono>
-#include <vector>
-#include <iomanip>
-#include <conio.h>
-#include <sstream>
-#include <string>
-#include <cfloat>
+#include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
+#include "imgui/backends/imgui_impl_win32.h"
+#include "imgui/backends/imgui_impl_opengl3.h"
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <GL/gl.h>
 #include <algorithm>
-#include"imgui/imgui.h"
-void clearScreen() {
-    std::cout << "\033[2J\033[H";
+#include <cfloat>
+#include <cmath>
+#include <vector>
+#include <string>
+#include <chrono>
+
+// ============================================================
+//  helper: environment -> colour
+// ============================================================
+static ImU32 EnvColor(EnvironmentType t, float energy, float maxE) {
+    float i = (maxE > 0.001f) ? energy / maxE : 0.5f;
+    i = std::clamp(i, 0.25f, 1.0f);
+    int r, g, b;
+    switch (t) {
+    case GRESSLEND: r = 107; g = 142;  b = 35;  break;
+    case WATER:     r = 30;  g = 144;  b = 255; break;
+    case FOREST:    r = 34;  g = 139;  b = 34;  break;
+    case MOUTAN:    r = 139; g = 137;  b = 137; break;
+    default:        r = 128; g = 128;  b = 128; break;
+    }
+    return IM_COL32((int)(r*i), (int)(g*i), (int)(b*i), 255);
 }
 
-void drawWorld(const World& world) {
+static const char* EnvName(EnvironmentType t) {
+    switch (t) {
+    case GRESSLEND: return "Grassland";
+    case WATER:     return "Water";
+    case FOREST:    return "Forest";
+    case MOUTAN:    return "Mountain";
+    default:        return "?";
+    }
+}
+
+// ============================================================
+//  World grid
+// ============================================================
+static void DrawWorldGrid(const World& world, float cellSize = 28.0f) {
+    const auto& envs = world.GetEnvironments();
     const auto& orgs = world.GetReproducas();
-    const auto& envs = world.GetEnvironments();
-    int w = world.GetWidth();
-    int h = world.GetHeight();
+    int w = world.GetWidth(), h = world.GetHeight();
 
-    std::vector<std::vector<char>> grid(h, std::vector<char>(w, ' '));
+    float maxE = 0.001f;
+    for (auto* e : envs) if (e->energy > maxE) maxE = e->energy;
 
-    for (size_t i = 0; i < envs.size(); ++i) {
-        int x = i % w;
-        int y = i / w;
-        switch (envs[i]->name) {
-        case GRESSLEND: grid[y][x] = '.'; break;
-        case WATER:     grid[y][x] = '~'; break;
-        case FOREST:    grid[y][x] = 'T'; break;
-        case MOUTAN:    grid[y][x] = '^'; break;
-        default:        grid[y][x] = '?';
-        }
-    }
-
-    for (auto org : orgs) {
-        int x = org->Pos.first;
-        int y = org->Pos.second;
-        if (x >= 0 && x < w && y >= 0 && y < h) {
-            grid[y][x] = (org->type == PLANT) ? '*' : 'A';
-        }
-    }
+    ImDrawList* dl = ImGui::GetWindowDrawList();
+    ImVec2 base = ImGui::GetCursorScreenPos();
 
     for (int y = 0; y < h; ++y) {
-        for (int x = 0; x < w; ++x)
-            std::cout << grid[y][x];
-        std::cout << '\n';
-    }
-}
-
-void drawEnergyMap(const World& world) {
-    const auto& envs = world.GetEnvironments();
-    int w = world.GetWidth();
-    int h = world.GetHeight();
-
-    // Find min and max energy for normalization
-    float minEnergy = FLT_MAX, maxEnergy = FLT_MIN;
-    for (size_t i = 0; i < envs.size(); ++i) {
-        float e = envs[i]->energy;
-        if (e < minEnergy) minEnergy = e;
-        if (e > maxEnergy) maxEnergy = e;
-    }
-
-    // Energy character mapping (low to high)
-    const char* energyChars = " .-:+*#@";
-    int numLevels = 7;
-
-    std::cout << "\n--- Energy Map (Heatmap) ---\n";
-    std::cout << "Energy range: [" << std::fixed << std::setprecision(2)
-              << minEnergy << " - " << maxEnergy << "]\n";
-
-    for (int y = 0; y < h; ++y) {
-        std::cout << std::setw(2) << y << " ";
         for (int x = 0; x < w; ++x) {
             int idx = y * w + x;
-            if (idx < (int)envs.size()) {
-                float e = envs[idx]->energy;
-                int level = 0;
-                if (maxEnergy > minEnergy) {
-                    level = static_cast<int>((e - minEnergy) / (maxEnergy - minEnergy) * (numLevels - 1));
-                    level = std::max(0, std::min(level, numLevels - 1));
-                }
-                std::cout << energyChars[level];
-            } else {
-                std::cout << '?';
-            }
+            ImVec2 p0(base.x + x*cellSize, base.y + y*cellSize);
+            ImVec2 p1(p0.x + cellSize, p0.y + cellSize);
+
+            ImU32 col = IM_COL32(20, 20, 20, 255);
+            if (idx < (int)envs.size())
+                col = EnvColor(envs[idx]->name, envs[idx]->energy, maxE);
+
+            dl->AddRectFilled(p0, p1, col);
+            dl->AddRect(p0, p1, IM_COL32(50, 50, 50, 255), 0, 0, 1.0f);
         }
-        std::cout << " " << std::setw(2) << y << "\n";
     }
 
-    // Print legend
-    std::cout << "   ";
-    for (int i = 0; i < numLevels; ++i) {
-        std::cout << energyChars[i];
-    }
-    std::cout << " (low to high energy)\n";
-    std::cout << "-----------------------------\n";
-}
-
-void printEnergyGrid(const World& world) {
-    const auto& envs = world.GetEnvironments();
-    int w = world.GetWidth();
-    int h = world.GetHeight();
-
-    std::cout << "\n--- Energy Grid (Numeric) ---\n";
-    std::cout << "     ";
-    for (int x = 0; x < w; ++x) {
-        std::cout << std::setw(5) << x;
-    }
-    std::cout << "\n     " << std::string(w * 5, '-') << "\n";
-
-    for (int y = 0; y < h; ++y) {
-        std::cout << std::setw(3) << y << " |";
-        for (int x = 0; x < w; ++x) {
-            int idx = y * w + x;
-            if (idx < (int)envs.size()) {
-                std::cout << std::setw(5) << std::fixed << std::setprecision(1) << envs[idx]->energy;
-            } else {
-                std::cout << std::setw(5) << "?";
-            }
-        }
-        std::cout << " | " << std::setw(3) << y << "\n";
-    }
-    std::cout << "     " << std::string(w * 5, '-') << "\n";
-    std::cout << "     ";
-    for (int x = 0; x < w; ++x) {
-        std::cout << std::setw(5) << x;
-    }
-    std::cout << "\n---------------------------------\n";
-}
-
-void printEnergyHistogram(const World& world) {
-    const auto& envs = world.GetEnvironments();
-    int w = world.GetWidth();
-    int h = world.GetHeight();
-
-    // Create histogram buckets
-    const int numBuckets = 20;
-    float minEnergy = FLT_MAX, maxEnergy = FLT_MIN;
-    for (size_t i = 0; i < envs.size(); ++i) {
-        float e = envs[i]->energy;
-        if (e < minEnergy) minEnergy = e;
-        if (e > maxEnergy) maxEnergy = e;
-    }
-
-    std::vector<int> buckets(numBuckets, 0);
-    for (size_t i = 0; i < envs.size(); ++i) {
-        float e = envs[i]->energy;
-        int bucket = 0;
-        if (maxEnergy > minEnergy) {
-            bucket = static_cast<int>((e - minEnergy) / (maxEnergy - minEnergy) * (numBuckets - 1));
-            bucket = std::max(0, std::min(bucket, numBuckets - 1));
-        }
-        buckets[bucket]++;
-    }
-
-    // Find max bucket value for scaling
-    int maxBucket = *std::max_element(buckets.begin(), buckets.end());
-    const int barWidth = 30;
-
-    std::cout << "\n--- Energy Distribution Histogram ---\n";
-    for (int i = 0; i < numBuckets; ++i) {
-        float low = minEnergy + (maxEnergy - minEnergy) * i / numBuckets;
-        float high = minEnergy + (maxEnergy - minEnergy) * (i + 1) / numBuckets;
-        int barLen = (maxBucket > 0) ? (buckets[i] * barWidth / maxBucket) : 0;
-
-        std::cout << std::fixed << std::setprecision(2)
-                  << std::setw(6) << low << "-"
-                  << std::setw(6) << high << " |";
-        for (int j = 0; j < barLen; ++j) std::cout << "#";
-        std::cout << " " << buckets[i] << "\n";
-    }
-    std::cout << "Total cells: " << envs.size() << "\n";
-    std::cout << "-------------------------------------\n";
-}
-
-void printPlantDetails(const World& world) {
-    const auto& orgs = world.GetReproducas();
-    int plantCount = 0;
-    std::cout << "\n--- Plant Details ---\n";
-    for (const auto* org : orgs) {
+    for (auto* org : orgs) {
+        int x = org->Pos.first, y = org->Pos.second;
+        if (x < 0 || x >= w || y < 0 || y >= h) continue;
+        ImVec2 c(base.x + x*cellSize + cellSize*0.5f,
+                 base.y + y*cellSize + cellSize*0.5f);
+        float r = cellSize * 0.38f;
         if (org->type == PLANT) {
-            const Plant* plant = static_cast<const Plant*>(org);
-            std::cout << "Plant #" << std::setw(3) << plant->id
-                << "  Pos: (" << std::setw(3) << org->Pos.first << ","
-                << std::setw(3) << org->Pos.second << ")"
-                << "  Energy: " << std::fixed << std::setprecision(2) << org->energy
-                << "\n";
-            ++plantCount;
-            if (plantCount >= 20) {
-                std::cout << "... (showing first 20 of " << (orgs.size()) << " plants)\n";
-                break;
-            }
+            dl->AddCircleFilled(c, r, IM_COL32(0, 220, 80, 210));
+            dl->AddCircle(c, r, IM_COL32(0, 100, 40, 255), 0, 1.5f);
+        } else {
+            dl->AddCircleFilled(c, r, IM_COL32(255, 90, 70, 210));
+            dl->AddCircle(c, r, IM_COL32(180, 50, 30, 255), 0, 1.5f);
         }
     }
-    std::cout << "Total plants: " << plantCount << "\n";
+
+    ImGui::Dummy(ImVec2(w*cellSize, h*cellSize));
+
+    if (ImGui::IsItemHovered()) {
+        ImVec2 m = ImGui::GetMousePos();
+        int gx = (int)((m.x - base.x)/cellSize);
+        int gy = (int)((m.y - base.y)/cellSize);
+        if (gx >= 0 && gx < w && gy >= 0 && gy < h) {
+            int idx = gy*w + gx;
+            ImGui::BeginTooltip();
+            ImGui::Text("(%d, %d)", gx, gy);
+            if (idx < (int)envs.size()) {
+                ImGui::Text("Terrain: %s", EnvName(envs[idx]->name));
+                ImGui::Text("Energy:  %.1f", envs[idx]->energy);
+            }
+            for (auto* org : orgs) {
+                if (org->Pos.first == gx && org->Pos.second == gy)
+                    ImGui::Text("%s  E=%.1f",
+                        org->type == PLANT ? "Plant" : "Animal", org->energy);
+            }
+            ImGui::EndTooltip();
+        }
+    }
 }
 
-void queryPosition(const World& world, int x, int y) {
+// ============================================================
+//  Energy heat-map
+// ============================================================
+static void DrawEnergyHeatmap(const World& world, float cs = 14.0f) {
+    const auto& envs = world.GetEnvironments();
+    int w = world.GetWidth(), h = world.GetHeight();
+
+    float minE = FLT_MAX, maxE = FLT_MIN;
+    for (auto* e : envs) {
+        if (e->energy < minE) minE = e->energy;
+        if (e->energy > maxE) maxE = e->energy;
+    }
+    float range = (maxE - minE) > 0.001f ? (maxE - minE) : 1.0f;
+
+    ImDrawList* dl = ImGui::GetWindowDrawList();
+    ImVec2 base = ImGui::GetCursorScreenPos();
+
+    for (int y = 0; y < h; ++y) {
+        for (int x = 0; x < w; ++x) {
+            int idx = y*w + x;
+            ImVec2 p0(base.x + x*cs, base.y + y*cs);
+            ImVec2 p1(p0.x + cs, p0.y + cs);
+            ImU32 col = IM_COL32(20, 20, 20, 255);
+            if (idx < (int)envs.size()) {
+                float t = (envs[idx]->energy - minE) / range;
+                int r = (int)(t * 255);
+                int g = (int)((1.0f - std::abs(t - 0.5f)*2.0f) * 255);
+                int b = (int)((1.0f - t) * 255);
+                col = IM_COL32(r, g, b, 255);
+            }
+            dl->AddRectFilled(p0, p1, col);
+        }
+    }
+    ImGui::Dummy(ImVec2(w*cs, h*cs));
+    ImGui::Text("Range: %.1f .. %.1f", minE, maxE);
+}
+
+// ============================================================
+//  Plant table
+// ============================================================
+static void DrawPlantList(const World& world) {
+    const auto& orgs = world.GetReproducas();
+    if (!ImGui::BeginTable("##plants", 4,
+        ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg |
+        ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingFixedFit))
+        return;
+
+    ImGui::TableSetupColumn("ID",     ImGuiTableColumnFlags_WidthFixed, 40);
+    ImGui::TableSetupColumn("X",      ImGuiTableColumnFlags_WidthFixed, 40);
+    ImGui::TableSetupColumn("Y",      ImGuiTableColumnFlags_WidthFixed, 40);
+    ImGui::TableSetupColumn("Energy", ImGuiTableColumnFlags_WidthFixed, 70);
+    ImGui::TableHeadersRow();
+
+    int n = 0;
+    for (auto* org : orgs) {
+        if (org->type != PLANT) continue;
+        const Plant* p = static_cast<const Plant*>(org);
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0); ImGui::Text("%d",   p->id);
+        ImGui::TableSetColumnIndex(1); ImGui::Text("%d",   (int)org->Pos.first);
+        ImGui::TableSetColumnIndex(2); ImGui::Text("%d",   (int)org->Pos.second);
+        ImGui::TableSetColumnIndex(3);
+        ImVec4 c = org->energy > 5.0f ? ImVec4(0.3f,1,0.3f,1) : ImVec4(1,0.5f,0.3f,1);
+        ImGui::TextColored(c, "%.1f", org->energy);
+        if (++n >= 50) break;
+    }
+    ImGui::EndTable();
+}
+
+// ============================================================
+//  Stats bar
+// ============================================================
+static void DrawStats(const World& world, int frame, int total) {
     const auto& orgs = world.GetReproducas();
     const auto& envs = world.GetEnvironments();
-    int w = world.GetWidth();
-    int h = world.GetHeight();
-
-    std::cout << "\n--- Position (" << x << ", " << y << ") Info ---\n";
-
-    if (x < 0 || x >= w || y < 0 || y >= h) {
-        std::cout << "Coordinates out of bounds!\n";
-        return;
+    int plants = 0, animals = 0;
+    float pE = 0, aE = 0, envE = 0;
+    for (auto* o : orgs) {
+        if (o->type == PLANT) { ++plants;  pE += o->energy; }
+        else                  { ++animals; aE += o->energy; }
     }
+    for (auto* e : envs) envE += e->energy;
 
-    int envIdx = y * w + x;
-    if (envIdx >= 0 && envIdx < (int)envs.size()) {
-        std::cout << "Environment: ";
-        switch (envs[envIdx]->name) {
-        case GRESSLEND: std::cout << "GRASSLAND"; break;
-        case WATER:     std::cout << "WATER"; break;
-        case FOREST:    std::cout << "FOREST"; break;
-        case MOUTAN:    std::cout << "MOUNTAIN"; break;
-        default:        std::cout << "UNKNOWN"; break;
-        }
-        std::cout << "\n";
-    }
-
-    int found = 0;
-    for (const auto* org : orgs) {
-        if (org->Pos.first == x && org->Pos.second == y) {
-            if (org->type == PLANT) {
-                const Plant* plant = static_cast<const Plant*>(org);
-                std::cout << "Organism #" << plant->id;
-            } else {
-                std::cout << "Organism [animal]";
-            }
-            std::cout << "  Type: " << (org->type == PLANT ? "PLANT" : "ANIMAL")
-                << "  Energy: " << std::fixed << std::setprecision(2) << org->energy << "\n";
-            ++found;
-        }
-    }
-    if (found == 0) {
-        std::cout << "No organism at this position.\n";
-    }
-    std::cout << "--------------------------\n";
+    ImGui::Text("Frame %d/%d", frame, total); ImGui::SameLine(130);
+    ImGui::Text("| Plants: %d", plants);       ImGui::SameLine(250);
+    ImGui::Text("Animals: %d", animals);       ImGui::SameLine(370);
+    ImGui::Text("| P-E: %.0f", pE);           ImGui::SameLine(480);
+    ImGui::Text("A-E: %.0f", aE);             ImGui::SameLine(590);
+    ImGui::Text("Env-E: %.0f", envE);
 }
 
+// ============================================================
+//  Main UI
+// ============================================================
+static bool showHeatmap  = false;
+static bool showPlants   = true;
+static bool showQuery    = false;
+
+void RenderUI(World& world, int frame, int total,
+              bool paused, bool* pPaused, bool* pStep, float* pSpeed)
+{
+    if (ImGui::BeginMainMenuBar()) {
+        if (ImGui::BeginMenu("View")) {
+            ImGui::MenuItem("Plants",      nullptr, &showPlants);
+            ImGui::MenuItem("Heatmap",     nullptr, &showHeatmap);
+            ImGui::MenuItem("Query Panel", nullptr, &showQuery);
+            ImGui::EndMenu();
+        }
+        ImGui::EndMainMenuBar();
+    }
+
+    // ---- controls ----
+    ImGui::SetNextWindowPos(ImVec2(10, 30), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Controls", nullptr,
+        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize);
+
+    if (ImGui::Button(*pPaused ? ">  Run" : "|| Pause"))
+        *pPaused = !*pPaused;
+    ImGui::SameLine();
+    if (ImGui::Button("Step")) *pStep = true;
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(120);
+    ImGui::SliderFloat("Speed", pSpeed, 0.1f, 10.0f, "%.1fx");
+
+    ImGui::SameLine();
+    ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
+    ImGui::SameLine();
+    DrawStats(world, frame, total);
+    ImGui::End();
+
+    // ---- world grid ----
+    ImGui::SetNextWindowPos(ImVec2(10, 80), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(500, 520), ImGuiCond_FirstUseEver);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(6, 6));
+    ImGui::Begin("World", nullptr, ImGuiWindowFlags_NoScrollbar);
+    DrawWorldGrid(world);
+    ImGui::End();
+    ImGui::PopStyleVar();
+
+    // ---- heatmap ----
+    if (showHeatmap) {
+        ImGui::SetNextWindowSize(ImVec2(290, 290), ImGuiCond_FirstUseEver);
+        ImGui::Begin("Energy Heatmap", &showHeatmap);
+        DrawEnergyHeatmap(world);
+        ImGui::End();
+    }
+
+    // ---- plant list ----
+    if (showPlants) {
+        ImGui::SetNextWindowSize(ImVec2(260, 380), ImGuiCond_FirstUseEver);
+        ImGui::Begin("Plants", &showPlants);
+        DrawPlantList(world);
+        ImGui::End();
+    }
+
+    // ---- position query ----
+    if (showQuery) {
+        ImGui::SetNextWindowSize(ImVec2(260, 240), ImGuiCond_FirstUseEver);
+        ImGui::Begin("Position Query", &showQuery);
+        static int qx = 0, qy = 0;
+        ImGui::InputInt("X", &qx); ImGui::SameLine();
+        ImGui::InputInt("Y", &qy);
+        int w = world.GetWidth(), h = world.GetHeight();
+        if (qx >= 0 && qx < w && qy >= 0 && qy < h) {
+            const auto& envs = world.GetEnvironments();
+            const auto& orgs = world.GetReproducas();
+            int idx = qy*w + qx;
+            ImGui::Separator();
+            if (idx < (int)envs.size()) {
+                ImGui::Text("Terrain: %s", EnvName(envs[idx]->name));
+                ImGui::Text("Energy:  %.1f", envs[idx]->energy);
+            }
+            for (auto* org : orgs) {
+                if (org->Pos.first == qx && org->Pos.second == qy) {
+                    ImGui::Text("%s  E=%.1f",
+                        org->type == PLANT ? "Plant" : "Animal", org->energy);
+                    if (org->type == PLANT)
+                        ImGui::Text("  ID: %d", static_cast<const Plant*>(org)->id);
+                }
+            }
+        } else {
+            ImGui::TextDisabled("Out of range [0..%d, 0..%d]", w-1, h-1);
+        }
+        ImGui::End();
+    }
+}
+
+// ============================================================
+//  Win32 + OpenGL setup
+// ============================================================
+static HGLRC   g_hRC;
+static HDC     g_hDC;
+static HWND    g_hWnd;
+static bool    g_done = false;
+static RECT    g_rect;
+
+// Forward message handler
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+static LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
+        return true;
+    switch (msg) {
+    case WM_SIZE:
+        GetClientRect(hWnd, &g_rect);
+        return 0;
+    case WM_DESTROY:
+        g_done = true;
+        PostQuitMessage(0);
+        return 0;
+    }
+    return DefWindowProc(hWnd, msg, wParam, lParam);
+}
+
+static bool InitWindow() {
+    WNDCLASSEXW wc = { sizeof(wc) };
+    wc.style         = CS_OWNDC;
+    wc.lpfnWndProc   = WndProc;
+    wc.hInstance     = GetModuleHandle(nullptr);
+    wc.hCursor       = LoadCursor(nullptr, IDC_ARROW);
+    wc.lpszClassName = L"EcoSim";
+    RegisterClassExW(&wc);
+
+    g_rect = { 0, 0, 1280, 800 };
+    AdjustWindowRect(&g_rect, WS_OVERLAPPEDWINDOW, FALSE);
+
+    g_hWnd = CreateWindowW(
+        L"EcoSim", L"Eco Simulation",
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, CW_USEDEFAULT,
+        g_rect.right - g_rect.left, g_rect.bottom - g_rect.top,
+        nullptr, nullptr, wc.hInstance, nullptr);
+    if (!g_hWnd) return false;
+
+    // OpenGL pixel format
+    PIXELFORMATDESCRIPTOR pfd = { sizeof(pfd), 1,
+        PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
+        PFD_TYPE_RGBA, 32, 0,0,0,0,0,0, 0,0, 0,0,0,0, 24,8,0,
+        PFD_MAIN_PLANE, 0,0,0,0 };
+    g_hDC = GetDC(g_hWnd);
+    int pf = ChoosePixelFormat(g_hDC, &pfd);
+    SetPixelFormat(g_hDC, pf, &pfd);
+    g_hRC = wglCreateContext(g_hDC);
+    wglMakeCurrent(g_hDC, g_hRC);
+
+    ShowWindow(g_hWnd, SW_SHOW);
+    UpdateWindow(g_hWnd);
+    GetClientRect(g_hWnd, &g_rect);
+    return true;
+}
+
+static void CleanupWindow() {
+    if (g_hRC) { wglMakeCurrent(nullptr, nullptr); wglDeleteContext(g_hRC); }
+    if (g_hDC && g_hWnd) ReleaseDC(g_hWnd, g_hDC);
+    if (g_hWnd) DestroyWindow(g_hWnd);
+    UnregisterClassW(L"EcoSim", GetModuleHandle(nullptr));
+}
+
+// ============================================================
+//  main
+// ============================================================
 int main() {
+    if (!InitWindow()) return 1;
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGui::GetIO().IniFilename = nullptr;
+    ImGui::StyleColorsDark();
+
+    ImGui_ImplWin32_Init(g_hWnd);
+    ImGui_ImplOpenGL3_Init();
+
     World& world = World::GetWorld();
     world.CurrentWeather = SUN;
 
     const int totalFrames = 3000;
-    const int frameDelayMs = 100;
+    int   frame    = 0;
+    bool  paused   = false;
+    bool  stepReq  = false;
+    float speed    = 1.0f;
 
-    bool paused = false;
-    int frame = 0;
+    auto lastStep = std::chrono::steady_clock::now();
 
-    std::cout << "\n=== Debug Controls ===\n";
-    std::cout << "Space: Pause/Resume\n";
-    std::cout << "[while paused] Enter 'x y' to query position\n";
-    std::cout << "n: Step (single frame)\n";
-    std::cout << "s: Continue simulation (auto mode)\n";
-    std::cout << "q: Quit\n";
-    std::cout << "====================\n\n";
+    while (!g_done && frame < totalFrames) {
+        // Pump messages
+        MSG msg;
+        while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+            if (msg.message == WM_QUIT) { g_done = true; break; }
+        }
+        if (g_done) break;
 
-    while (frame < totalFrames) {
-        if (_kbhit()) {
-            int ch = _getch();
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplWin32_NewFrame();
+        ImGui::NewFrame();
 
-            if (ch == ' ') {
-                paused = !paused;
-                std::cout << (paused ? "\n[PAUSED] Enter 'n' step, 's' auto, 'q' quit, or type 'x y': " : "[RESUMED]\n");
-            }
-            else if (ch == 's' || ch == 'S') {
-                paused = false;
-                std::cout << "[AUTO MODE]\n";
-            }
-            else if (ch == 'n' || ch == 'N') {
-                world.Update();
-                ++frame;
-                clearScreen();
-                std::cout << "===== Eco Simulation Frame " << (frame)
-                    << " / " << totalFrames << " =====\n";
-                drawWorld(world);
-                printPlantDetails(world);
-                std::cout << "\n[STEP] Enter 's' auto, 'n' next, 'q' quit, or type 'x y': ";
-            }
-            else if (ch == 'q' || ch == 'Q') {
-                std::cout << "\n===== Simulation Ended =====\n";
-                break;
-            }
-            else if (paused && ch >= '0' && ch <= '9') {
-                std::string line;
-                line += ch;
-                while (_kbhit()) {
-                    int ch2 = _getch();
-                    if (ch2 == '\r' || ch2 == '\n') break;
-                    if (ch2 == ' ') {
-                        line += ' ';
-                        while (_kbhit()) {
-                            int ch3 = _getch();
-                            if (ch3 == '\r' || ch3 == '\n') break;
-                            line += ch3;
-                        }
-                        break;
-                    }
-                    line += ch2;
-                }
-                std::istringstream iss(line);
-                int x = -1, y = -1;
-                char space;
-                if (iss >> x >> space >> y) {
-                    queryPosition(world, x, y);
-                } else {
-                    iss.clear();
-                    iss.str(line);
-                    if (iss >> x >> y) {
-                        queryPosition(world, x, y);
-                    } else {
-                        std::cout << "Invalid input. Use format: 'x y' (e.g., '5 10')\n";
-                    }
-                }
-                std::cout << "\n[PAUSED] Enter 'n' step, 's' auto, 'q' quit, or type 'x y': ";
-            }
+        RenderUI(world, frame, totalFrames, paused, &paused, &stepReq, &speed);
+
+        // Simulation step
+        auto now = std::chrono::steady_clock::now();
+        float stepInterval = 100.0f / speed;
+        float elapsed = std::chrono::duration<float, std::milli>(now - lastStep).count();
+        if ((!paused && elapsed >= stepInterval) || stepReq) {
+            world.Update();
+            ++frame;
+            stepReq = false;
+            lastStep = now;
         }
 
-        if (paused) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(50));
-            continue;
-        }
-
-        world.Update();
-        ++frame;
-
-        clearScreen();
-        std::cout << "===== Eco Simulation Frame " << (frame)
-            << " / " << totalFrames << " =====\n";
-
-        drawWorld(world);
-        drawEnergyMap(world);
-        printEnergyGrid(world);
-        // printEnergyHistogram(world);
-        printPlantDetails(world);
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(frameDelayMs));
+        // Render
+        ImGui::Render();
+        glViewport(0, 0, (int)(g_rect.right - g_rect.left), (int)(g_rect.bottom - g_rect.top));
+        glClearColor(0.12f, 0.12f, 0.12f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        SwapBuffers(g_hDC);
     }
 
-    clearScreen();
-    std::cout << "===== Simulation Finished =====\n";
-    drawWorld(world);
-    drawEnergyMap(world);
-    printEnergyGrid(world);
-    // printEnergyHistogram(world);
-    printPlantDetails(world);
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
+    CleanupWindow();
     return 0;
 }

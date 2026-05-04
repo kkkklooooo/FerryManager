@@ -12,9 +12,10 @@ set(SOURCES
     WordDefine.cpp
     test_main.cpp
     ${IMGUI_SOURCES}
+    imgui/backends/imgui_impl_win32.cpp
+    imgui/backends/imgui_impl_opengl3.cpp
 )
 
-# ͷ�ļ�����ΪIDE�Ѻã���������룩
 set(HEADERS
     Registry.h
     Organism.h
@@ -26,8 +27,12 @@ add_executable(ecosim ${SOURCES} ${HEADERS})
 
 target_include_directories(ecosim PRIVATE
     ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/imgui
+    ${CMAKE_SOURCE_DIR}/imgui/backends
 )
-# ���ʹ��MSVC����������һЩѡ��
+
+target_link_libraries(ecosim PRIVATE opengl32 gdi32 dwmapi)
+
 if(MSVC)
     target_compile_options(ecosim PRIVATE /EHsc)
 endif()
