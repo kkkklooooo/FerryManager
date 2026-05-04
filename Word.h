@@ -16,6 +16,7 @@ class World
 public:
     Weather CurrentWeather;
     World(int len,int weigth);
+    void AddLeftEnergyRequest(const LeftEnergyRequest& request);
     // 更新世界状态（例如环境变化等）
     void Update();
     // 处理所有繁殖请求，生成新生物

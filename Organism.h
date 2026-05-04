@@ -16,6 +16,10 @@ class Plant;
 class Reproducable;
 
 
+struct LeftEnergyRequest{
+    std::pair<int, int> pos;
+    float energy;
+};
 /**
  * @brief 生成请求结构体，用于在世界中暂存待生成的子代信息
  */
@@ -34,7 +38,7 @@ struct ReproduceRequest
 class Organism
 {
 public:
-    float energy = 1;               // 当前能量值
+    float energy = 5;               // 当前能量值
     float step_energy_cost;         // 每帧消耗的能量
     std::pair<int, int> Pos;         // 位置坐标 (x, y)
     bool active = true;             // 是否活跃（false表示死亡）
@@ -43,7 +47,7 @@ public:
     // 构造函数：初始化每步能量消耗和获得以及类型
     Organism(float step_energy_cost, OrganismType type);
     // 检查能量，若能量≤0则设置active为false
-    void check_energy();
+    void check_active();
     // 移动一步：增减能量并检查生死
     virtual void Step()=0;
 };

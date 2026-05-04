@@ -51,13 +51,18 @@ Organism::Organism(float step_energy_cost, OrganismType type)
 }
 
 /**
- * @brief 检查能量值，若能量<=0则标记为不活跃（死亡）
+ * @brief 检查active
  */
-void Organism::check_energy() //单独死亡
+void Organism::check_active() //单独死亡
 {
     if (energy <= 0)
     {
         active = false;
+    }
+    if(!active){
+        printf("Organism %d die\n",id);
+        World::GetWorld().AddLeftEnergyRequest({Pos,energy});
+        energy=0;
     }
 }
 
@@ -67,7 +72,7 @@ void Organism::check_energy() //单独死亡
 void Organism::Step()
 {
     energy -= step_energy_cost;
-    check_energy();
+    check_active();
 }
 
 /**
@@ -126,7 +131,7 @@ void Plant::Reproduce()
     // 在 [-reproduce_radius, +reproduce_radius] 范围内随机偏移
     int x_new = x + std::rand() % (2 * reproduce_radius + 1) - reproduce_radius;
     int y_new = y + std::rand() % (2 * reproduce_radius + 1) - reproduce_radius;
-    // printf("\033[31mPlant request at (%d, %d) with radius %d\033[0m\n", x_new, y_new);
+    printf("\033[31mPlant request at (%d, %d) with radius %d\033[0m\n", x_new, y_new);
     // 确保新位置在有效世界边界内
     if (x_new >= 0 && x_new < len && y_new >= 0 && y_new < weight)
     {
@@ -143,7 +148,7 @@ void Plant::Reproduce()
 
 void Plant::Step() 
 {
-    energy -= step_energy_cost;
+    Organism::Step();
 }
 
 bool isNaber(Organism* a, Organism* b) {//指针方便多态
@@ -183,21 +188,25 @@ void PredationOrFuck(Reproducable* a, Reproducable* b) {
         a->energy += b->energy * AnimalAbsorbRate*lossRate;
         b->energy-= b->energy * AnimalAbsorbRate;
         b->active=false;
+        printf("\033[31m%s eat %s\033[0m\n", a->name, b->name);
         return;
     }
     if (bEa && !aEb) {
         b->energy += a->energy * AnimalAbsorbRate*lossRate;
         a->energy -= a->energy * AnimalAbsorbRate;
         a->active = false;
+        printf("\033[31m%s eat %s\033[0m\n", b->name, a->name);
         return;
     }
     if (aEb && bEa) {
         if (a->energy >= b->energy) {
             b->active = false;
+            printf("\033[31m%s eat %s\033[0m\n", a->name, b->name);
             return;
         }
         else {
             a->active = false;
+            printf("\033[31m%s eat %s\033[0m\n", b->name, a->name);
             return;
         }
     }

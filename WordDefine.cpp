@@ -13,6 +13,11 @@ World::World(int len, int weigth) {
     }
 }
 
+void World::AddLeftEnergyRequest(const LeftEnergyRequest &request)
+{
+    if(request.energy>0) Environments[request.pos.second*weight+request.pos.first]->deadOrganismEnergy+=request.energy;
+}
+
 void World::Update()
 {
     //杀死死了的东西

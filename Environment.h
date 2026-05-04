@@ -17,6 +17,7 @@ public:
 				int mp);
 	std::pair<int, int> Pos;
 	float energy;//初始能量
+	float deadOrganismEnergy=0;//死亡生物的能量
 	OrganismType type;
 	EnvironmentType name;
 	std::vector<OrganismName> CanLiveIn;//能活着
@@ -24,7 +25,7 @@ public:
 	int havePlant;//现在有多少
 	bool canPlant(ReproduceRequest);//能生
 	void EnergyExchange(Reproducable* on);//能量交换
-	virtual void Update(Weather)=0;//更新
+	virtual void Update(Weather);//更新
 };
 
 class Water : public Environment
