@@ -132,7 +132,7 @@ void Plant::Reproduce()
     // 在 [-reproduce_radius, +reproduce_radius] 范围内随机偏移
     int x_new = x + std::rand() % (2 * reproduce_radius + 1) - reproduce_radius;
     int y_new = y + std::rand() % (2 * reproduce_radius + 1) - reproduce_radius;
-    printf("\033[31mPlant request at (%d, %d) with radius %d\033[0m\n", x_new, y_new);
+    // printf("\033[31mPlant request at (%d, %d) with radius %d\033[0m\n", x_new, y_new);
     // 确保新位置在有效世界边界内
     if (x_new >= 0 && x_new < len && y_new >= 0 && y_new < weight)
     {
@@ -149,14 +149,18 @@ void Plant::Reproduce()
 
 void Plant::Step() 
 {
+    float ori=step_energy_cost;
     step_energy_cost*=calculate_overlay_cost();
     Organism::Step();
+    step_energy_cost=ori;
 }
 
 float Plant::calculate_overlay_cost()
 {
    float overlay= World::GetWorld().calculate_overlay(Pos); 
-   float factor=(float)1/(abs(overlay-1)+0.01);
+   float fuck=1.4;
+   float factor=(float)1/(abs(overlay-fuck))+(fuck-1)/fuck;
+//    printf("Plant %d overlay %f\n",id,factor);
    return factor;
 }
 
