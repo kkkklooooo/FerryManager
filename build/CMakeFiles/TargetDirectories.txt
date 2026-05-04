@@ -1,0 +1,3 @@
+D:/Projects/FerryManager/build/CMakeFiles/ecosim.dir
+D:/Projects/FerryManager/build/CMakeFiles/edit_cache.dir
+D:/Projects/FerryManager/build/CMakeFiles/rebuild_cache.dir

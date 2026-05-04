@@ -3,7 +3,7 @@
 #include "Organism.h"
 #include <utility>
 const float EnvironmentEnergyAbsorbRate=0.01;
-const float PlantAbsortRate = 0.2;
+const float PlantAbsortRate = 0.4;
 
 class Environment
 { // 环境大类
@@ -14,7 +14,7 @@ public:
 				EnvironmentType na,
 				int mp);
 	std::pair<int, int> Pos;
-	float energy;
+	float energy;//初始能量
 	OrganismType type;
 	EnvironmentType name;
 	std::vector<OrganismName> CanLiveIn;//能活着

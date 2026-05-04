@@ -3,3 +3,5 @@ modules
 .vscode
 .vs
 *.obj
+out
+build

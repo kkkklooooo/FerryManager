@@ -1,3 +1,0 @@
-E:/free/FerryManager/out/build/x64-Debug/CMakeFiles/ecosim.dir
-E:/free/FerryManager/out/build/x64-Debug/CMakeFiles/edit_cache.dir
-E:/free/FerryManager/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir

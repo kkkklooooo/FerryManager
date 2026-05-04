@@ -101,7 +101,7 @@ Reproducable::Reproducable(float energy_threshold, float energy_cost, int radius
  */
 
 Plant::Plant(int id, int x, int y, int radius)
-    : Reproducable(0.5, 1, radius, 1, PLANT)
+    : Reproducable(25, 10, radius, 1, PLANT)
 {
     this->id = id;
     Pos = std::make_pair(x, y);
@@ -126,15 +126,18 @@ void Plant::Reproduce()
     // 在 [-reproduce_radius, +reproduce_radius] 范围内随机偏移
     int x_new = x + std::rand() % (2 * reproduce_radius + 1) - reproduce_radius;
     int y_new = y + std::rand() % (2 * reproduce_radius + 1) - reproduce_radius;
+    // printf("\033[31mPlant request at (%d, %d) with radius %d\033[0m\n", x_new, y_new);
     // 确保新位置在有效世界边界内
     if (x_new >= 0 && x_new < len && y_new >= 0 && y_new < weight)
     {
         // 子代植物的半径在父半径的[0.25,2.0]倍之间随机，并取整
-        int r = reproduce_radius * std::min(2.0, std::max(0.25, (double)std::rand() / RAND_MAX));
-        if (World::GetWorld().AddReproduceRequest({ PLANT,Plant_Name, std::make_pair(x_new, y_new), r })) {
-            energy -= reproduce_energy_cost;
-            std::printf("Plant request at (%d, %d) %id\n", x_new, y_new, id);
+        float r = reproduce_radius * std::min(2.0, std::max(0.25, (double)std::rand() / RAND_MAX));
+        int r_int=std::max(1, (int)r); 
+        if(!( World::GetWorld().AddReproduceRequest({PLANT,Plant_Name, std::make_pair(x_new, y_new), r_int}) )){
+            energy += reproduce_energy_cost;
+            return;
         }
+        // std::printf("Plant request at (%d, %d) %id\n", x_new, y_new,id);
     }
 }
 
@@ -155,6 +158,9 @@ bool isNaber(Organism* a, Organism* b) {//指针方便多态
 
 void PredationOrFuck(Reproducable* a, Reproducable* b) {
     //怀孕判断
+    if(a->type==PLANT&&a->reproduce_able){
+        a->Reproduce();
+    }
     if (a->name == b->name) {
         if (a->reproduce_able && !b->reproduce_able) {
             a->Reproduce();

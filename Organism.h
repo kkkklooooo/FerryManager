@@ -5,8 +5,8 @@
 #include <vector>
 #include"Registry.h"
 // 全局变量：用于生成生物的唯一ID
-const float AnimalAbsorbRate=0.3;
-const float lossRate = 0.8;
+const float AnimalAbsorbRate=0.5;
+const float lossRate = 0.9;
 extern int id;
 
 
@@ -34,7 +34,7 @@ struct ReproduceRequest
 class Organism
 {
 public:
-    float energy = 100;               // 当前能量值
+    float energy = 1;               // 当前能量值
     float step_energy_cost;         // 每帧消耗的能量
     std::pair<int, int> Pos;         // 位置坐标 (x, y)
     bool active = true;             // 是否活跃（false表示死亡）
