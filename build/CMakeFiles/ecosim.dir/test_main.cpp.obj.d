@@ -182,4 +182,12 @@ CMakeFiles/ecosim.dir/test_main.cpp.obj: \
  D:/mingw64/lib/gcc/x86_64-w64-mingw32/15.1.0/include/c++/bits/uniform_int_dist.h \
  D:/mingw64/lib/gcc/x86_64-w64-mingw32/15.1.0/include/c++/bits/stl_tempbuf.h \
  D:/mingw64/lib/gcc/x86_64-w64-mingw32/15.1.0/include/c++/pstl/glue_algorithm_defs.h \
- D:/mingw64/lib/gcc/x86_64-w64-mingw32/15.1.0/include/c++/pstl/execution_defs.h
+ D:/mingw64/lib/gcc/x86_64-w64-mingw32/15.1.0/include/c++/pstl/execution_defs.h \
+ D:\Projects\FerryManager\imgui/imgui.h \
+ D:\Projects\FerryManager\imgui/imconfig.h \
+ D:/mingw64/lib/gcc/x86_64-w64-mingw32/15.1.0/include/stdarg.h \
+ D:/mingw64/x86_64-w64-mingw32/include/stdarg.h \
+ D:/mingw64/x86_64-w64-mingw32/include/_mingw_stdarg.h \
+ D:/mingw64/x86_64-w64-mingw32/include/string.h \
+ D:/mingw64/x86_64-w64-mingw32/include/sec_api/string_s.h \
+ D:/mingw64/x86_64-w64-mingw32/include/assert.h

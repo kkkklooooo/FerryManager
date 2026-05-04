@@ -34,7 +34,7 @@ bool Environment::canPlant(ReproduceRequest a) {
 }
 
 void Environment::EnergyExchange(Reproducable* on) {
-	energy += on->step_energy_cost * EnvironmentEnergyAbsorbRate*lossRate;//土地吸收粪便或者尸体 cost已经在step去除了
+	if(energy<SingleEnvironmentMaxEnergy) energy +=(  on->step_energy_cost * EnvironmentEnergyAbsorbRate*lossRate);//土地吸收粪便或者尸体 cost已经在step去除了
 	if (on->type == PLANT) {//植物吸收土地
 		float abs=std::min( PlantAbsortRate * energy,StepMaxAbsorb/lossRate);
 		abs=abs*lossRate;
@@ -51,7 +51,7 @@ void Water::Update(Weather sky) {
 	switch (sky) {
 		case SUN:
 			Valum -= 0.1;
-			energy += 0.1;
+			if(energy<SingleEnvironmentMaxEnergy)energy += 0.1;
 			break;
 		default:
 			break;
@@ -67,7 +67,7 @@ GressLand::GressLand(std::pair<int, int> pos,float en,int mp)
 void GressLand::Update(Weather sky) {
 	switch (sky) {
 	case SUN:
-		energy += 2;
+		if(SingleEnvironmentMaxEnergy>=energy)energy += 2;
 		break;
 	default:
 		break;
