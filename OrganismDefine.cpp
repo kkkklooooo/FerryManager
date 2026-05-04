@@ -1,4 +1,5 @@
 #include "Organism.h"
+#include<cmath>
 #include "Word.h"
 #include"Environment.h"
 #include <algorithm>
@@ -148,7 +149,15 @@ void Plant::Reproduce()
 
 void Plant::Step() 
 {
+    step_energy_cost*=calculate_overlay_cost();
     Organism::Step();
+}
+
+float Plant::calculate_overlay_cost()
+{
+   float overlay= World::GetWorld().calculate_overlay(Pos); 
+   float factor=(float)1/(abs(overlay-1)+0.01);
+   return factor;
 }
 
 bool isNaber(Organism* a, Organism* b) {//指针方便多态

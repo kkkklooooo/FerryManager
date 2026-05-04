@@ -96,6 +96,23 @@ void World::RemoveDeadOrganisms()
     }), Reproducas.end());
 }
 
+float World::calculate_overlay(std::pair<int, int> pos)
+{
+    std::vector<std::pair<int, int>> pos_list={{-1,0},{1,0},{0,-1},{0,1},{-1,-1},{1,1},{1,-1},{-1,1}};
+    int cnt=0;
+    for (auto i : pos_list) {
+        int x = pos.first + i.first;
+        int y = pos.second + i.second;
+        if (x >= 0 && x < len && y >= 0 && y < weight) {
+            cnt+=Environments[y*weight+x]->havePlant;
+        }else{
+            cnt+=Environments[pos.second*weight+pos.first]->maxPlant;
+        }
+    }
+    return (float)cnt/(8.0*Environments[pos.second*weight+pos.first]->maxPlant);
+
+}
+
 /**
  * @brief 获取世界单例实例
  * @return World& 世界对象的引用

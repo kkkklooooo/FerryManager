@@ -86,6 +86,7 @@ public:
     // 重写繁殖方法：随机生成子代位置并向世界提交繁殖请求
     void Reproduce() override;
     void Step();
+    float calculate_overlay_cost();
 };
 
 

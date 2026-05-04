@@ -35,7 +35,7 @@ bool Environment::canPlant(ReproduceRequest a) {
 
 void Environment::EnergyExchange(Reproducable* on) {
 	// if(energy<SingleEnvironmentMaxEnergy) energy +=(  on->step_energy_cost * EnvironmentEnergyAbsorbRate*lossRate);//土地吸收粪便或者尸体 cost已经在step去除了
-	if (on->type == PLANT) {//植物吸收土地
+	if (on->type == PLANT&&on->active) {//植物吸收土地
 		float abs=std::min( PlantAbsortRate * energy,StepMaxAbsorb/lossRate);
 		abs=abs*lossRate;
 		on->energy +=abs;

@@ -25,6 +25,7 @@ public:
     bool AddReproduceRequest(const ReproduceRequest& request);
     // 移除所有能量为0（active == false）的生物
     void RemoveDeadOrganisms();
+    float calculate_overlay(std::pair<int, int> pos);
     // 获取世界单例实例
     static World& GetWorld();
     //只读测试 不是真正的代码
