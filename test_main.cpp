@@ -45,10 +45,14 @@ static const char* EnvName(EnvironmentType t) {
 // ============================================================
 //  World grid
 // ============================================================
-static void DrawWorldGrid(const World& world, float cellSize = 28.0f) {
+static void DrawWorldGrid(const World& world) {
     const auto& envs = world.GetEnvironments();
     const auto& orgs = world.GetReproducas();
     int w = world.GetWidth(), h = world.GetHeight();
+
+    ImVec2 avail = ImGui::GetContentRegionAvail();
+    float cellSize = std::min(avail.x / w, avail.y / h);
+    cellSize = std::max(cellSize, 3.0f);
 
     float maxE = 0.001f;
     for (auto* e : envs) if (e->energy > maxE) maxE = e->energy;
@@ -199,6 +203,8 @@ static void DrawStats(const World& world, int frame, int total) {
     ImGui::Text("| P-E: %.0f", pE);           ImGui::SameLine(480);
     ImGui::Text("A-E: %.0f", aE);             ImGui::SameLine(590);
     ImGui::Text("Env-E: %.0f", envE);
+    ImGui::SameLine(700);
+    ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 }
 
 // ============================================================
@@ -209,7 +215,7 @@ static bool showPlants   = true;
 static bool showQuery    = false;
 
 void RenderUI(World& world, int frame, int total,
-              bool paused, bool* pPaused, bool* pStep, float* pSpeed)
+              bool paused, bool* pPaused, bool* pStep, float* pSpeed, bool* pUnlimited)
 {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("View")) {
@@ -223,8 +229,8 @@ void RenderUI(World& world, int frame, int total,
 
     // ---- controls ----
     ImGui::SetNextWindowPos(ImVec2(10, 30), ImGuiCond_FirstUseEver);
-    ImGui::Begin("Controls", nullptr,
-        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::SetNextWindowSize(ImVec2(920, 0), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_NoTitleBar);
 
     if (ImGui::Button(*pPaused ? ">  Run" : "|| Pause"))
         *pPaused = !*pPaused;
@@ -232,7 +238,9 @@ void RenderUI(World& world, int frame, int total,
     if (ImGui::Button("Step")) *pStep = true;
     ImGui::SameLine();
     ImGui::SetNextItemWidth(120);
-    ImGui::SliderFloat("Speed", pSpeed, 0.1f, 10.0f, "%.1fx");
+    ImGui::SliderFloat("Speed", pSpeed, 0.1f, 100.0f, "%.1fx");
+    ImGui::SameLine();
+    ImGui::Checkbox("No Limit", pUnlimited);
 
     ImGui::SameLine();
     ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
@@ -389,8 +397,8 @@ int main() {
     int   frame    = 0;
     bool  paused   = false;
     bool  stepReq  = false;
+    bool  unlimited = false;
     float speed    = 1.0f;
-
     auto lastStep = std::chrono::steady_clock::now();
 
     while (!g_done && frame < totalFrames) {
@@ -407,13 +415,13 @@ int main() {
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        RenderUI(world, frame, totalFrames, paused, &paused, &stepReq, &speed);
+        RenderUI(world, frame, totalFrames, paused, &paused, &stepReq, &speed, &unlimited);
 
         // Simulation step
         auto now = std::chrono::steady_clock::now();
         float stepInterval = 100.0f / speed;
         float elapsed = std::chrono::duration<float, std::milli>(now - lastStep).count();
-        if ((!paused && elapsed >= stepInterval) || stepReq) {
+        if ((!paused && (unlimited || elapsed >= stepInterval)) || stepReq) {
             world.Update();
             ++frame;
             stepReq = false;

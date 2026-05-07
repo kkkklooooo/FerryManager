@@ -36,8 +36,8 @@ bool Environment::canPlant(ReproduceRequest a) {
 void Environment::EnergyExchange(Reproducable* on) {
 	// if(energy<SingleEnvironmentMaxEnergy) energy +=(  on->step_energy_cost * EnvironmentEnergyAbsorbRate*lossRate);//土地吸收粪便或者尸体 cost已经在step去除了
 	if (on->type == PLANT&&on->active) {//植物吸收土地
-		float abs=std::min( PlantAbsortRate * energy,StepMaxAbsorb/lossRate);
-		abs=abs*lossRate;
+		float abs=std::min( World::GetWorld().conf.Environment_plant_absorb_rate * energy,World::GetWorld().conf.Environmrnt_step_max_absorb/World::GetWorld().conf.Organism_loss_rate);
+		abs=abs*World::GetWorld().conf.Organism_loss_rate;
 		on->energy +=abs;
 		energy -= abs;
 	}
@@ -46,7 +46,7 @@ void Environment::EnergyExchange(Reproducable* on) {
 
 void Environment::Update(Weather)
 {
-	float gain=deadOrganismEnergy*lossRate;//增加尸体上的能量
+	float gain=deadOrganismEnergy*World::GetWorld().conf.Organism_loss_rate;//增加尸体上的能量
 	energy += gain;
 	deadOrganismEnergy=0;
 }
@@ -59,7 +59,7 @@ void Water::Update(Weather sky) {
 	switch (sky) {
 		case SUN:
 			Valum -= 0.1;
-			if(energy<SingleEnvironmentMaxEnergy)energy += 0.1;
+			if(energy<World::GetWorld().conf.Environment_single_chunk_max_energy)energy += 0.1;
 			break;
 		default:
 			break;
@@ -76,7 +76,7 @@ GressLand::GressLand(std::pair<int, int> pos,float en,int mp)
 void GressLand::Update(Weather sky) {
 	switch (sky) {
 	case SUN:
-		if(SingleEnvironmentMaxEnergy>=energy)energy += 2;
+		if(World::GetWorld().conf.Environment_single_chunk_max_energy>=energy)energy += 2;
 		break;
 	default:
 		break;

@@ -5,8 +5,8 @@
 #include <vector>
 #include"Registry.h"
 // 全局变量：用于生成生物的唯一ID
-const float AnimalAbsorbRate=0.5;
-const float lossRate = 0.9;
+// const float AnimalAbsorbRate=0.5;
+// const float lossRate = 0.9;
 extern int id;
 
 
@@ -79,7 +79,7 @@ class Plant : public Reproducable
 {
 public:
     // 构造函数：传入ID、坐标和半径
-    Plant(int id, int x, int y, int radius);
+    Plant(int id, int x, int y, int radius,float reproduce_energy_threshold,float reproduce_energy_cost,float step_energy_cost);
 
     int id;   // 植物唯一标识符
 

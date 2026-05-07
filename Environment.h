@@ -2,10 +2,10 @@
 #include "Registry.h"
 #include "Organism.h"
 #include <utility>
-const float EnvironmentEnergyAbsorbRate=0.01;
-const float PlantAbsortRate = 0.4;
-const float StepMaxAbsorb = 2;
-const float SingleEnvironmentMaxEnergy = 50;
+// const float EnvironmentEnergyAbsorbRate=0.01;
+// const float PlantAbsortRate = 0.4;
+// const float StepMaxAbsorb = 2;
+// const float SingleEnvironmentMaxEnergy = 50;
 
 class Environment
 { // 环境大类
@@ -17,7 +17,7 @@ public:
 				int mp);
 	std::pair<int, int> Pos;
 	float energy;//初始能量
-	float deadOrganismEnergy=0;//死亡生物的能量
+	float deadOrganismEnergy=0;//当前区块死亡生物的剩余能量,未被吸收的
 	OrganismType type;
 	EnvironmentType name;
 	std::vector<OrganismName> CanLiveIn;//能活着

@@ -2,8 +2,7 @@
 #include"Registry.h"
 #include"Organism.h"
 #include"Environment.h"
-const int len = 50;
-const int weight = 50;
+#include"Config.h"
 class World
 {
     // 待处理的繁殖请求列表
@@ -14,8 +13,9 @@ class World
     std::vector<Environment*>Environments;
 
 public:
+    Config conf;
     Weather CurrentWeather;
-    World(int len,int weigth);
+    World(Config&conf);
     void AddLeftEnergyRequest(const LeftEnergyRequest& request);
     // 更新世界状态（例如环境变化等）
     void Update();
@@ -31,6 +31,6 @@ public:
     //只读测试 不是真正的代码
     const std::vector<Reproducable*>& GetReproducas() const { return Reproducas; }
     const std::vector<Environment*>& GetEnvironments() const { return Environments; }
-    int GetWidth() const { return len; }
-    int GetHeight() const { return weight; }
+    int GetWidth() const { return conf.width; }
+    int GetHeight() const { return conf.length; }
 };

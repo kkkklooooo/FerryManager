@@ -3,11 +3,11 @@
 #include"Environment.h"
 #include<algorithm>
 
-World::World(int len, int weigth) {
-    Reproducas.push_back(new Plant(id++, 5, 5, 3));
-    Reproducas.push_back(new Plant(id++, 4, 5, 3));
-    for (int i = 0; i <len; i++) {
-        for (int j = 0; j < weight; j++) {
+World::World(Config&conf):conf(conf) {
+    Reproducas.push_back(new Plant(id++, 5, 5, conf.Plant_init_radius,conf.Organism_reproduce_energy_threshold,conf.Organism_reproduce_energy_cost,conf.Organism_step_energy_cost));
+    Reproducas.push_back(new Plant(id++, 4, 5, conf.Plant_init_radius,conf.Organism_reproduce_energy_threshold,conf.Organism_reproduce_energy_cost,conf.Organism_step_energy_cost));
+    for (int i = 0; i <conf.length; i++) {
+        for (int j = 0; j < conf.width; j++) {
             Environments.push_back(new GressLand(std::make_pair(i, j), 2, 2));
         }
     }
@@ -15,7 +15,7 @@ World::World(int len, int weigth) {
 
 void World::AddLeftEnergyRequest(const LeftEnergyRequest &request)
 {
-    if(request.energy>0) Environments[request.pos.second*weight+request.pos.first]->deadOrganismEnergy+=request.energy;
+    if(request.energy>0) Environments[request.pos.second*GetWidth()+request.pos.first]->deadOrganismEnergy+=request.energy;
 }
 
 void World::Update()
@@ -41,7 +41,7 @@ void World::Update()
 
     //植物和环境交互
     for (auto i : Reproducas) {
-        Environments[i->Pos.second*weight+i->Pos.first]->EnergyExchange(i);
+        Environments[i->Pos.second*GetWidth()+i->Pos.first]->EnergyExchange(i);
     }
     //捕食和生孩子
     for (auto i = Reproducas.begin(); i != Reproducas.end(); i++) {
@@ -72,7 +72,7 @@ void World::Reproduce()
 bool  World::AddReproduceRequest(const ReproduceRequest& request)
 {
     //能生
-    if (Environments[request.pos.first * weight + request.pos.second]->canPlant(request)) {
+    if (Environments[request.pos.first * GetWidth() + request.pos.second]->canPlant(request)) {
         reproduce_requests.push_back(request);
         return true;
     }
@@ -87,7 +87,7 @@ void World::RemoveDeadOrganisms()
     // 移除能量为0的生物
     Reproducas.erase(std::remove_if(Reproducas.begin(), Reproducas.end(), [&](Reproducable* organism) { 
         if (!(organism->energy>0)){
-            Environments[organism->Pos.second*weight+organism->Pos.first]->havePlant--;
+            Environments[organism->Pos.second*GetWidth()+organism->Pos.first]->havePlant--;
             return true;
         }else{
             return false;
@@ -100,16 +100,18 @@ float World::calculate_overlay(std::pair<int, int> pos)
 {
     std::vector<std::pair<int, int>> pos_list={{-1,0},{1,0},{0,-1},{0,1},{-1,-1},{1,1},{1,-1},{-1,1}};
     int cnt=0;
+    int len = GetHeight();
+    int width = GetWidth();
     for (auto i : pos_list) {
         int x = pos.first + i.first;
         int y = pos.second + i.second;
-        if (x >= 0 && x < len && y >= 0 && y < weight) {
-            cnt+=Environments[y*weight+x]->havePlant;
+        if (x >= 0 && x < len && y >= 0 && y < width) {
+            cnt+=Environments[y*width+x]->havePlant;
         }else{
-            cnt+=Environments[pos.second*weight+pos.first]->maxPlant;
+            cnt+=Environments[pos.second*width+pos.first]->maxPlant;
         }
     }
-    return (float)cnt/(8.0*Environments[pos.second*weight+pos.first]->maxPlant);
+    return (float)cnt/(8.0*Environments[pos.second*width+pos.first]->maxPlant);
 
 }
 
@@ -119,6 +121,7 @@ float World::calculate_overlay(std::pair<int, int> pos)
  */
 World& World::GetWorld()
 {
-    static World Instance(len,weight);
+    static Config conf(50,50);
+    static World Instance(conf);
     return Instance;
 }

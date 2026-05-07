@@ -12,7 +12,7 @@ int id = 0;
 //工厂函数 根据request返回对应指针
 Reproducable* ReprodueNewOrganism(ReproduceRequest request) {
     if (request.type == PLANT) {
-        return new Plant(id++, request.pos.first, request.pos.second, request.radius);
+        return new Plant(id++, request.pos.first, request.pos.second, request.radius,World::GetWorld().conf.Organism_reproduce_energy_threshold,World::GetWorld().conf.Organism_reproduce_energy_cost,World::GetWorld().conf.Organism_step_energy_cost);
     }
     else//TODO 动物和资源的实现
     {
@@ -60,8 +60,8 @@ void Organism::check_active() //单独死亡
     {
         active = false;
     }
-    if(!active){
-        printf("Organism %d die\n",id);
+    if(!active&&energy>0){
+        printf("Organism %d die with %f energy left\n",id,energy);
         World::GetWorld().AddLeftEnergyRequest({Pos,energy});
         energy=0;
     }
@@ -106,8 +106,8 @@ Reproducable::Reproducable(float energy_threshold, float energy_cost, int radius
  * @param radius 繁殖影响半径
  */
 
-Plant::Plant(int id, int x, int y, int radius)
-    : Reproducable(25, 10, radius, 1, PLANT)
+Plant::Plant(int id, int x, int y, int radius,float reproduce_energy_threshold,float reproduce_energy_cost,float step_energy_cost)
+    : Reproducable(reproduce_energy_threshold, reproduce_energy_cost, radius, step_energy_cost, PLANT)
 {
     this->id = id;
     Pos = std::make_pair(x, y);
@@ -134,7 +134,7 @@ void Plant::Reproduce()
     int y_new = y + std::rand() % (2 * reproduce_radius + 1) - reproduce_radius;
     // printf("\033[31mPlant request at (%d, %d) with radius %d\033[0m\n", x_new, y_new);
     // 确保新位置在有效世界边界内
-    if (x_new >= 0 && x_new < len && y_new >= 0 && y_new < weight)
+    if (x_new >= 0 && x_new < World::GetWorld().GetHeight() && y_new >= 0 && y_new < World::GetWorld().GetWidth())
     {
         // 子代植物的半径在父半径的[0.25,2.0]倍之间随机，并取整
         float r = reproduce_radius * std::min(2.0, std::max(0.25, (double)std::rand() / RAND_MAX));
@@ -158,7 +158,7 @@ void Plant::Step()
 float Plant::calculate_overlay_cost()
 {
    float overlay= World::GetWorld().calculate_overlay(Pos); 
-   float fuck=1.4;
+   float fuck=World::GetWorld().conf.Orgianism_overlay_param;
    float factor=(float)1/(abs(overlay-fuck))+(fuck-1)/fuck;
 //    printf("Plant %d overlay %f\n",id,factor);
    return factor;
@@ -198,15 +198,15 @@ void PredationOrFuck(Reproducable* a, Reproducable* b) {
         bEa=true;
     }
     if (aEb && !bEa) {
-        a->energy += b->energy * AnimalAbsorbRate*lossRate;
-        b->energy-= b->energy * AnimalAbsorbRate;
+        a->energy += b->energy * World::GetWorld().conf.Organism_animal_absorb_rate*World::GetWorld().conf.Organism_loss_rate;
+        b->energy-= b->energy * World::GetWorld().conf.Organism_animal_absorb_rate;
         b->active=false;
         printf("\033[31m%s eat %s\033[0m\n", a->name, b->name);
         return;
     }
     if (bEa && !aEb) {
-        b->energy += a->energy * AnimalAbsorbRate*lossRate;
-        a->energy -= a->energy * AnimalAbsorbRate;
+        b->energy += a->energy * World::GetWorld().conf.Organism_animal_absorb_rate*World::GetWorld().conf.Organism_loss_rate;
+        a->energy -= a->energy * World::GetWorld().conf.Organism_animal_absorb_rate;
         a->active = false;
         printf("\033[31m%s eat %s\033[0m\n", b->name, a->name);
         return;
