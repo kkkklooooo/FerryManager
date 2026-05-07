@@ -392,7 +392,7 @@ int main() {
     World& world = World::GetWorld();
     world.CurrentWeather = SUN;
 
-    const int totalFrames = 3000;
+    const int totalFrames = 30000;
     int   frame    = 0;
     bool  paused   = false;
     bool  stepReq  = false;
@@ -420,11 +420,24 @@ int main() {
         auto now = std::chrono::steady_clock::now();
         float stepInterval = 100.0f / speed;
         float elapsed = std::chrono::duration<float, std::milli>(now - lastStep).count();
-        if ((!paused && (unlimited || elapsed >= stepInterval)) || stepReq) {
+
+        if (stepReq) {
             world.Update();
             ++frame;
             stepReq = false;
             lastStep = now;
+        } else if (!paused) {
+            if (unlimited) {
+                for (int i = 0; i < 500 && frame < totalFrames; ++i) {
+                    world.Update();
+                    ++frame;
+                }
+                lastStep = now;
+            } else if (elapsed >= stepInterval) {
+                world.Update();
+                ++frame;
+                lastStep = now;
+            }
         }
 
         // Render
