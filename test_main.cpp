@@ -229,8 +229,8 @@ void RenderUI(World& world, int frame, int total,
 
     // ---- controls ----
     ImGui::SetNextWindowPos(ImVec2(10, 30), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(920, 0), ImGuiCond_FirstUseEver);
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_NoTitleBar);
+    ImGui::Begin("Controls", nullptr,
+        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize);
 
     if (ImGui::Button(*pPaused ? ">  Run" : "|| Pause"))
         *pPaused = !*pPaused;
@@ -242,9 +242,8 @@ void RenderUI(World& world, int frame, int total,
     ImGui::SameLine();
     ImGui::Checkbox("No Limit", pUnlimited);
 
-    ImGui::SameLine();
-    ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
-    ImGui::SameLine();
+    ImGui::Spacing();
+    ImGui::Separator();
     DrawStats(world, frame, total);
     ImGui::End();
 
