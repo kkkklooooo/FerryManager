@@ -85,10 +85,28 @@ public:
 
     // 重写繁殖方法：随机生成子代位置并向世界提交繁殖请求
     void Reproduce() override;
-    void Step();
+    void Step() override;
     float calculate_overlay_cost();
 };
 
+class Animal :public Reproducable
+{
+public:
+    Animal(int ra,int id, int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost, float step_energy_cost);
+
+    int rate;
+
+    int id; //动物唯一标符
+
+    static  float _energy_rate;
+
+    static  int SetRate();//由世界返回动物的速度区间
+    static  void  SetRate(Animal& a);//由能量改变速度大小
+    void Reproduce() override;
+    void Step() override;
+    float calculate_overlay_cost();
+  
+};
 
 Reproducable* ReprodueNewOrganism(ReproduceRequest request);
 bool isNaber(Organism* a, Organism* b);//判断是不是相邻方便捕食

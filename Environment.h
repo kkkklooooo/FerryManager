@@ -14,12 +14,14 @@ public:
 	Environment(std::pair<int, int> pos,
 				float en,
 				EnvironmentType na,
+				int sin, 
 				int mp);
 	std::pair<int, int> Pos;
 	float energy;//初始能量
 	float deadOrganismEnergy=0;//当前区块死亡生物的剩余能量,未被吸收的
 	OrganismType type;
 	EnvironmentType name;
+	int SingleEnvironmentMaxEnergy;//水和草地的能量上限肯定不同的
 	std::vector<OrganismName> CanLiveIn;//能活着
 	int maxPlant;//草最多有多少
 	int havePlant;//现在有多少

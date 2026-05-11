@@ -5,16 +5,26 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
+#include<random>
 
-// 全局唯一标识，用于给新生植物分配ID
-int id = 0;
+// 全局唯一标识，用于给新生植物和动物分配ID
+int Plant_id = 0;
+int Animal_id = 0;
+std::random_device rd;
+std::mt19937 gen(rd());//随机旋转种子
+const double pi = std::acos(-1.0);
+std::uniform_real_distribution<double> dist(0.0, 2.0*pi);//范围
 
 //工厂函数 根据request返回对应指针
 Reproducable* ReprodueNewOrganism(ReproduceRequest request) {
     if (request.type == PLANT) {
-        return new Plant(id++, request.pos.first, request.pos.second, request.radius,World::GetWorld().conf.Organism_reproduce_energy_threshold,World::GetWorld().conf.Organism_reproduce_energy_cost,World::GetWorld().conf.Organism_step_energy_cost);
+        return new Plant(Plant_id++, request.pos.first, request.pos.second, request.radius,World::GetWorld().conf.Organism_reproduce_energy_threshold,World::GetWorld().conf.Organism_reproduce_energy_cost,World::GetWorld().conf.Organism_step_energy_cost);
     }
-    else//TODO 动物和资源的实现
+    else if(request.type==ANIMAL)
+    {
+        return new Animal(Animal::SetRate(), Animal_id++, request.pos.first, request.pos.second, request.radius, World::GetWorld().conf.Organism_reproduce_energy_threshold, World::GetWorld().conf.Organism_reproduce_energy_cost, World::GetWorld().conf.Organism_step_energy_cost);
+    }
+    else
     {
         return nullptr;
     }
@@ -111,7 +121,7 @@ Plant::Plant(int id, int x, int y, int radius,float reproduce_energy_threshold,f
 {
     this->id = id;
     Pos = std::make_pair(x, y);
-    reproduce_able = (id%2)?true:false;            // 植物始终可以繁殖（只要能量足够）
+    reproduce_able = true;            // 植物始终可以繁殖（只要能量足够）
 }
 
 /**
@@ -164,6 +174,80 @@ float Plant::calculate_overlay_cost()
    return factor;
 }
 
+float Animal::_energy_rate = World::GetWorld().conf.Animal_energy_rate;
+
+Animal::Animal(int ra, int id, int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost, float step_energy_cost)
+    :rate(ra) ,id(id), Reproducable(reproduce_energy_threshold, reproduce_energy_cost, radius, step_energy_cost, ANIMAL)
+{
+    energy = 20;//测试用 每个动物初始能量应该不同
+    Pos = std::make_pair(x, y);
+    reproduce_able = (id % 2) ? true : false;//就是和植物抢id了
+}
+
+
+
+void Animal::Reproduce() {
+    if (!active || !reproduce_able) {//死了就不能活着
+        return;
+    }
+    if (energy < reproduce_energy_threshold) {
+
+        return;
+    }
+    int x = Pos.first;
+    int y = Pos.second;
+    // 在 [-reproduce_radius, +reproduce_radius] 范围内随机偏移
+    int x_new = x + std::rand() % (2 * reproduce_radius + 1) - reproduce_radius;
+    int y_new = y + std::rand() % (2 * reproduce_radius + 1) - reproduce_radius;
+    // printf("\033[31mPlant request at (%d, %d) with radius %d\033[0m\n", x_new, y_new);
+    // 确保新位置在有效世界边界内
+    if (x_new >= 0 && x_new < World::GetWorld().GetHeight() && y_new >= 0 && y_new < World::GetWorld().GetWidth())
+    {
+        // 子代植动物物的半径在父半径的[0.25,2.0]倍之间随机，并取整
+        float r = reproduce_radius * std::min(2.0, std::max(0.25, (double)std::rand() / RAND_MAX));
+        int r_int = std::max(1, (int)r);
+        if (!(World::GetWorld().AddReproduceRequest({ANIMAL,Animal_Name, std::make_pair(x_new, y_new), r_int }))) {
+            energy -= reproduce_energy_cost;
+            return;
+        }
+        // std::printf("Plant request at (%d, %d) %id\n", x_new, y_new,id);
+    }
+}
+
+int Animal::SetRate() {
+    return 3;
+}
+
+void Animal::SetRate(Animal& a) {
+    a.rate = a.energy * _energy_rate;
+}
+
+void Animal::Step() {
+    float ori = step_energy_cost;
+    step_energy_cost *= calculate_overlay_cost();
+    Organism::Step();
+    step_energy_cost = ori;
+    //移动
+    double angle = dist(gen);
+    int x = rate * sin(angle);
+    int y = rate * cos(angle);
+    if (!(x + y)) {
+        x +=rate;
+    }
+    x += Pos.first;
+    y += Pos.second;
+    Pos = std::make_pair(x, y);
+}
+
+float Animal::calculate_overlay_cost()// 同植物
+{
+    float overlay = World::GetWorld().calculate_overlay(Pos);
+    float fuck = World::GetWorld().conf.Orgianism_overlay_param;
+    float factor = (float)1 / (abs(overlay - fuck)) + (fuck - 1) / fuck;
+    //    printf("Plant %d overlay %f\n",id,factor);
+    return factor;
+}
+
 bool isNaber(Organism* a, Organism* b) {//指针方便多态
     if (b->Pos.first >= a->Pos.first - 1
         && b->Pos.first <= a->Pos.first + 1
@@ -188,7 +272,7 @@ void PredationOrFuck(Reproducable* a, Reproducable* b) {
         }
         return;
     }
-    //捕食判断 
+    //捕食判断 TODO 要用新的class来处理
     bool aEb=false;
     bool bEa=false;
     if (std::find(a->diet.begin(), a->diet.end(), b->name)!=a->diet.end()) {

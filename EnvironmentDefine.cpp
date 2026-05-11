@@ -9,11 +9,13 @@
 Environment::Environment(std::pair<int, int> pos,
 	float en,
 	EnvironmentType na,
+	int sin,
 	int mp)
 	:Pos(pos)
-	,energy(en)
-	,type(ENVIRONMENT)
-	,name(na)
+	, energy(en)
+	, type(ENVIRONMENT)
+	, name(na)
+	, SingleEnvironmentMaxEnergy(sin)
 	,maxPlant(mp)
 	,havePlant(0)
 {}
@@ -34,13 +36,14 @@ bool Environment::canPlant(ReproduceRequest a) {
 }
 
 void Environment::EnergyExchange(Reproducable* on) {
-	// if(energy<SingleEnvironmentMaxEnergy) energy +=(  on->step_energy_cost * EnvironmentEnergyAbsorbRate*lossRate);//土地吸收粪便或者尸体 cost已经在step去除了
+	energy += std::min(World::GetWorld().conf.Environmrnt_step_max_absorb, on->energy * World::GetWorld().conf.Environment_energy_absorb_rate);
 	if (on->type == PLANT&&on->active) {//植物吸收土地
 		float abs=std::min( World::GetWorld().conf.Environment_plant_absorb_rate * energy,World::GetWorld().conf.Environmrnt_step_max_absorb/World::GetWorld().conf.Organism_loss_rate);
 		abs=abs*World::GetWorld().conf.Organism_loss_rate;
 		on->energy +=abs;
 		energy -= abs;
 	}
+	
 }
 
 
@@ -52,7 +55,7 @@ void Environment::Update(Weather)
 }
 
 Water::Water(std::pair<int, int> pos, float en, int mp, float V)
-	:Environment(pos, en, WATER, mp), Valum(V)
+	:Environment(pos, en, WATER,100, mp), Valum(V)
 {}
 
 void Water::Update(Weather sky) {
@@ -68,7 +71,7 @@ void Water::Update(Weather sky) {
 }
 
 GressLand::GressLand(std::pair<int, int> pos,float en,int mp) 
-	:Environment(pos, en, GRESSLEND, mp)
+	:Environment(pos, en, GRESSLEND,200,mp)
 {
 	CanLiveIn.push_back(Plant_Name);
 }

@@ -23,7 +23,7 @@ set(HEADERS
     Word.h
 )
 
-add_executable(ecosim ${SOURCES} ${HEADERS})
+add_executable(ecosim ${SOURCES} ${HEADERS} "MyOperator.h" "MyOperatorDefine.cpp")
 
 target_include_directories(ecosim PRIVATE
     ${CMAKE_SOURCE_DIR}

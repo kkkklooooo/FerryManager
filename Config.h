@@ -18,5 +18,5 @@ class Config{
     float Organism_step_energy_cost=1;
     float Orgianism_overlay_param=1.4;
     int Plant_init_radius=3;
-
+    float Animal_energy_rate = 0.3;
 };
