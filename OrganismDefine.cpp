@@ -1,4 +1,5 @@
 #include "Organism.h"
+#include "MyOperator.h" 
 #include<cmath>
 #include "Word.h"
 #include"Environment.h"
@@ -15,19 +16,12 @@ std::mt19937 gen(rd());//随机旋转种子
 const double pi = std::acos(-1.0);
 std::uniform_real_distribution<double> dist(0.0, 2.0*pi);//范围
 
-//工厂函数 根据request返回对应指针
+//工厂函数 根据request返回对应指针 //可以退休了
 Reproducable* ReprodueNewOrganism(ReproduceRequest request) {
     if (request.type == PLANT) {
         return new Plant(Plant_id++, request.pos.first, request.pos.second, request.radius,World::GetWorld().conf.Organism_reproduce_energy_threshold,World::GetWorld().conf.Organism_reproduce_energy_cost,World::GetWorld().conf.Organism_step_energy_cost);
     }
-    else if(request.type==ANIMAL)
-    {
-        return new Animal(Animal::SetRate(), Animal_id++, request.pos.first, request.pos.second, request.radius, World::GetWorld().conf.Organism_reproduce_energy_threshold, World::GetWorld().conf.Organism_reproduce_energy_cost, World::GetWorld().conf.Organism_step_energy_cost);
-    }
-    else
-    {
-        return nullptr;
-    }
+    return MyOperator::GetOp()(request,Animal_id++);
 }
 
 
@@ -57,7 +51,7 @@ Reproducable* ReprodueNewOrganism(ReproduceRequest request) {
  * @param type              生物类型（植物、被捕食者、捕食者等）
  */
 Organism::Organism(float step_energy_cost, OrganismType type)
-    : step_energy_cost(step_energy_cost), type(type)
+    : step_energy_cost(step_energy_cost), type(type),name(Organism_Name)
 {
 }
 
@@ -119,6 +113,7 @@ Reproducable::Reproducable(float energy_threshold, float energy_cost, int radius
 Plant::Plant(int id, int x, int y, int radius,float reproduce_energy_threshold,float reproduce_energy_cost,float step_energy_cost)
     : Reproducable(reproduce_energy_threshold, reproduce_energy_cost, radius, step_energy_cost, PLANT)
 {
+    name = Plant_Name;
     this->id = id;
     Pos = std::make_pair(x, y);
     reproduce_able = true;            // 植物始终可以繁殖（只要能量足够）
@@ -149,7 +144,7 @@ void Plant::Reproduce()
         // 子代植物的半径在父半径的[0.25,2.0]倍之间随机，并取整
         float r = reproduce_radius * std::min(2.0, std::max(0.25, (double)std::rand() / RAND_MAX));
         int r_int=std::max(1, (int)r); 
-        if(!( World::GetWorld().AddReproduceRequest({PLANT,Plant_Name, std::make_pair(x_new, y_new), r_int}) )){
+        if(!( World::GetWorld().AddReproduceRequest({PLANT,name, std::make_pair(x_new, y_new), r_int}) )){
             energy -= reproduce_energy_cost;
             return;
         }
@@ -176,9 +171,11 @@ float Plant::calculate_overlay_cost()
 
 float Animal::_energy_rate = World::GetWorld().conf.Animal_energy_rate;
 
-Animal::Animal(int ra, int id, int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost, float step_energy_cost)
-    :rate(ra) ,id(id), Reproducable(reproduce_energy_threshold, reproduce_energy_cost, radius, step_energy_cost, ANIMAL)
+Animal::Animal(int id,int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost, float step_energy_cost)
+    :id(id), Reproducable(reproduce_energy_threshold, reproduce_energy_cost, radius, step_energy_cost, ANIMAL)
 {
+    rate = SetRate();
+    name = Animal_Name;
     energy = 20;//测试用 每个动物初始能量应该不同
     Pos = std::make_pair(x, y);
     reproduce_able = (id % 2) ? true : false;//就是和植物抢id了
@@ -206,7 +203,7 @@ void Animal::Reproduce() {
         // 子代植动物物的半径在父半径的[0.25,2.0]倍之间随机，并取整
         float r = reproduce_radius * std::min(2.0, std::max(0.25, (double)std::rand() / RAND_MAX));
         int r_int = std::max(1, (int)r);
-        if (!(World::GetWorld().AddReproduceRequest({ANIMAL,Animal_Name, std::make_pair(x_new, y_new), r_int }))) {
+        if (!(World::GetWorld().AddReproduceRequest({ANIMAL,name, std::make_pair(x_new, y_new), r_int }))) {
             energy -= reproduce_energy_cost;
             return;
         }
@@ -214,12 +211,12 @@ void Animal::Reproduce() {
     }
 }
 
-int Animal::SetRate() {
+float Animal::SetRate() {
     return 3;
 }
 
-void Animal::SetRate(Animal& a) {
-    a.rate = a.energy * _energy_rate;
+void Animal::SetRate(Animal* a) {
+    a->rate = a->energy * _energy_rate;
 }
 
 void Animal::Step() {
@@ -229,14 +226,17 @@ void Animal::Step() {
     step_energy_cost = ori;
     //移动
     double angle = dist(gen);
-    int x = rate * sin(angle);
-    int y = rate * cos(angle);
-    if (!(x + y)) {
-        x +=rate;
+    int x_move = rate * sin(angle);
+    int y_move = rate * cos(angle);
+    if (!(x_move + y_move)) {
+        x_move +=rate;
     }
-    x += Pos.first;
-    y += Pos.second;
-    Pos = std::make_pair(x, y);
+    double omg = dist(gen) / (2.0 * pi);
+    x_move *= omg;
+    y_move *= omg;
+    x_move += Pos.first;
+    y_move += Pos.second;
+    Pos = std::make_pair(x_move, y_move);
 }
 
 float Animal::calculate_overlay_cost()// 同植物
@@ -263,49 +263,16 @@ void PredationOrFuck(Reproducable* a, Reproducable* b) {
     if(a->type==PLANT&&a->reproduce_able){
         a->Reproduce();
     }
-    if (a->name == b->name) {
-        if (a->reproduce_able && !b->reproduce_able) {
+    else if (a->name == b->name) {
+         if (a->reproduce_able && !b->reproduce_able) {
             a->Reproduce();
-        }
-        if (b->reproduce_able && !a->reproduce_able) {
+         }
+         if (b->reproduce_able && !a->reproduce_able) {
             b->Reproduce();
-        }
-        return;
+         }
+         return;
     }
-    //捕食判断 TODO 要用新的class来处理
-    bool aEb=false;
-    bool bEa=false;
-    if (std::find(a->diet.begin(), a->diet.end(), b->name)!=a->diet.end()) {
-        aEb=true;
-    }
-    if (std::find(b->diet.begin(), b->diet.end(), a->name)!=b->diet.end()) {
-        bEa=true;
-    }
-    if (aEb && !bEa) {
-        a->energy += b->energy * World::GetWorld().conf.Organism_animal_absorb_rate*World::GetWorld().conf.Organism_loss_rate;
-        b->energy-= b->energy * World::GetWorld().conf.Organism_animal_absorb_rate;
-        b->active=false;
-        printf("\033[31m%s eat %s\033[0m\n", a->name, b->name);
-        return;
-    }
-    if (bEa && !aEb) {
-        b->energy += a->energy * World::GetWorld().conf.Organism_animal_absorb_rate*World::GetWorld().conf.Organism_loss_rate;
-        a->energy -= a->energy * World::GetWorld().conf.Organism_animal_absorb_rate;
-        a->active = false;
-        printf("\033[31m%s eat %s\033[0m\n", b->name, a->name);
-        return;
-    }
-    if (aEb && bEa) {
-        if (a->energy >= b->energy) {
-            b->active = false;
-            printf("\033[31m%s eat %s\033[0m\n", a->name, b->name);
-            return;
-        }
-        else {
-            a->active = false;
-            printf("\033[31m%s eat %s\033[0m\n", b->name, a->name);
-            return;
-        }
-    }
+    //捕食判断
+    MyOperator::GetOp()(a, b);
     return;
 }

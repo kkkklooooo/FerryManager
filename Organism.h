@@ -92,16 +92,16 @@ public:
 class Animal :public Reproducable
 {
 public:
-    Animal(int ra,int id, int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost, float step_energy_cost);
+    Animal(int id,int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost, float step_energy_cost);
 
-    int rate;
+    float rate;
 
     int id; //动物唯一标符
 
     static  float _energy_rate;
 
-    static  int SetRate();//由世界返回动物的速度区间
-    static  void  SetRate(Animal& a);//由能量改变速度大小
+    virtual  float SetRate();//由世界返回动物的速度区间
+    virtual  void  SetRate(Animal* a);//由能量改变速度大小
     void Reproduce() override;
     void Step() override;
     float calculate_overlay_cost();

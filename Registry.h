@@ -18,6 +18,8 @@ enum OrganismName { //临时占位测试 后面要改成具体的名称
     Reporoducable_Name,
     Plant_Name,
     Animal_Name,
+    Wolf_Name,
+    Sheep_Name,
     Environment_Name,
 };
 
