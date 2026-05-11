@@ -100,6 +100,10 @@ Reproducable::Reproducable(float energy_threshold, float energy_cost, int radius
     reproduce_able = false;          // 默认不可繁殖，由派生类自行设置
 }
 
+bool Reproducable::canEat(Reproducable* other) const {
+    return std::find(diet.begin(), diet.end(), other->name) != diet.end();
+}
+
 /**
  * @brief 繁殖行为的默认实现 纯虚函数
  */

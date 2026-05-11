@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(where python *)",
-      "Read(//c/Users/mrx/**)"
+      "Read(//c/Users/mrx/**)",
+      "Bash(git *)"
     ]
   }
 }

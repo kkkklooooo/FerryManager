@@ -1,14 +1,15 @@
 # ninja log v6
-21	247	8002015626498669	CMakeFiles/ecosim.dir/EnvironmentDefine.cpp.obj	15e91ed509eff24f
-15	434	8002015626438667	CMakeFiles/ecosim.dir/OrganismDefine.cpp.obj	8d2c855ac9fce1bb
-25	275	8002015626538668	CMakeFiles/ecosim.dir/WordDefine.cpp.obj	fea57a300385b672
-30	505	8002015626588693	CMakeFiles/ecosim.dir/test_main.cpp.obj	6d0d78a5b098c055
-417	1159	8001929724570000	ecosim.exe	88775976c04a0f12
+15	542	8002090271207457	CMakeFiles/ecosim.dir/EnvironmentDefine.cpp.obj	15e91ed509eff24f
+11	746	8002090271177361	CMakeFiles/ecosim.dir/OrganismDefine.cpp.obj	8d2c855ac9fce1bb
+18	571	8002090271247301	CMakeFiles/ecosim.dir/WordDefine.cpp.obj	fea57a300385b672
 35	344	8001928832284423	CMakeFiles/ecosim.dir/imgui/imgui_tables.cpp.obj	e424c122a9836aea
+442	719	8002090621076840	ecosim.exe	eb0994d4e83673e1
+13	441	8002090616792272	CMakeFiles/ecosim.dir/test_main.cpp.obj	6d0d78a5b098c055
 26	346	8001928832194402	CMakeFiles/ecosim.dir/imgui/imgui_demo.cpp.obj	52b07f38f8356a7e
 31	399	8001928832244400	CMakeFiles/ecosim.dir/imgui/imgui_draw.cpp.obj	9501d5c2709e758
-47	412	8001928832404394	CMakeFiles/ecosim.dir/imgui/backends/imgui_impl_win32.cpp.obj	8559acbbbf481816
 42	444	8001928832344400	CMakeFiles/ecosim.dir/imgui/imgui_widgets.cpp.obj	6ae70fdf8bbb5354
+47	412	8001928832404394	CMakeFiles/ecosim.dir/imgui/backends/imgui_impl_win32.cpp.obj	8559acbbbf481816
 52	414	8001928832454590	CMakeFiles/ecosim.dir/imgui/backends/imgui_impl_opengl3.cpp.obj	e4e50c43ec4a1b91
+3	145	8002146927448633	build.ninja	5c8a401775257b2f
 21	628	8001928832136291	CMakeFiles/ecosim.dir/imgui/imgui.cpp.obj	a11257aa05a90841
-31	383	8002013257513955	CMakeFiles/ecosim.dir/MyOperatorDefine.cpp.obj	6366d0aca4d2bc90
+26	609	8002090271327077	CMakeFiles/ecosim.dir/MyOperatorDefine.cpp.obj	6366d0aca4d2bc90
