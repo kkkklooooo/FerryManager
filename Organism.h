@@ -7,8 +7,9 @@
 // 全局变量：用于生成生物的唯一ID
 // const float AnimalAbsorbRate=0.5;
 // const float lossRate = 0.9;
-extern int id;
 
+extern int Plant_id;
+extern int Animal_id;
 
 
 class Organism;

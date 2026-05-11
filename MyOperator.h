@@ -10,7 +10,7 @@ public:
 	static void register_Animal_Create(OrganismName name, Creator creator);
 
 
-	bool operator()(Reproducable* a,Reproducable* b);
+	void operator()(Reproducable* a,Reproducable* b);
 	Reproducable* operator()(ReproduceRequest &x,int id);
 	static MyOperator& GetOp();
 private:

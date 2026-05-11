@@ -1,12 +1,14 @@
 #include"MyOperator.h"
+#include<cstdio>
+#include<algorithm>
 using Creator = std::function<Animal*( int id, int x, int y, int radius)>;
-bool MyOperator::operator()(Reproducable* a, Reproducable* b) {
+void MyOperator::operator()(Reproducable* a, Reproducable* b) {
     bool aEb = false;
     bool bEa = false;
-    if (std::find(a->diet.begin(), a->diet.end(), b->name) != a->diet.end()) {
+    if (find(a->diet.begin(), a->diet.end(), b->name) != a->diet.end()) {
         aEb = true;
     }
-    if (std::find(b->diet.begin(), b->diet.end(), a->name) != b->diet.end()) {
+    if (find(b->diet.begin(), b->diet.end(), a->name) != b->diet.end()) {
         bEa = true;
     }
     if (aEb && !bEa) {

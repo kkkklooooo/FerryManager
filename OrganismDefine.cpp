@@ -8,9 +8,9 @@
 #include <cstdlib>
 #include<random>
 
+int Plant_id=0;
+int Animal_id=0;
 // 全局唯一标识，用于给新生植物和动物分配ID
-int Plant_id = 0;
-int Animal_id = 0;
 std::random_device rd;
 std::mt19937 gen(rd());//随机旋转种子
 const double pi = std::acos(-1.0);
@@ -65,7 +65,7 @@ void Organism::check_active() //单独死亡
         active = false;
     }
     if(!active&&energy>0){
-        printf("Organism %d die with %f energy left\n",id,energy);
+        printf("Organism %d die with %f energy left\n",Plant_id,energy);
         World::GetWorld().AddLeftEnergyRequest({Pos,energy});
         energy=0;
     }

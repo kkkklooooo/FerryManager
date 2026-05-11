@@ -4,8 +4,8 @@
 #include<algorithm>
 
 World::World(Config&conf):conf(conf) {
-    Reproducas.push_back(new Plant(id++, 5, 5, conf.Plant_init_radius,conf.Organism_reproduce_energy_threshold,conf.Organism_reproduce_energy_cost,conf.Organism_step_energy_cost));
-    Reproducas.push_back(new Plant(id++, 4, 5, conf.Plant_init_radius,conf.Organism_reproduce_energy_threshold,conf.Organism_reproduce_energy_cost,conf.Organism_step_energy_cost));
+    Reproducas.push_back(new Plant(Plant_id++, 5, 5, conf.Plant_init_radius,conf.Organism_reproduce_energy_threshold,conf.Organism_reproduce_energy_cost,conf.Organism_step_energy_cost));
+    Reproducas.push_back(new Plant(Plant_id++, 4, 5, conf.Plant_init_radius,conf.Organism_reproduce_energy_threshold,conf.Organism_reproduce_energy_cost,conf.Organism_step_energy_cost));
     for (int i = 0; i <conf.length; i++) {
         for (int j = 0; j < conf.width; j++) {
             Environments.push_back(new GressLand(std::make_pair(i, j), 2, 2));
