@@ -1,4 +1,5 @@
 #include "Organism.h"
+#include<cassert>
 #include "MyOperator.h" 
 #include<cmath>
 #include "Word.h"
@@ -77,6 +78,7 @@ void Organism::check_active() //单独死亡
 void Organism::Step()
 {
     energy -= step_energy_cost;
+    // assert(energy >= -100);
     check_active();
 }
 
@@ -146,6 +148,7 @@ void Plant::Reproduce()
         int r_int=std::max(1, (int)r); 
         if(!( World::GetWorld().AddReproduceRequest({PLANT,name, std::make_pair(x_new, y_new), r_int}) )){
             energy -= reproduce_energy_cost;
+            // assert(energy >= -100);
             return;
         }
         // std::printf("Plant request at (%d, %d) %id\n", x_new, y_new,id);
@@ -205,6 +208,7 @@ void Animal::Reproduce() {
         int r_int = std::max(1, (int)r);
         if (!(World::GetWorld().AddReproduceRequest({ANIMAL,name, std::make_pair(x_new, y_new), r_int }))) {
             energy -= reproduce_energy_cost;
+            // assert(energy >= -100);
             return;
         }
         // std::printf("Plant request at (%d, %d) %id\n", x_new, y_new,id);

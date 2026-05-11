@@ -1,4 +1,5 @@
 #include"MyOperator.h"
+#include<cassert>
 #include<cstdio>
 #include<algorithm>
 using Creator = std::function<Animal*( int id, int x, int y, int radius)>;
@@ -15,6 +16,7 @@ void MyOperator::operator()(Reproducable* a, Reproducable* b) {
         a->energy += b->energy * World::GetWorld().conf.Organism_animal_absorb_rate * World::GetWorld().conf.Organism_loss_rate;
         b->energy -= b->energy * World::GetWorld().conf.Organism_animal_absorb_rate;
         b->active = false;
+        // assert(a->energy >= -100&& b->energy >= -100);
         printf("\033[31m%s eat %s\033[0m\n", a->name, b->name);
         return;
     }
@@ -22,6 +24,7 @@ void MyOperator::operator()(Reproducable* a, Reproducable* b) {
         b->energy += a->energy * World::GetWorld().conf.Organism_animal_absorb_rate * World::GetWorld().conf.Organism_loss_rate;
         a->energy -= a->energy * World::GetWorld().conf.Organism_animal_absorb_rate;
         a->active = false;
+        // assert(a->energy >= -100&& b->energy >= -100);
         printf("\033[31m%s eat %s\033[0m\n", b->name, a->name);
         return;
     }
