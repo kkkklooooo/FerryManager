@@ -51,8 +51,8 @@ static void DrawWorldGrid(const World& world) {
     int w = world.GetWidth(), h = world.GetHeight();
 
     ImVec2 avail = ImGui::GetContentRegionAvail();
-    float cellSize = std::min(avail.x / w, avail.y / h);
-    cellSize = std::max(cellSize, 3.0f);
+    float cellSize =min(avail.x / w, avail.y / h);
+    cellSize = max(cellSize, 3.0f);
 
     float maxE = 0.001f;
     for (auto* e : envs) if (e->energy > maxE) maxE = e->energy;
