@@ -44,6 +44,7 @@
  5) StepMaxAbsorb=2: 植物每步最大吸收量
  6) SingleEnvironmentMaxEnergy=50: 单个格子环境能量上限
  7) 植物初始能量=5, 繁殖阈值=25, 繁殖消耗=10
+ 8）动物能量速度比值为0.3
 
 6.GUI界面 (基于ImGui + OpenGL, test_main.cpp)
  1) 窗口标题"Eco Simulation", 默认1280x800
@@ -71,11 +72,14 @@
 8.关键改动记录 (自ce67777之后)
  1) 界面从控制台字符画改为ImGui+OpenGL图形窗口
  2) 新增植物拥挤成本(overlay cost)机制
- 3) 死亡生物能量回归环境(deadOrganismEnergy)
- 4) 环境能量上限(SingleEnvironmentMaxEnergy=50)
+ 3) 死亡生物能量回归环境(deadOrganismEnergy)  ？？真？？ 未正常实现（在RemoveDeadOrganisms，PredationOrFuck，EnergyExchange（已经修改）没找到）
+ 4) 环境能量上限 修改为每个环境各异
  5) 植物吸收上限(StepMaxAbsorb=2)
  6) 世界从100x100缩小到50x50
  7) 修复多处xy坐标索引反了的bug
  8) 修复植物繁殖能量计算bug(+=改为-=)
  9) 生物初始能量从1改为5
 10) 捕食行为增加控制台红色日志输出
+11) 我添加了MyOperator 便于让工厂函数可扩展(有一点点石山和没有逻辑的重载）
+    两个动物输入就是要吃 ，一个Request 输入就是要返回新动物 
+

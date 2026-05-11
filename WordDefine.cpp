@@ -39,7 +39,7 @@ void World::Update()
         return a->Pos.second < b->Pos.second;
         });
 
-    //植物和环境交互
+    //动植物和环境交互
     for (auto i : Reproducas) {
         Environments[i->Pos.second*GetWidth()+i->Pos.first]->EnergyExchange(i);
     }
