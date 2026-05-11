@@ -63,15 +63,11 @@ public:
     Reproducable(float energy_threshold, float energy_cost, int radius, float sec, OrganismType type);
     virtual ~Reproducable() = default;
     std::vector<EnvironmentType> live_environment;
-    std::vector<OrganismName> diet;
-
+    std::vector<OrganismName>diet;
     float reproduce_energy_threshold;
     float reproduce_energy_cost;
     int reproduce_radius;
     bool reproduce_able;
-
-    // 捕食相关 — 默认用 diet 判断，子类可覆写自定义捕食逻辑
-    virtual bool canEat(Reproducable* other) const;
 
     // 纯虚函数（实际有默认实现），派生类应重写具体的繁殖行为
     virtual void Reproduce()=0;
@@ -110,7 +106,7 @@ public:
     void Reproduce() override;
     void Step() override;
     float calculate_overlay_cost();
-
+  
 };
 
 Reproducable* ReprodueNewOrganism(ReproduceRequest request);
