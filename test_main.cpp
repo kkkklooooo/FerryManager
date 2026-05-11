@@ -215,7 +215,8 @@ static bool showPlants   = true;
 static bool showQuery    = false;
 
 void RenderUI(World& world, int frame, int total,
-              bool paused, bool* pPaused, bool* pStep, float* pSpeed, bool* pUnlimited)
+              bool paused, bool* pPaused, bool* pStep, float* pSpeed, bool* pUnlimited,
+              int* pMaxSteps)
 {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("View")) {
@@ -241,6 +242,9 @@ void RenderUI(World& world, int frame, int total,
     ImGui::SliderFloat("Speed", pSpeed, 0.1f, 100.0f, "%.1fx");
     ImGui::SameLine();
     ImGui::Checkbox("No Limit", pUnlimited);
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(80);
+    ImGui::SliderInt("Batch", pMaxSteps, 1, 500);
 
     ImGui::Spacing();
     ImGui::Separator();
@@ -397,6 +401,7 @@ int main() {
     bool  paused   = false;
     bool  stepReq  = false;
     bool  unlimited = false;
+    int   maxStepsPerFrame = 500;
     float speed    = 1.0f;
     auto lastStep = std::chrono::steady_clock::now();
 
@@ -414,7 +419,8 @@ int main() {
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        RenderUI(world, frame, totalFrames, paused, &paused, &stepReq, &speed, &unlimited);
+        RenderUI(world, frame, totalFrames, paused, &paused, &stepReq, &speed, &unlimited,
+                  &maxStepsPerFrame);
 
         // Simulation step
         auto now = std::chrono::steady_clock::now();
@@ -428,7 +434,7 @@ int main() {
             lastStep = now;
         } else if (!paused) {
             if (unlimited) {
-                for (int i = 0; i < 500 && frame < totalFrames; ++i) {
+                for (int i = 0; i < maxStepsPerFrame && frame < totalFrames; ++i) {
                     world.Update();
                     ++frame;
                 }
