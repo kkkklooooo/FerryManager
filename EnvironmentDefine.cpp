@@ -56,7 +56,7 @@ void Environment::EnergyExchange(Reproducable *on)
 }
 
 EnvironmentConfig Environment::FindEnvironmentConfig(const std::string& name) {
-	auto& animals = World::GetWorld().game_conf.The_Environments;
+	auto& animals = TestConfig::GetTestConfig().The_Environments;
 	for (auto& a : animals) {
 		if (a.name == name) return a;
 	}

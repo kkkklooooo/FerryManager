@@ -231,7 +231,7 @@ void Animal::Reproduce()
     
     // printf("\033[31mAnimal request at (%d, %d) with radius %d\033[0m\n", x_new, y_new);
     // 确保新位置在有效世界边界内
-    if (x_new >= 0 && x_new < World::GetWorld().GetHeight() && y_new >= 0 && y_new < World::GetWorld().GetWidth())
+    if (x_new >= 0 && x_new < TestConfig::GetTestConfig().The_Word.length && y_new >= 0 && y_new < TestConfig::GetTestConfig().The_Word.width)
     {
         // 子代植动物物的半径在父半径的[0.25,2.0]倍之间随机，并取整
         float r = reproduce_radius * std::min(2.0, std::max(0.25, (double)std::rand() / RAND_MAX));
@@ -278,7 +278,7 @@ void Animal::Step()
 
         x_move += Pos.first;
         y_move += Pos.second;
-        Pos = std::make_pair(std::max(std::min(x_move, World::GetWorld().GetHeight() - 1), 0), std::max(std::min(y_move, World::GetWorld().GetWidth() - 1), 0));
+        Pos = std::make_pair(std::max(std::min(x_move, TestConfig::GetTestConfig().The_Word.length - 1), 0), std::max(std::min(y_move, TestConfig::GetTestConfig().The_Word.width - 1), 0));
     }
 }
 

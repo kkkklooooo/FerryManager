@@ -10,16 +10,16 @@ public:
 		:Animal(iD, x, y, radius, reproduce_energy_threshold, reproduce_energy_cost,org)
 	{}
 	static AnimalConfig FindAnimalConfig(const std::string& name) {
-		auto& animals = World::GetWorld().game_conf.The_Animals;
+		auto& animals = TestConfig::GetTestConfig().The_Animals;
 		for (auto& a : animals) {
 			if (a.name == name) return a;
 		}
-		return World::GetWorld().game_conf.Default_Animal_Config;
+		return TestConfig::GetTestConfig().Default_Animal_Config;
 	}
 };
 
 //系统的原有用注册表
+//此时的clonfg都没有创建只能硬编码？
+static AnimalRegistrator wolf("Wolf", [](int id, int x, int y, int radius) {return new UserAnimal(id, x, y,radius, 25, World::GetWorld().conf.Organism_reproduce_energy_cost,UserAnimal::FindAnimalConfig("Wolf")); });
 
-static AnimalRegistrator wolf("Wolf", [](int id, int x, int y, int radius) {return new UserAnimal(id, x, y,radius,World::GetWorld().conf.Organism_reproduce_energy_threshold, World::GetWorld().conf.Organism_reproduce_energy_cost,UserAnimal::FindAnimalConfig("Wolf")); });
-
-static AnimalRegistrator sheep("Sheep", [](int id, int x, int y, int radius) {return new UserAnimal(id, x, y, radius,World::GetWorld().conf.Organism_reproduce_energy_threshold, World::GetWorld().conf.Organism_reproduce_energy_cost, UserAnimal::FindAnimalConfig("Sheep")); });
+static AnimalRegistrator sheep("Sheep", [](int id, int x, int y, int radius) {return new UserAnimal(id, x, y, radius, 25, World::GetWorld().conf.Organism_reproduce_energy_cost, UserAnimal::FindAnimalConfig("Sheep")); });

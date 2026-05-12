@@ -9,9 +9,10 @@
 
 static World* TheOnlyWord;//世界指针单例
 
-World::World(Config& Conf, TestConfig* Game_conf)
+World::World(Config& Conf, TestConfig& Game_conf)
     :conf(Conf),game_conf(Game_conf)
 {
+    TheOnlyWord = this;
     // ---- 植物: 30株分散在草地各处（生产者基础） ----
     auto addPlant = [&](int x, int y) {
         Reproducas.push_back(new Plant(Plant_id++, x, y, conf.Plant_init_radius,
@@ -48,9 +49,9 @@ World::World(Config& Conf, TestConfig* Game_conf)
     addWolf(44, 42);  // 右上, 靠近另一群羊
 
     // ---- 环境: 100x100 草地, 初始能量有自然波动 ----
-    for (int i = 0; i < conf.length; i++)
+    for (int i = 0; i < game_conf.The_Word.length; i++)
     {
-        for (int j = 0; j < conf.width; j++)
+        for (int j = 0; j < game_conf.The_Word.width; j++)
         {
             float distX = (i - 50) * (i - 50);
             float distY = (j - 50) * (j - 50);
@@ -213,9 +214,9 @@ void World::Reset()
     addWolf(10, 10);
     addWolf(44, 42);
 
-    for (int i = 0; i < conf.length; i++)
+    for (int i = 0; i < game_conf.The_Word.length; i++)
     {
-        for (int j = 0; j < conf.width; j++)
+        for (int j = 0; j < game_conf.The_Word.width; j++)
         {
             float distX = (i - 50) * (i - 50);
             float distY = (j - 50) * (j - 50);
@@ -224,4 +225,9 @@ void World::Reset()
             Environments.push_back(new GressLand(std::make_pair(i, j), initEnergy, 2));
         }
     }
+}
+
+World& World::GetWorld(Config Cof,TestConfig& Game_conf) {
+    static World The_World(Cof, Game_conf);
+    return The_World;
 }

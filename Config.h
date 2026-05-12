@@ -7,6 +7,7 @@
 using json = nlohmann::json;
 
 
+
 //����ֻ�øı��ʼ�ٶȣ���ʼ���������ƣ�ʳ���ʼ����
 struct AnimalConfig {
     std::string name="Animal";
@@ -16,7 +17,6 @@ struct AnimalConfig {
     float max_rate=-1;
     float step_energy_cost = -1.0f;
     float energy_rate = -1.0f; //�ٶ��������й�  Ҫͨ��������
-
 };
 
 struct EnvironmentConfig{
@@ -49,6 +49,7 @@ public:
     std::vector<AnimalConfig>The_Animals;
     std::vector<PlantConfig>The_Plants;
     //����
+    static TestConfig& GetTestConfig();
     void User_Set_Word(WordConfig &fuck);
     void User_AddNew_Animal(AnimalConfig &fuck);
     void User_AddNew_Plant(PlantConfig &fuck);
@@ -87,11 +88,11 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TestConfig,
 
 class Config{
     public:
-    Config(int length,int width){
+ /*   Config(int length,int width){
         this->length=length;
         this->width=width;
     }
-    int length=50;
+    int length=50;*/
     int width=50;
     float Environment_energy_absorb_rate=0.01f;
     float Environment_plant_absorb_rate=0.4f;
@@ -104,6 +105,7 @@ class Config{
     float Organism_step_energy_cost=1;
     float Orgianism_overlay_param=1.4;
     int Plant_init_radius=3;
+    static Config& GetConfig();
 };
 
 

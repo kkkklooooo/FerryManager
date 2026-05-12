@@ -1,5 +1,7 @@
 #include"Config.h"
 
+TestConfig* g_GameConf;
+
 WordConfig TestConfig::Check_Word(WordConfig &fu) {
 	if (fu.length < 50)fu.length = 50;
 	if (fu.width < 50)fu.width = 50;
@@ -31,4 +33,15 @@ PlantConfig TestConfig::Check_Plant(PlantConfig& fu) {
 
 void TestConfig::User_AddNew_Plant(PlantConfig& fuck) {
 	The_Plants.push_back(Check_Plant(fuck));
+}
+
+TestConfig& TestConfig::GetTestConfig() {
+	return *g_GameConf;
+}
+
+//±ÈWorldÏÈ¼ÓÔØ
+
+Config& Config::GetConfig() {
+	static Config The_Config;
+	return The_Config;
 }

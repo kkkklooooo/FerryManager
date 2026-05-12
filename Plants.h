@@ -9,12 +9,12 @@ public:
 		:Plant(iD, x, y,radius, reproduce_energy_threshold, reproduce_energy_cost, org)
 	{}
 	static PlantConfig FindPlantConfig(const std::string& name) {
-		auto& animals = World::GetWorld().game_conf.The_Plants;
+		auto& animals = TestConfig::GetTestConfig().The_Plants;
 		for (auto& a : animals) {
 			if (a.name == name) return a;
 		}
 		printf("\033[返回了不知道的东西\033[0m\n");
-		return World::GetWorld().game_conf.Default_Plant_Config;
+		return TestConfig::GetTestConfig().Default_Plant_Config;
 	}
 };
 

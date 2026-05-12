@@ -13,10 +13,10 @@ class World
     std::vector<Environment*>Environments;
 
 public:
-    TestConfig* game_conf;
-    Config conf;
+    TestConfig & game_conf;
+    Config& conf;
     Weather CurrentWeather;
-    World(Config&Conf, TestConfig* Game_conf);
+    World(Config&Conf, TestConfig& Game_conf);
     void AddLeftEnergyRequest(const LeftEnergyRequest& request);
     // ��������״̬�����绷���仯�ȣ�
     void Update();
@@ -30,9 +30,10 @@ public:
     void Reset();
     // ��ȡ���絥��ʵ��
     static World& GetWorld();
+    static World& GetWorld(Config conf,TestConfig& Game_conf);
     //ֻ������ ���������Ĵ���
     const std::vector<Reproducable*>& GetReproducas() const { return Reproducas; }
     const std::vector<Environment*>& GetEnvironments() const { return Environments; }
-    int GetWidth() const { return conf.width; }
-    int GetHeight() const { return conf.length; }
+    int GetWidth() const { return game_conf.The_Word.width; }
+    int GetHeight() const { return game_conf.The_Word.length; }
 };
