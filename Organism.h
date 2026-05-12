@@ -96,7 +96,7 @@ public:
     Animal(int id,int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost, float step_energy_cost);
 
     float rate;
-
+    int eat_intrval=0;
     int id; //动物唯一标符
 
     static  float _energy_rate;
@@ -106,6 +106,9 @@ public:
     void Reproduce() override;
     void Step() override;
     float calculate_overlay_cost();
+    void OnEatInterval(){
+        eat_intrval=20;
+    }
   
 };
 

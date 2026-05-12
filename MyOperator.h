@@ -12,6 +12,7 @@ public:
 
 	void operator()(Reproducable* a,Reproducable* b);
 	Reproducable* operator()(ReproduceRequest &x,int id);
+	Reproducable* operator()(int x,int y,OrganismName n,int id);
 	static MyOperator& GetOp();
 private:
 	//全局唯一注册表

@@ -5,11 +5,11 @@
 #include"Config.h"
 class World
 {
-    // 待处理的繁殖请求列表
+    // 锟斤拷锟斤拷锟斤拷锟侥凤拷殖锟斤拷锟斤拷锟叫憋拷
     std::vector<ReproduceRequest> reproduce_requests;
-    // 所有可繁殖对象指针列表
+    // 锟斤拷锟叫可凤拷殖锟斤拷锟斤拷指锟斤拷锟叫憋拷
     std::vector<Reproducable*> Reproducas;
-    //所有环境对象
+    //锟斤拷锟叫伙拷锟斤拷锟斤拷锟斤拷
     std::vector<Environment*>Environments;
 
 public:
@@ -17,18 +17,19 @@ public:
     Weather CurrentWeather;
     World(Config&conf);
     void AddLeftEnergyRequest(const LeftEnergyRequest& request);
-    // 更新世界状态（例如环境变化等）
+    // 锟斤拷锟斤拷锟斤拷锟斤拷状态锟斤拷锟斤拷锟界环锟斤拷锟戒化锟饺ｏ拷
     void Update();
-    // 处理所有繁殖请求，生成新生物
+    // 锟斤拷锟斤拷锟斤拷锟叫凤拷殖锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷
     void Reproduce();
-    // 向世界添加一个繁殖请求
+    // 锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷一锟斤拷锟斤拷殖锟斤拷锟斤拷
     bool AddReproduceRequest(const ReproduceRequest& request);
-    // 移除所有能量为0（active == false）的生物
+    // 锟狡筹拷锟斤拷锟斤拷锟斤拷锟斤拷为0锟斤拷active == false锟斤拷锟斤拷锟斤拷锟斤拷
     void RemoveDeadOrganisms();
     float calculate_overlay(std::pair<int, int> pos);
-    // 获取世界单例实例
+    void Reset();
+    // 锟斤拷取锟斤拷锟界单锟斤拷实锟斤拷
     static World& GetWorld();
-    //只读测试 不是真正的代码
+    //只锟斤拷锟斤拷锟斤拷 锟斤拷锟斤拷锟斤拷锟斤拷锟侥达拷锟斤拷
     const std::vector<Reproducable*>& GetReproducas() const { return Reproducas; }
     const std::vector<Environment*>& GetEnvironments() const { return Environments; }
     int GetWidth() const { return conf.width; }

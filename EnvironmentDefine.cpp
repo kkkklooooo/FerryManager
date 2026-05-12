@@ -34,8 +34,9 @@ bool Environment::canPlant(ReproduceRequest a)
 
 void Environment::EnergyExchange(Reproducable *on)
 {
-	float add=std::min(World::GetWorld().conf.Environmrnt_step_max_absorb, on->energy * World::GetWorld().conf.Environment_energy_absorb_rate);
-	energy += add;
+	//只有死后才能add
+	// float add=std::min(World::GetWorld().conf.Environmrnt_step_max_absorb, on->energy * World::GetWorld().conf.Environment_energy_absorb_rate);
+	// energy += add;
 	if (on->type == PLANT && on->active)
 	{ // 植物吸收土地
 		float abs = std::min(World::GetWorld().conf.Environment_plant_absorb_rate * energy, World::GetWorld().conf.Environmrnt_step_max_absorb / World::GetWorld().conf.Organism_loss_rate);
@@ -54,7 +55,8 @@ void Environment::EnergyExchange(Reproducable *on)
 void Environment::Update(Weather)
 {
 	float gain = deadOrganismEnergy * World::GetWorld().conf.Organism_loss_rate; // 增加尸体上的能量
-	energy += gain;
+	if(energy<World::GetWorld().conf.Environment_single_chunk_max_energy*2) energy += std::min(gain,World::GetWorld().conf.Environment_single_chunk_max_energy-energy);
+	
 	deadOrganismEnergy = 0;
 }
 
@@ -82,6 +84,9 @@ GressLand::GressLand(std::pair<int, int> pos, float en, int mp)
 	: Environment(pos, en, GRESSLEND, 200, mp)
 {
 	CanLiveIn.push_back(Plant_Name);
+	CanLiveIn.push_back(Animal_Name);
+	CanLiveIn.push_back(Sheep_Name);
+	CanLiveIn.push_back(Wolf_Name);
 }
 
 void GressLand::Update(Weather sky)

@@ -42,6 +42,28 @@ static const char* EnvName(EnvironmentType t) {
     }
 }
 
+static const char* OrganismDisplayName(OrganismName n) {
+    switch (n) {
+    case Plant_Name:  return "Plant";
+    case Wolf_Name:   return "Wolf";
+    case Sheep_Name:  return "Sheep";
+    case Animal_Name: return "Animal";
+    default:          return "?";
+    }
+}
+
+static ImU32 OrganismColor(OrganismName n, float energy, float maxE) {
+    float i = (maxE > 0.001f) ? energy / maxE : 0.5f;
+    i = std::clamp(i, 0.25f, 1.0f);
+    switch (n) {
+    case Plant_Name:  return IM_COL32(0,            (int)(220*i), (int)(80*i),  210);
+    case Wolf_Name:   return IM_COL32((int)(220*i), (int)(60*i),  (int)(50*i),  210);
+    case Sheep_Name:  return IM_COL32((int)(180*i), (int)(180*i), (int)(220*i), 210);
+    case Animal_Name: return IM_COL32((int)(255*i), (int)(90*i),  (int)(70*i),  210);
+    default:          return IM_COL32((int)(128*i), (int)(128*i), (int)(128*i), 210);
+    }
+}
+
 // ============================================================
 //  World grid
 // ============================================================
@@ -75,19 +97,25 @@ static void DrawWorldGrid(const World& world) {
         }
     }
 
+    float maxPlantE = 0.001f, maxAnimalE = 0.001f;
+    for (auto* org : orgs) {
+        if (org->type == PLANT) {
+            if (org->energy > maxPlantE) maxPlantE = org->energy;
+        } else {
+            if (org->energy > maxAnimalE) maxAnimalE = org->energy;
+        }
+    }
+
     for (auto* org : orgs) {
         int x = org->Pos.first, y = org->Pos.second;
         if (x < 0 || x >= w || y < 0 || y >= h) continue;
         ImVec2 c(base.x + x*cellSize + cellSize*0.5f,
                  base.y + y*cellSize + cellSize*0.5f);
         float r = cellSize * 0.38f;
-        if (org->type == PLANT) {
-            dl->AddCircleFilled(c, r, IM_COL32(0, 220, 80, 210));
-            dl->AddCircle(c, r, IM_COL32(0, 100, 40, 255), 0, 1.5f);
-        } else {
-            dl->AddCircleFilled(c, r, IM_COL32(255, 90, 70, 210));
-            dl->AddCircle(c, r, IM_COL32(180, 50, 30, 255), 0, 1.5f);
-        }
+        float maxE = (org->type == PLANT) ? maxPlantE : maxAnimalE;
+        ImU32 fill = OrganismColor(org->name, org->energy, maxE);
+        dl->AddCircleFilled(c, r, fill);
+        dl->AddCircle(c, r, IM_COL32(0, 0, 0, 80), 0, 1.5f);
     }
 
     ImGui::Dummy(ImVec2(w*cellSize, h*cellSize));
@@ -107,7 +135,7 @@ static void DrawWorldGrid(const World& world) {
             for (auto* org : orgs) {
                 if (org->Pos.first == gx && org->Pos.second == gy)
                     ImGui::Text("%s  E=%.1f",
-                        org->type == PLANT ? "Plant" : "Animal", org->energy);
+                        OrganismDisplayName(org->name), org->energy);
             }
             ImGui::EndTooltip();
         }
@@ -184,26 +212,69 @@ static void DrawPlantList(const World& world) {
 }
 
 // ============================================================
+//  Animal table
+// ============================================================
+static void DrawAnimalList(const World& world) {
+    const auto& orgs = world.GetReproducas();
+    if (!ImGui::BeginTable("##animals", 6,
+        ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg |
+        ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingFixedFit))
+        return;
+
+    ImGui::TableSetupColumn("ID",     ImGuiTableColumnFlags_WidthFixed, 40);
+    ImGui::TableSetupColumn("Type",   ImGuiTableColumnFlags_WidthFixed, 60);
+    ImGui::TableSetupColumn("X",      ImGuiTableColumnFlags_WidthFixed, 40);
+    ImGui::TableSetupColumn("Y",      ImGuiTableColumnFlags_WidthFixed, 40);
+    ImGui::TableSetupColumn("Energy", ImGuiTableColumnFlags_WidthFixed, 70);
+    ImGui::TableSetupColumn("Repro",  ImGuiTableColumnFlags_WidthFixed, 50);
+    ImGui::TableHeadersRow();
+
+    int n = 0;
+    for (auto* org : orgs) {
+        if (org->type == PLANT) continue;
+        ImGui::TableNextRow();
+        const Animal* a = static_cast<const Animal*>(org);
+        ImGui::TableSetColumnIndex(0); ImGui::Text("%d",   a->id);
+        ImGui::TableSetColumnIndex(1); ImGui::Text("%s",   OrganismDisplayName(org->name));
+        ImGui::TableSetColumnIndex(2); ImGui::Text("%d",   (int)org->Pos.first);
+        ImGui::TableSetColumnIndex(3); ImGui::Text("%d",   (int)org->Pos.second);
+        ImGui::TableSetColumnIndex(4);
+        ImVec4 c = org->energy > 15.0f ? ImVec4(0.3f,1,0.3f,1) : ImVec4(1,0.5f,0.3f,1);
+        ImGui::TextColored(c, "%.1f", org->energy);
+        ImGui::TableSetColumnIndex(5);
+        ImVec4 rc = org->reproduce_able ? ImVec4(0.3f,1,0.3f,1) : ImVec4(0.6f,0.6f,0.6f,1);
+        ImGui::TextColored(rc, "%s", org->reproduce_able ? "Y" : "N");
+        if (++n >= 50) break;
+    }
+    ImGui::EndTable();
+}
+
+// ============================================================
 //  Stats bar
 // ============================================================
 static void DrawStats(const World& world, int frame, int total) {
     const auto& orgs = world.GetReproducas();
     const auto& envs = world.GetEnvironments();
-    int plants = 0, animals = 0;
+    int plants = 0, animals = 0, wolves = 0, sheep = 0;
     float pE = 0, aE = 0, envE = 0;
     for (auto* o : orgs) {
         if (o->type == PLANT) { ++plants;  pE += o->energy; }
-        else                  { ++animals; aE += o->energy; }
+        else {
+            ++animals; aE += o->energy;
+            if (o->name == Wolf_Name)  ++wolves;
+            if (o->name == Sheep_Name) ++sheep;
+        }
     }
     for (auto* e : envs) envE += e->energy;
 
     ImGui::Text("Frame %d/%d", frame, total); ImGui::SameLine(130);
     ImGui::Text("| Plants: %d", plants);       ImGui::SameLine(250);
     ImGui::Text("Animals: %d", animals);       ImGui::SameLine(370);
-    ImGui::Text("| P-E: %.0f", pE);           ImGui::SameLine(480);
-    ImGui::Text("A-E: %.0f", aE);             ImGui::SameLine(590);
+    ImGui::Text("W: %d  S: %d", wolves, sheep);ImGui::SameLine(490);
+    ImGui::Text("| P-E: %.0f", pE);           ImGui::SameLine(600);
+    ImGui::Text("A-E: %.0f", aE);             ImGui::SameLine(710);
     ImGui::Text("Env-E: %.0f", envE);
-    ImGui::SameLine(700);
+    ImGui::SameLine(830);
     ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 }
 
@@ -212,15 +283,17 @@ static void DrawStats(const World& world, int frame, int total) {
 // ============================================================
 static bool showHeatmap  = false;
 static bool showPlants   = true;
+static bool showAnimals  = false;
 static bool showQuery    = false;
 
-void RenderUI(World& world, int frame, int total,
+void RenderUI(World& world, int* pFrame, int total,
               bool paused, bool* pPaused, bool* pStep, float* pSpeed, bool* pUnlimited,
               int* pMaxSteps)
 {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("View")) {
             ImGui::MenuItem("Plants",      nullptr, &showPlants);
+            ImGui::MenuItem("Animals",     nullptr, &showAnimals);
             ImGui::MenuItem("Heatmap",     nullptr, &showHeatmap);
             ImGui::MenuItem("Query Panel", nullptr, &showQuery);
             ImGui::EndMenu();
@@ -238,6 +311,7 @@ void RenderUI(World& world, int frame, int total,
     ImGui::SameLine();
     if (ImGui::Button("Step")) *pStep = true;
     ImGui::SameLine();
+    if (ImGui::Button("Reset")) { world.Reset(); *pFrame = 0; }
     ImGui::SetNextItemWidth(120);
     ImGui::SliderFloat("Speed", pSpeed, 0.1f, 100.0f, "%.1fx");
     ImGui::SameLine();
@@ -248,7 +322,7 @@ void RenderUI(World& world, int frame, int total,
 
     ImGui::Spacing();
     ImGui::Separator();
-    DrawStats(world, frame, total);
+    DrawStats(world, *pFrame, total);
     ImGui::End();
 
     // ---- world grid ----
@@ -276,6 +350,14 @@ void RenderUI(World& world, int frame, int total,
         ImGui::End();
     }
 
+    // ---- animal list ----
+    if (showAnimals) {
+        ImGui::SetNextWindowSize(ImVec2(290, 380), ImGuiCond_FirstUseEver);
+        ImGui::Begin("Animals", &showAnimals);
+        DrawAnimalList(world);
+        ImGui::End();
+    }
+
     // ---- position query ----
     if (showQuery) {
         ImGui::SetNextWindowSize(ImVec2(260, 240), ImGuiCond_FirstUseEver);
@@ -296,9 +378,11 @@ void RenderUI(World& world, int frame, int total,
             for (auto* org : orgs) {
                 if (org->Pos.first == qx && org->Pos.second == qy) {
                     ImGui::Text("%s  E=%.1f",
-                        org->type == PLANT ? "Plant" : "Animal", org->energy);
+                        OrganismDisplayName(org->name), org->energy);
                     if (org->type == PLANT)
                         ImGui::Text("  ID: %d", static_cast<const Plant*>(org)->id);
+                    else
+                        ImGui::Text("  ID: %d", static_cast<const Animal*>(org)->id);
                 }
             }
         } else {
@@ -419,7 +503,7 @@ int main() {
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        RenderUI(world, frame, totalFrames, paused, &paused, &stepReq, &speed, &unlimited,
+        RenderUI(world, &frame, totalFrames, paused, &paused, &stepReq, &speed, &unlimited,
                   &maxStepsPerFrame);
 
         // Simulation step

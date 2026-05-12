@@ -16,16 +16,18 @@ void MyOperator::operator()(Reproducable* a, Reproducable* b) {
         a->energy += b->energy * World::GetWorld().conf.Organism_animal_absorb_rate * World::GetWorld().conf.Organism_loss_rate;
         b->energy -= b->energy * World::GetWorld().conf.Organism_animal_absorb_rate;
         b->active = false;
+        dynamic_cast<Animal*>(a)->OnEatInterval();
         // assert(a->energy >= -100&& b->energy >= -100);
-        printf("\033[31m%s eat %s\033[0m\n", a->name, b->name);
+        // printf("\033[31m%s eat %s\033[0m\n", a->name, b->name);
         return;
     }
     if (bEa && !aEb) {
         b->energy += a->energy * World::GetWorld().conf.Organism_animal_absorb_rate * World::GetWorld().conf.Organism_loss_rate;
         a->energy -= a->energy * World::GetWorld().conf.Organism_animal_absorb_rate;
         a->active = false;
+        dynamic_cast<Animal*>(b)->OnEatInterval();
         // assert(a->energy >= -100&& b->energy >= -100);
-        printf("\033[31m%s eat %s\033[0m\n", b->name, a->name);
+        // printf("\033[31m%s eat %s\033[0m\n", b->name, a->name);
         return;
     }
     if (aEb && bEa) {
@@ -48,6 +50,14 @@ void MyOperator::register_Animal_Create(OrganismName name, Creator creator) {
 }
 
 
+Reproducable* MyOperator::operator()(int x,int y,OrganismName n,int id) { 
+    auto it = registry().find(n);
+    if (it != registry().end()) {// 调用注册的创建函数
+        return it->second( id, x, y, 0); 
+    }
+    return nullptr;
+
+} 
 Reproducable* MyOperator::operator()(ReproduceRequest& x,int id) {  
     auto it = registry().find(x.name);
     if (it != registry().end()) {// 调用注册的创建函数
