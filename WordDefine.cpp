@@ -3,58 +3,37 @@
 #include "Organism.h"
 #include "Environment.h"
 #include <algorithm>
-#include <cmath>
 #include <cstdio>
 #include"Animals.h"
 
 World::World(Config &conf) : conf(conf)
 {
-    // ---- 植物: 30株分散在草地各处 (生产者基础) ----
-    auto addPlant = [&](int x, int y) {
-        Reproducas.push_back(new Plant(Plant_id++, x, y, conf.Plant_init_radius,
-            conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
-    };
-    // 左下草地集群
-    addPlant(5,5); addPlant(7,4); addPlant(4,7); addPlant(8,6); addPlant(6,8);
-    // 中部集群
-    addPlant(20,25); addPlant(22,23); addPlant(19,26); addPlant(23,27); addPlant(21,28);
-    addPlant(24,24); addPlant(18,22);
-    // 右上集群
-    addPlant(40,40); addPlant(42,38); addPlant(39,42); addPlant(43,41); addPlant(41,43);
-    addPlant(38,39);
-    // 左上集群
-    addPlant(8,40); addPlant(10,38); addPlant(7,42); addPlant(11,41); addPlant(9,43);
-    // 右下集群
-    addPlant(42,8); addPlant(44,6); addPlant(40,9); addPlant(43,10); addPlant(41,7);
-    // 中央散落
-    addPlant(25,10); addPlant(30,35); addPlant(15,30);
-
-    // ---- 绵羊: 8只, 分2群 (初级消费者) ----
-    auto addSheep = [&](int x, int y) {
-        Reproducas.push_back(MyOperator()(x, y, 3, "Sheep", Animal_id++));
-    };
-    addSheep(20, 23); addSheep(22, 24); addSheep(21, 26); addSheep(23, 25);  // 中部草场
-    addSheep(40, 38); addSheep(42, 39); addSheep(41, 41); addSheep(39, 40);  // 右上草场
-
-    // ---- 狼: 3只, 分散巡逻 (顶级捕食者) ----
-    auto addWolf = [&](int x, int y) {
-        Reproducas.push_back(MyOperator()(x, y, 3, "Wolf", Animal_id++));
-    };
-    addWolf(25, 25);  // 中部, 靠近一群羊
-    addWolf(10, 10);  // 左下, 远离羊群
-    addWolf(44, 42);  // 右上, 靠近另一群羊
-
-    // ---- 环境: 50x50 草地, 初始能量有自然波动 ----
+    Reproducas.push_back(new Plant(Plant_id++, 5, 5, conf.Plant_init_radius, conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
+    Reproducas.push_back(new Plant(Plant_id++, 10, 5, conf.Plant_init_radius, conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
+    Reproducas.push_back(new Plant(Plant_id++, 7, 5, conf.Plant_init_radius, conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
+    Reproducas.push_back(new Plant(Plant_id++, 6, 5, conf.Plant_init_radius, conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
+    Reproducas.push_back(new Plant(Plant_id++, 4, 5, conf.Plant_init_radius, conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
+    Reproducas.push_back(MyOperator()(10, 13, 3, "Wolf", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 22, 3, "Sheep",Animal_id++));
     for (int i = 0; i < conf.length; i++)
     {
         for (int j = 0; j < conf.width; j++)
         {
-            // 中心区域肥沃, 边缘贫瘠
-            float distX = (i - 25) * (i - 25);
-            float distY = (j - 25) * (j - 25);
-            float dist = std::sqrt(distX + distY);
-            float initEnergy = 3.0f + 10.0f * std::exp(-dist / 15.0f);  // 中心~13, 边缘~3
-            Environments.push_back(new GressLand(std::make_pair(i, j), initEnergy, 2));
+            Environments.push_back(new GressLand(std::make_pair(i, j), 2, 2));
         }
     }
 }
@@ -194,41 +173,30 @@ void World::Reset()
     Plant_id = 0;
     Animal_id = 0;
 
-    auto addPlant = [&](int x, int y) {
-        Reproducas.push_back(new Plant(Plant_id++, x, y, conf.Plant_init_radius,
-            conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
-    };
-    addPlant(5,5); addPlant(7,4); addPlant(4,7); addPlant(8,6); addPlant(6,8);
-    addPlant(20,25); addPlant(22,23); addPlant(19,26); addPlant(23,27); addPlant(21,28);
-    addPlant(24,24); addPlant(18,22);
-    addPlant(40,40); addPlant(42,38); addPlant(39,42); addPlant(43,41); addPlant(41,43);
-    addPlant(38,39);
-    addPlant(8,40); addPlant(10,38); addPlant(7,42); addPlant(11,41); addPlant(9,43);
-    addPlant(42,8); addPlant(44,6); addPlant(40,9); addPlant(43,10); addPlant(41,7);
-    addPlant(25,10); addPlant(30,35); addPlant(15,30);
-
-    auto addSheep = [&](int x, int y) {
-        Reproducas.push_back(MyOperator()(x, y, 3, "Sheep", Animal_id++));
-    };
-    addSheep(20, 23); addSheep(22, 24); addSheep(21, 26); addSheep(23, 25);
-    addSheep(40, 38); addSheep(42, 39); addSheep(41, 41); addSheep(39, 40);
-
-    auto addWolf = [&](int x, int y) {
-        Reproducas.push_back(MyOperator()(x, y, 3, "Wolf", Animal_id++));
-    };
-    addWolf(25, 25);
-    addWolf(10, 10);
-    addWolf(44, 42);
-
+    Reproducas.push_back(new Plant(Plant_id++, 5, 5, conf.Plant_init_radius, conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
+    Reproducas.push_back(new Plant(Plant_id++, 10, 5, conf.Plant_init_radius, conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
+    Reproducas.push_back(new Plant(Plant_id++, 7, 5, conf.Plant_init_radius, conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
+    Reproducas.push_back(new Plant(Plant_id++, 6, 5, conf.Plant_init_radius, conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
+    Reproducas.push_back(new Plant(Plant_id++, 4, 5, conf.Plant_init_radius, conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
+    Reproducas.push_back(MyOperator()(10, 13, 3, "Wolf", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 22, 3, "Sheep", Animal_id++));
     for (int i = 0; i < conf.length; i++)
     {
         for (int j = 0; j < conf.width; j++)
         {
-            float distX = (i - 25) * (i - 25);
-            float distY = (j - 25) * (j - 25);
-            float dist = std::sqrt(distX + distY);
-            float initEnergy = 3.0f + 10.0f * std::exp(-dist / 15.0f);
-            Environments.push_back(new GressLand(std::make_pair(i, j), initEnergy, 2));
+            Environments.push_back(new GressLand(std::make_pair(i, j), 2, 2));
         }
     }
 }
