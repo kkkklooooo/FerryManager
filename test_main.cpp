@@ -19,50 +19,38 @@
 // ============================================================
 //  helper: environment -> colour
 // ============================================================
-static ImU32 EnvColor(EnvironmentType t, float energy, float maxE) {
+static ImU32 EnvColor(const std::string& name, float energy, float maxE) {
     float i = (maxE > 0.001f) ? energy / maxE : 0.5f;
     i = std::clamp(i, 0.25f, 1.0f);
     int r, g, b;
-    switch (t) {
-    case GRESSLEND: r = 107; g = 142;  b = 35;  break;
-    case WATER:     r = 30;  g = 144;  b = 255; break;
-    case FOREST:    r = 34;  g = 139;  b = 34;  break;
-    case MOUTAN:    r = 139; g = 137;  b = 137; break;
-    default:        r = 128; g = 128;  b = 128; break;
-    }
+    if (name == "GressLand")      { r = 107; g = 142; b = 35; }
+    else if (name == "Water")     { r = 30;  g = 144; b = 255; }
+    else if (name == "Forest")    { r = 34;  g = 139; b = 34; }
+    else if (name == "Mountain")  { r = 139; g = 137; b = 137; }
+    else                           { r = 128; g = 128; b = 128; }
     return IM_COL32((int)(r*i), (int)(g*i), (int)(b*i), 255);
 }
 
-static const char* EnvName(EnvironmentType t) {
-    switch (t) {
-    case GRESSLEND: return "Grassland";
-    case WATER:     return "Water";
-    case FOREST:    return "Forest";
-    case MOUTAN:    return "Mountain";
-    default:        return "?";
-    }
+static const char* EnvName(const std::string& name) {
+    if (name == "GressLand") return "Grassland";
+    if (name == "Water")     return "Water";
+    if (name == "Forest")    return "Forest";
+    if (name == "Mountain")  return "Mountain";
+    return name.c_str();
 }
 
-static const char* OrganismDisplayName(OrganismName n) {
-    switch (n) {
-    case Plant_Name:  return "Plant";
-    case Wolf_Name:   return "Wolf";
-    case Sheep_Name:  return "Sheep";
-    case Animal_Name: return "Animal";
-    default:          return "?";
-    }
+static const char* OrganismDisplayName(const std::string& name) {
+    return name.c_str();
 }
 
-static ImU32 OrganismColor(OrganismName n, float energy, float maxE) {
+static ImU32 OrganismColor(const std::string& name, float energy, float maxE) {
     float i = (maxE > 0.001f) ? energy / maxE : 0.5f;
     i = std::clamp(i, 0.25f, 1.0f);
-    switch (n) {
-    case Plant_Name:  return IM_COL32(0,            (int)(220*i), (int)(80*i),  210);
-    case Wolf_Name:   return IM_COL32((int)(220*i), (int)(60*i),  (int)(50*i),  210);
-    case Sheep_Name:  return IM_COL32((int)(180*i), (int)(180*i), (int)(220*i), 210);
-    case Animal_Name: return IM_COL32((int)(255*i), (int)(90*i),  (int)(70*i),  210);
-    default:          return IM_COL32((int)(128*i), (int)(128*i), (int)(128*i), 210);
-    }
+    if (name == "Plant")       return IM_COL32(0,            (int)(220*i), (int)(80*i),  210);
+    if (name == "Wolf")        return IM_COL32((int)(220*i), (int)(60*i),  (int)(50*i),  210);
+    if (name == "Sheep")       return IM_COL32((int)(180*i), (int)(180*i), (int)(220*i), 210);
+    if (name == "Animal")      return IM_COL32((int)(255*i), (int)(90*i),  (int)(70*i),  210);
+    return IM_COL32((int)(128*i), (int)(128*i), (int)(128*i), 210);
 }
 
 // ============================================================
@@ -74,8 +62,8 @@ static void DrawWorldGrid(const World& world) {
     int w = world.GetWidth(), h = world.GetHeight();
 
     ImVec2 avail = ImGui::GetContentRegionAvail();
-    float cellSize = min(avail.x / w, avail.y / h);
-    cellSize = max(cellSize, 3.0f);
+    float cellSize = std::min(avail.x / w, avail.y / h);
+    cellSize = std::max(cellSize, 3.0f);
 
     float maxE = 0.001f;
     for (auto* e : envs) if (e->energy > maxE) maxE = e->energy;
@@ -270,8 +258,8 @@ static void DrawStats(const World& world, int frame, int total) {
 if (o->type == PLANT ) { ++plants;  pE += o->energy; }
         else {
             ++animals; aE += o->energy;
-            if (o->name == Wolf_Name)  ++wolves;
-            if (o->name == Sheep_Name) ++sheep;
+            if (o->name == "Wolf")  ++wolves;
+            if (o->name == "Sheep") ++sheep;
         }
     }
     for (auto* e : envs) envE += e->energy;

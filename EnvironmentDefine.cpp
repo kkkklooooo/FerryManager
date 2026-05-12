@@ -40,7 +40,7 @@ void Environment::EnergyExchange(Reproducable *on)
 	if (on->type == PLANT && on->active)
 	{ // 植物吸收土地 
 	  // @ TODO 修改参数
-		float abs = std::min(World::GetWorld().conf.Environment_plant_absorb_rate * energy, World::GetWorld().conf.Environmrnt_step_max_absorb / World::GetWorld().conf.Organism_loss_rate);
+		float abs = std::min(World::GetWorld().conf.Environment_plant_absorb_rate * energy, World::GetWorld().conf.Environment_step_max_absorb / World::GetWorld().conf.Organism_loss_rate);
 		abs = abs * World::GetWorld().conf.Organism_loss_rate;
 		on->energy += abs;
 		// assert(on->energy>=-100);

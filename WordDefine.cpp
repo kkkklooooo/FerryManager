@@ -13,22 +13,22 @@ World::World(Config &conf) : conf(conf)
     Reproducas.push_back(new Plant(Plant_id++, 7, 5, conf.Plant_init_radius, conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
     Reproducas.push_back(new Plant(Plant_id++, 6, 5, conf.Plant_init_radius, conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
     Reproducas.push_back(new Plant(Plant_id++, 4, 5, conf.Plant_init_radius, conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
-    Reproducas.push_back(MyOperator()(10, 13, 3, OrganismName::Wolf_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 22, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 13, 3, "Wolf", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep",Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 22, 3, "Sheep",Animal_id++));
     for (int i = 0; i < conf.length; i++)
     {
         for (int j = 0; j < conf.width; j++)
@@ -178,22 +178,20 @@ void World::Reset()
     Reproducas.push_back(new Plant(Plant_id++, 7, 5, conf.Plant_init_radius, conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
     Reproducas.push_back(new Plant(Plant_id++, 6, 5, conf.Plant_init_radius, conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
     Reproducas.push_back(new Plant(Plant_id++, 4, 5, conf.Plant_init_radius, conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
-    Reproducas.push_back(MyOperator()(10, 13, 3, OrganismName::Wolf_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
-    Reproducas.push_back(MyOperator()(10, 22, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 13, 3, "Wolf", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, "Sheep", Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 22, 3, "Sheep", Animal_id++));
     for (int i = 0; i < conf.length; i++)
     {
         for (int j = 0; j < conf.width; j++)

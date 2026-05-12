@@ -8,7 +8,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <random>
-#include<corecrt_math_defines.h>
+// #include<corecrt_math_defines.h>
 int Plant_id = 0;
 int Animal_id = 0;
 // 全局唯一标识，用于给新生植物和动物分配ID

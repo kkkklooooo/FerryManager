@@ -48,7 +48,7 @@
     "reproduce_original_energy": 10,
     "step_energy_cost": 0.01,
     "overlay_param": 1.4
-  }
+  },
   "The_Animals": [
     {
       "name": "Wolf",
