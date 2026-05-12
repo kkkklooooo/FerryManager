@@ -15,6 +15,7 @@ int Plant_id = 0;
 int Animal_id = 0;
 // 全局唯一标识，用于给新生植物和动物分配ID
 std::random_device rd;
+double rand01() { return rand() / (RAND_MAX + 1.0); }
 std::mt19937 gen(rd()); // 随机旋转种子
 const double pi = std::acos(-1.0);
 std::uniform_real_distribution<double> dist(0.0, 2.0 * pi); // 范围
@@ -193,7 +194,8 @@ Animal::Animal(int iD, int x, int y, int radius, float reproduce_energy_threshol
     name = "Animal";
     energy = 20; // 测试用 每个动物初始能量应该不同
     Pos = std::make_pair(x, y);
-    reproduce_able = (id % 2) ? true : false; // 就是和植物抢id了
+    // reproduce_able = (id % 2) ? true : false; // 就是和植物抢id了
+    reproduce_able = true; // 就是和植物抢id了//当前靠id区分很容易导致集体不育,先暂时关闭
 }
 
 Animal::Animal(int iD,int x, int y, int radius,float reproduce_energy_threshold, float reproduce_energy_cost,AnimalConfig& org):id(iD),
@@ -211,9 +213,7 @@ Reproducable(reproduce_energy_threshold, reproduce_energy_cost, radius, org.step
 
 void Animal::Reproduce()
 {
-    if(name=="Wolf") {
-        printf("Wolf %d reproduce\n",id);
-    }
+    
     if (!active || !reproduce_able)
     { // 死了就不能活着
         return;
@@ -228,20 +228,19 @@ void Animal::Reproduce()
     // 在 [-reproduce_radius, +reproduce_radius] 范围内随机偏移
     int x_new = x + std::rand() % (2 * reproduce_radius + 1) - reproduce_radius;
     int y_new = y + std::rand() % (2 * reproduce_radius + 1) - reproduce_radius;
-    if(name== "Wolf"){
-        printf("Wolf %d reproduce\n",id);
-    }
-    printf("\033[31mAnimal request at (%d, %d) with radius %d\033[0m\n", x_new, y_new);
+    
+    // printf("\033[31mAnimal request at (%d, %d) with radius %d\033[0m\n", x_new, y_new);
     // 确保新位置在有效世界边界内
     if (x_new >= 0 && x_new < World::GetWorld().GetHeight() && y_new >= 0 && y_new < World::GetWorld().GetWidth())
     {
         // 子代植动物物的半径在父半径的[0.25,2.0]倍之间随机，并取整
         float r = reproduce_radius * std::min(2.0, std::max(0.25, (double)std::rand() / RAND_MAX));
         int r_int = std::max(1, (int)r);
+        printf("%d\n",r_int);
         if (!(World::GetWorld().AddReproduceRequest({ANIMAL, name, std::make_pair(x_new, y_new), r_int})))
         {
             energy -= reproduce_energy_cost;
-            printf("Animal Generating");
+            // printf("Animal Generating");
             // assert(energy >= -100);
             return;
         }
@@ -318,6 +317,8 @@ void PredationOrFuck(Reproducable *a, Reproducable *b)
         if (b->reproduce_able && !a->reproduce_able)
         {
             b->Reproduce();
+        }else{
+            rand01()<0.5?b->Reproduce():a->Reproduce();
         }
         return;
     }

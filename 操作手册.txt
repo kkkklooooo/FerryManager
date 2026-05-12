@@ -87,3 +87,62 @@
   1)要给环境加上吸收死了的动物的方法（加入step更新按比例吸收deadOrganismEnergy）
   2)用config计算的所以东西要修改（已经成为石山之王）！@@ ！
   3)config.jason的参数要修改不能有-1;
+9.关键改动记录 (073d288 及之后)
+
+  commit 073d288 "优化时间复杂度 提升空间复杂度" (2026-05-12)
+  ---
+  核心改动: 繁殖/捕食交互从 O(n^2) 全量遍历改为空间网格分桶
+
+  1) Environment.h: 新增 std::vector<Reproducable*> Organisms 字段
+     - 每个格子维护一个生物指针列表，作为空间网格使用
+
+  2) WordDefine.cpp: World::Update() 重构
+     - 每帧开头 env->Organisms.clear() 清空网格
+     - RemoveDeadOrganisms() 移到最前
+     - 生物 Step() + 填网格合并在一个循环
+     - O(n^2) 双重遍历替换为空间分桶:
+       for(x) for(y) 遍历所有格子
+         查当前格子+8邻格的 Organisms
+         i<j 判重后调用 PredationOrFuck
+     - 删除了 std::sort (不再需要)
+     - 植物自繁殖尚未拆分(仍走 PredationOrFuck 的 PLANT 分支)
+     - havePlant-- 条件从 type==PLANT 改为 true (所有死亡都减)
+
+  3) 格式化: #include 对齐, 指针声明风格统一
+
+  ---
+  当前工作区未提交改动 (073d288..HEAD~工作区):
+  ---
+  1) WordDefine.cpp: World::GetWorld() 中 Config 从 50x50 扩大到 100x100
+  2) plan.md: 新增第八章 "Boids 遗传算法 + 空间网格繁殖 实施计划"
+     - 7 步详细实施计划, 包含代码示例
+     - BoidGenes 结构体设计 (cohesion/alignment/separation/vision)
+     - BoidsMove() 伪代码(复用空间网格查邻居)
+     - 基因突变机制(mutate clamp)
+     - Wolf/Sheep 初始基因差异化
+     - 工厂注入基因、UI 展示方案
+     - 选择压力分析表
+  3) test_main.cpp 已支持:
+     - 多动物类型显示(Wolf/Sheep 不同颜色)
+     - 植物/动物亮度分离计算
+     - Reset 按钮(重置世界)
+     - Organisms 列表(Plant表 + Animal表含Repro列)
+     - 表格使用 ScrollY + outer_size 修复显示不全问题
+
+  ---
+  当前架构概要 (073d288 之后):
+  ---
+  数据流: World::Update()
+    1. clear 空间网格 + RemoveDeadOrganisms
+    2. 环境 Update + 能量交换 + 生物 Step + 填网格
+    3. 空间分桶: 繁殖+捕食
+    4. 执行繁殖请求(Reproduce)
+
+  类型系统: OrganismName 枚举已废弃, 改用 std::string
+    - "Plant" / "Wolf" / "Sheep" / "Animal"
+    - 注册机制: AnimalRegistrator + MyOperator::registry
+    - 工厂: MyOperator::operator(int x,int y,int r,string n,int id)
+
+  空间网格: Environment::Organisms (每帧清+填)
+    - 服务于繁殖/捕食交互 (当前)
+    - 可复用于 boids 邻居查询 (计划中)

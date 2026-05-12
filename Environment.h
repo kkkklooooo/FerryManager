@@ -27,6 +27,10 @@ public:
 	std::vector<std::string> CanLiveIn;//能活着
 	int maxPlant;//草最多有多少
 	int havePlant;//现在有多少
+
+	std::vector<Reproducable*> Organisms;
+
+
 	bool canPlant(ReproduceRequest);//能生
 	void EnergyExchange(Reproducable* on);//能量交换
 	void getDeadOrgnismEnergy(float dead) { deadOrganismEnergy += (dead > 0) ? dead : 0.0; }
