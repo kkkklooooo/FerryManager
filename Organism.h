@@ -5,6 +5,7 @@
 #include <vector>
 #include<string>
 #include"Registry.h"
+#include"Config.h"
 // 全局变量：用于生成生物的唯一ID
 // const float AnimalAbsorbRate=0.5;
 // const float lossRate = 0.9;
@@ -82,7 +83,7 @@ class Plant : public Reproducable
 public:
     // 构造函数：传入ID、坐标和半径
     Plant(int id, int x, int y, int radius,float reproduce_energy_threshold,float reproduce_energy_cost,float step_energy_cost);
-
+    Plant(int id, int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost, PlantConfig& org);
     int id;   // 植物唯一标识符
 
     // 重写繁殖方法：随机生成子代位置并向世界提交繁殖请求
@@ -95,12 +96,13 @@ class Animal :public Reproducable
 {
 public:
     Animal(int id,int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost, float step_energy_cost);
-
+    Animal(int id,int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost,AnimalConfig& need);
     float rate;
     int eat_intrval=0;
     int id; //动物唯一标符
 
     float _energy_rate;
+    float max_rate=10000;
 
     virtual  float SetRate();//由世界返回动物的速度区间
     virtual  void  SetRate(Animal* a);//由能量改变速度大小
