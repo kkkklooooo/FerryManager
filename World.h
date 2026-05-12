@@ -14,6 +14,7 @@ class World
 
 public:
     Config conf;
+    TestConfig game_conf;
     Weather CurrentWeather;
     World(Config&conf);
     void AddLeftEnergyRequest(const LeftEnergyRequest& request);

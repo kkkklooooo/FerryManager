@@ -2,7 +2,7 @@
 #include<cstdio>
 #include <cassert>
 #include "Registry.h"
-#include "Word.h"
+#include "World.h"
 #include "Environment.h"
 #include <algorithm>
 
@@ -20,7 +20,7 @@ bool Environment::canPlant(ReproduceRequest a)
 	{
 		if (std::find(CanLiveIn.begin(), CanLiveIn.end(), a.name) != CanLiveIn.end())
 		{
-			havePlant++;
+			if(a.type==PLANT) havePlant++; // æ¤ç‰©++ å› ä¸ºæ¤ç‰©ä¸ä¼šåŠ¨
 			return true;
 		}
 		else
@@ -34,12 +34,12 @@ bool Environment::canPlant(ReproduceRequest a)
 
 void Environment::EnergyExchange(Reproducable *on)
 {
-	//Ö»ÓĞËÀºó²ÅÄÜadd
+	//Ö»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½add
 	// float add=std::min(World::GetWorld().conf.Environmrnt_step_max_absorb, on->energy * World::GetWorld().conf.Environment_energy_absorb_rate);
 	// energy += add;
 	if (on->type == PLANT && on->active)
-	{ // Ö²ÎïÎüÊÕÍÁµØ 
-	  // @ TODO ĞŞ¸Ä²ÎÊı
+	{ // Ö²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 
+	  // @ TODO ï¿½Ş¸Ä²ï¿½ï¿½ï¿½
 		float abs = std::min(World::GetWorld().conf.Environment_plant_absorb_rate * energy, World::GetWorld().conf.Environment_step_max_absorb / World::GetWorld().conf.Organism_loss_rate);
 		abs = abs * World::GetWorld().conf.Organism_loss_rate;
 		on->energy += abs;
@@ -55,7 +55,7 @@ void Environment::EnergyExchange(Reproducable *on)
 
 void Environment::Update(Weather)
 {
-	float gain = deadOrganismEnergy * World::GetWorld().conf.Organism_loss_rate; // Ôö¼ÓÊ¬ÌåÉÏµÄÄÜÁ¿
+	float gain = deadOrganismEnergy * World::GetWorld().conf.Organism_loss_rate; // ï¿½ï¿½ï¿½ï¿½Ê¬ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½ï¿½
 	if(energy<World::GetWorld().conf.Environment_single_chunk_max_energy*2) energy += std::min(gain,World::GetWorld().conf.Environment_single_chunk_max_energy-energy);
 	
 	deadOrganismEnergy = 0;
