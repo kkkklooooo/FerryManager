@@ -24,7 +24,7 @@ bool Environment::canPlant(ReproduceRequest a)
 	{
 		if (std::find(CanLiveIn.begin(), CanLiveIn.end(), a.name) != CanLiveIn.end())
 		{
-			if(a.type==PLANT)havePlant++;//ֲ���++ ��Ϊֲ�ﲻ�ᶯ
+			if(a.type==PLANT) havePlant++; // 植物++ 因为植物不会动
 			return true;
 		}
 		else

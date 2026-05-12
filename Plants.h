@@ -5,8 +5,8 @@
 
 class UserPlant :public Plant {
 public:
-	UserPlant(int iD, int x, int y, int radius , float reproduce_energy_threshold, float reproduce_energy_cost,PlantConfig org)
-		:Plant(iD, x, y,radius, reproduce_energy_threshold, reproduce_energy_cost, org)
+	UserPlant(int iD, int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost, PlantConfig org)
+		:Plant(iD, x, y, radius, reproduce_energy_threshold, reproduce_energy_cost, org)
 	{}
 	static PlantConfig FindPlantConfig(const std::string& name) {
 		auto& animals = TestConfig::GetTestConfig().The_Plants;
@@ -17,4 +17,3 @@ public:
 		return TestConfig::GetTestConfig().Default_Plant_Config;
 	}
 };
-

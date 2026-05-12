@@ -2,12 +2,11 @@
 #include"World.h"
 #include<functional>
 #include<map>
-//Ã»Ïëµ½×îÔçÌÔÌ­µÄÊÇ×¢²á±í Ö»ÓĞ×îÊ¯É½µÄ²ÅÄÜ´æ»î£¿
 class MyOperator {
 public:
 	using Creator = std::function<Animal*( int id, int x, int y, int radius)>;
 
-	//×¢²áº¯Êı
+	//×¢ï¿½áº¯ï¿½ï¿½
 	static void register_Animal_Create(std::string name, Creator creator);
 
 
@@ -16,7 +15,7 @@ public:
 	Reproducable* operator()(int x,int y,int r, std::string n,int id);
 	static MyOperator& GetOp();
 private:
-	//È«¾ÖÎ¨Ò»×¢²á±í
+	//È«ï¿½ï¿½Î¨Ò»×¢ï¿½ï¿½ï¿½
 	static std::unordered_map <std::string , Creator>& registry();
 };
 

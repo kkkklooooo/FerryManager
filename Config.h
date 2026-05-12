@@ -7,8 +7,7 @@
 using json = nlohmann::json;
 
 
-
-//����ֻ�øı��ʼ�ٶȣ���ʼ���������ƣ�ʳ���ʼ����
+// 动物只需要改:初始速度，初始能量，食物，初始名字
 struct AnimalConfig {
     std::string name="Animal";
     std::vector<std::string> diet = {};
@@ -24,7 +23,8 @@ struct EnvironmentConfig{
     std::vector<std::string> CanLive;
 };
 
-//ֲ��ֻ���޸ĳ�ʼ��������ʼ����
+
+// 植物只能修改初始能量,初始名字
 struct PlantConfig{
     std::string name="Plant";
     int   reproduce_original_energy = -1;
@@ -32,18 +32,16 @@ struct PlantConfig{
 };
 
 
-
-
-//Ӧ�ú��޸�
+// 应用层修改
 struct WordConfig {
     int length = 50;
     int width = 50;
 };
 
-class TestConfig {//��ֹʯɽ��ը
+class TestConfig {// 防止石山爆炸
 public:
-    WordConfig The_Word;//����
-    AnimalConfig Default_Animal_Config;//Ĭ�ϵĶ������ڲ������
+    WordConfig The_Word;// 世界
+    AnimalConfig Default_Animal_Config;// 默认的动物(在内部插值)
     PlantConfig  Default_Plant_Config;
     std::vector<EnvironmentConfig>The_Environments;
     std::vector<AnimalConfig>The_Animals;
@@ -63,10 +61,10 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(WordConfig, length, width)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AnimalConfig,
     name,
     diet,
-    reproduce_original_rate, 
+    reproduce_original_rate,
     reproduce_original_energy,
     max_rate,
-    step_energy_cost,  
+    step_energy_cost,
     energy_rate)
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(EnvironmentConfig,
@@ -78,7 +76,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(PlantConfig,
     reproduce_original_energy,
     step_energy_cost)
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TestConfig, 
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TestConfig,
     The_Word,
     Default_Animal_Config,
     Default_Plant_Config,
@@ -107,5 +105,3 @@ class Config{
     int Plant_init_radius=3;
     static Config& GetConfig();
 };
-
-

@@ -84,6 +84,7 @@ public:
     // 构造函数：传入ID、坐标和半径
     Plant(int id, int x, int y, int radius,float reproduce_energy_threshold,float reproduce_energy_cost,float step_energy_cost);
     Plant(int id, int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost, PlantConfig& org);
+
     int id;   // 植物唯一标识符
 
     // 重写繁殖方法：随机生成子代位置并向世界提交繁殖请求
@@ -96,7 +97,8 @@ class Animal :public Reproducable
 {
 public:
     Animal(int id,int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost, float step_energy_cost);
-    Animal(int id,int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost,AnimalConfig& need);
+    Animal(int id,int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost, AnimalConfig& need);
+
     float rate;
     int eat_intrval=0;
     int id; //动物唯一标符

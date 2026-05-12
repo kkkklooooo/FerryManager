@@ -3,11 +3,12 @@
 #include"MyOperator.h"
 #include"Config.h"
 #include"World.h"
-//¶¯ÎïµÄÇ©Ãû¶¼Ò»Ñù£¡£¡
+// è¿™é‡Œæ˜¯æ ‡ç­¾äºŒ: å·¥å‚
+
 class UserAnimal :public Animal {
 public:
 	UserAnimal(int iD,int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost, AnimalConfig org)
-		:Animal(iD, x, y, radius, reproduce_energy_threshold, reproduce_energy_cost,org)
+		:Animal(iD, x, y, radius, reproduce_energy_threshold, reproduce_energy_cost, org)
 	{}
 	static AnimalConfig FindAnimalConfig(const std::string& name) {
 		auto& animals = TestConfig::GetTestConfig().The_Animals;
@@ -18,8 +19,8 @@ public:
 	}
 };
 
-//ÏµÍ³µÄÔ­ÓĞÓÃ×¢²á±í
-//´ËÊ±µÄclonfg¶¼Ã»ÓĞ´´½¨Ö»ÄÜÓ²±àÂë£¿
+//ç³»ç»Ÿçš„åŸæœ‰ç”¨æ³¨å†Œè¡¨
+//æ­¤æ—¶çš„clonfgéƒ½æ²¡æœ‰åˆ›å»ºåªèƒ½ç¡¬ç¼–ç ï¼Ÿ
 static AnimalRegistrator wolf("Wolf", [](int id, int x, int y, int radius) {return new UserAnimal(id, x, y,radius, 25, World::GetWorld().conf.Organism_reproduce_energy_cost,UserAnimal::FindAnimalConfig("Wolf")); });
 
 static AnimalRegistrator sheep("Sheep", [](int id, int x, int y, int radius) {return new UserAnimal(id, x, y, radius, 25, World::GetWorld().conf.Organism_reproduce_energy_cost, UserAnimal::FindAnimalConfig("Sheep")); });

@@ -1,5 +1,5 @@
 #include "World.h"
-#include"MyOperator.h"
+#include "MyOperator.h"
 #include "Organism.h"
 #include "Environment.h"
 #include <algorithm>
@@ -18,35 +18,35 @@ World::World(Config& Conf, TestConfig& Game_conf)
         Reproducas.push_back(new Plant(Plant_id++, x, y, conf.Plant_init_radius,
             conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
     };
-    // 左下草地集群
+    // 左下集群
     addPlant(5,5); addPlant(7,4); addPlant(4,7); addPlant(8,6); addPlant(6,8);
     // 中部集群
-    addPlant(20,25); addPlant(22,23); addPlant(19,26); addPlant(23,27); addPlant(21,28);
-    addPlant(24,24); addPlant(18,22);
+    addPlant(45,50); addPlant(47,48); addPlant(44,51); addPlant(48,52); addPlant(46,53);
+    addPlant(49,49); addPlant(43,47);
     // 右上集群
-    addPlant(40,40); addPlant(42,38); addPlant(39,42); addPlant(43,41); addPlant(41,43);
-    addPlant(38,39);
+    addPlant(85,85); addPlant(87,83); addPlant(84,87); addPlant(88,86); addPlant(86,88);
+    addPlant(83,84);
     // 左上集群
-    addPlant(8,40); addPlant(10,38); addPlant(7,42); addPlant(11,41); addPlant(9,43);
+    addPlant(8,85); addPlant(10,83); addPlant(7,87); addPlant(11,86); addPlant(9,88);
     // 右下集群
-    addPlant(42,8); addPlant(44,6); addPlant(40,9); addPlant(43,10); addPlant(41,7);
+    addPlant(87,8); addPlant(89,6); addPlant(85,9); addPlant(88,10); addPlant(86,7);
     // 中央散落
-    addPlant(25,10); addPlant(30,35); addPlant(15,30);
+    addPlant(55,20); addPlant(60,70); addPlant(30,60);
 
-    // ---- 绵羊: 8只, 分2群（初级消费者） ----
+    // ---- 绵羊: 8只, 分2群 (初级消费者) ----
     auto addSheep = [&](int x, int y) {
         Reproducas.push_back(MyOperator()(x, y, 3, "Sheep", Animal_id++));
     };
-    addSheep(20, 23); addSheep(22, 24); addSheep(21, 26); addSheep(23, 25);  // 中部草场
-    addSheep(40, 38); addSheep(42, 39); addSheep(41, 41); addSheep(39, 40);  // 右上草场
+    addSheep(45, 48); addSheep(47, 49); addSheep(46, 51); addSheep(48, 50);
+    addSheep(85, 83); addSheep(87, 84); addSheep(86, 86); addSheep(84, 85);
 
-    // ---- 狼: 3只, 分散巡逻（顶级捕食者） ----
+    // ---- 狼: 3只, 分散巡逻 (顶级捕食者) ----
     auto addWolf = [&](int x, int y) {
         Reproducas.push_back(MyOperator()(x, y, 3, "Wolf", Animal_id++));
     };
-    addWolf(25, 25);  // 中部, 靠近一群羊
-    addWolf(10, 10);  // 左下, 远离羊群
-    addWolf(44, 42);  // 右上, 靠近另一群羊
+    addWolf(50, 50);
+    addWolf(20, 20);
+    addWolf(89, 87);
 
     // ---- 环境: 100x100 草地, 初始能量有自然波动 ----
     for (int i = 0; i < game_conf.The_Word.length; i++)
@@ -56,7 +56,7 @@ World::World(Config& Conf, TestConfig& Game_conf)
             float distX = (i - 50) * (i - 50);
             float distY = (j - 50) * (j - 50);
             float dist = std::sqrt(distX + distY);
-            float initEnergy = 3.0f + 10.0f * std::exp(-dist / 15.0f);
+            float initEnergy = 3.0f + 15.0f * std::exp(-dist / 30.0f);
             Environments.push_back(new GressLand(std::make_pair(i, j), initEnergy, 2));
         }
     }
@@ -193,26 +193,26 @@ void World::Reset()
             conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
     };
     addPlant(5,5); addPlant(7,4); addPlant(4,7); addPlant(8,6); addPlant(6,8);
-    addPlant(20,25); addPlant(22,23); addPlant(19,26); addPlant(23,27); addPlant(21,28);
-    addPlant(24,24); addPlant(18,22);
-    addPlant(40,40); addPlant(42,38); addPlant(39,42); addPlant(43,41); addPlant(41,43);
-    addPlant(38,39);
-    addPlant(8,40); addPlant(10,38); addPlant(7,42); addPlant(11,41); addPlant(9,43);
-    addPlant(42,8); addPlant(44,6); addPlant(40,9); addPlant(43,10); addPlant(41,7);
-    addPlant(25,10); addPlant(30,35); addPlant(15,30);
+    addPlant(45,50); addPlant(47,48); addPlant(44,51); addPlant(48,52); addPlant(46,53);
+    addPlant(49,49); addPlant(43,47);
+    addPlant(85,85); addPlant(87,83); addPlant(84,87); addPlant(88,86); addPlant(86,88);
+    addPlant(83,84);
+    addPlant(8,85); addPlant(10,83); addPlant(7,87); addPlant(11,86); addPlant(9,88);
+    addPlant(87,8); addPlant(89,6); addPlant(85,9); addPlant(88,10); addPlant(86,7);
+    addPlant(55,20); addPlant(60,70); addPlant(30,60);
 
     auto addSheep = [&](int x, int y) {
         Reproducas.push_back(MyOperator()(x, y, 3, "Sheep", Animal_id++));
     };
-    addSheep(20, 23); addSheep(22, 24); addSheep(21, 26); addSheep(23, 25);
-    addSheep(40, 38); addSheep(42, 39); addSheep(41, 41); addSheep(39, 40);
+    addSheep(45, 48); addSheep(47, 49); addSheep(46, 51); addSheep(48, 50);
+    addSheep(85, 83); addSheep(87, 84); addSheep(86, 86); addSheep(84, 85);
 
     auto addWolf = [&](int x, int y) {
         Reproducas.push_back(MyOperator()(x, y, 3, "Wolf", Animal_id++));
     };
-    addWolf(25, 25);
-    addWolf(10, 10);
-    addWolf(44, 42);
+    addWolf(50, 50);
+    addWolf(20, 20);
+    addWolf(89, 87);
 
     for (int i = 0; i < game_conf.The_Word.length; i++)
     {
@@ -221,7 +221,7 @@ void World::Reset()
             float distX = (i - 50) * (i - 50);
             float distY = (j - 50) * (j - 50);
             float dist = std::sqrt(distX + distY);
-            float initEnergy = 3.0f + 10.0f * std::exp(-dist / 15.0f);
+            float initEnergy = 3.0f + 15.0f * std::exp(-dist / 30.0f);
             Environments.push_back(new GressLand(std::make_pair(i, j), initEnergy, 2));
         }
     }
