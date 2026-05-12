@@ -142,7 +142,7 @@ void World::RemoveDeadOrganisms()
                                         if (organism == nullptr) return true;
                                         if (!(organism->energy > 0))
                                         {
-                                            if (organism->type == PLANT)
+                                            if (true)
                                                 Environments[organism->Pos.second * GetWidth() + organism->Pos.first]->havePlant--;
                                             delete organism;
                                             return true;

@@ -177,9 +177,11 @@ static void DrawEnergyHeatmap(const World& world, float cs = 14.0f) {
 // ============================================================
 static void DrawPlantList(const World& world) {
     const auto& orgs = world.GetReproducas();
+    ImVec2 avail = ImGui::GetContentRegionAvail();
     if (!ImGui::BeginTable("##plants", 4,
         ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg |
-        ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingFixedFit))
+        ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingFixedFit,
+        ImVec2(0, avail.y)))
         return;
 
     ImGui::TableSetupColumn("ID",     ImGuiTableColumnFlags_WidthFixed, 40);
@@ -188,9 +190,8 @@ static void DrawPlantList(const World& world) {
     ImGui::TableSetupColumn("Energy", ImGuiTableColumnFlags_WidthFixed, 70);
     ImGui::TableHeadersRow();
 
-    int n = 0;
     for (auto* org : orgs) {
-        if (!org)continue;
+        if (!org) continue;
         if (org->type != PLANT) continue;
         const Plant* p = static_cast<const Plant*>(org);
         ImGui::TableNextRow();
@@ -200,7 +201,6 @@ static void DrawPlantList(const World& world) {
         ImGui::TableSetColumnIndex(3);
         ImVec4 c = org->energy > 5.0f ? ImVec4(0.3f,1,0.3f,1) : ImVec4(1,0.5f,0.3f,1);
         ImGui::TextColored(c, "%.1f", org->energy);
-        if (++n >= 50) break;
     }
     ImGui::EndTable();
 }
@@ -210,9 +210,11 @@ static void DrawPlantList(const World& world) {
 // ============================================================
 static void DrawAnimalList(const World& world) {
     const auto& orgs = world.GetReproducas();
+    ImVec2 avail = ImGui::GetContentRegionAvail();
     if (!ImGui::BeginTable("##animals", 6,
         ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg |
-        ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingFixedFit))
+        ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingFixedFit,
+        ImVec2(0, avail.y)))
         return;
 
     ImGui::TableSetupColumn("ID",     ImGuiTableColumnFlags_WidthFixed, 40);
@@ -223,9 +225,8 @@ static void DrawAnimalList(const World& world) {
     ImGui::TableSetupColumn("Repro",  ImGuiTableColumnFlags_WidthFixed, 50);
     ImGui::TableHeadersRow();
 
-    int n = 0;
     for (auto* org : orgs) {
-        if (org->type == PLANT ) continue;
+        if (org->type == PLANT) continue;
         ImGui::TableNextRow();
         const Animal* a = static_cast<const Animal*>(org);
         ImGui::TableSetColumnIndex(0); ImGui::Text("%d",   a->id);
@@ -238,7 +239,6 @@ static void DrawAnimalList(const World& world) {
         ImGui::TableSetColumnIndex(5);
         ImVec4 rc = org->reproduce_able ? ImVec4(0.3f,1,0.3f,1) : ImVec4(0.6f,0.6f,0.6f,1);
         ImGui::TextColored(rc, "%s", org->reproduce_able ? "Y" : "N");
-        if (++n >= 50) break;
     }
     ImGui::EndTable();
 }
@@ -349,7 +349,7 @@ void RenderUI(World& world, int* pFrame, int total,
 
     // ---- animal list ----
     if (showAnimals) {
-        ImGui::SetNextWindowSize(ImVec2(290, 380), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize(ImVec2(340, 420), ImGuiCond_FirstUseEver);
         ImGui::Begin("Animals", &showAnimals);
         DrawAnimalList(world);
         ImGui::End();

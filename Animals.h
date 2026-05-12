@@ -15,6 +15,7 @@ public:
 		rate = SetRate();
 		name = "Wolf";
 		diet.push_back("Sheep");
+		eat_intrval = 5;
 		
 	}
 	float SetRate() override {
