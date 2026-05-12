@@ -5,6 +5,7 @@
 #include "World.h"
 #include "Environment.h"
 #include <algorithm>
+#include <stdexcept>
 
 Environment::Environment(std::pair<int, int> pos,
 						 float en,
@@ -12,7 +13,9 @@ Environment::Environment(std::pair<int, int> pos,
 						 int sin,
 						 int mp)
 	: Pos(pos), energy(en), type(ENVIRONMENT), name(na), SingleEnvironmentMaxEnergy(sin), maxPlant(mp), havePlant(0)
-{}
+{
+	CanLiveIn = Environment::FindEnvironmentConfig(na).CanLive;
+}
 
 
 bool Environment::canPlant(ReproduceRequest a)
@@ -21,7 +24,7 @@ bool Environment::canPlant(ReproduceRequest a)
 	{
 		if (std::find(CanLiveIn.begin(), CanLiveIn.end(), a.name) != CanLiveIn.end())
 		{
-			if(a.type==PLANT)havePlant++;//Ö²Îï²Å++ ÒòÎªÖ²Îï²»»á¶¯
+			if(a.type==PLANT)havePlant++;//Ö²ï¿½ï¿½ï¿½++ ï¿½ï¿½ÎªÖ²ï¿½ï²»ï¿½á¶¯
 			return true;
 		}
 		else
@@ -35,10 +38,10 @@ bool Environment::canPlant(ReproduceRequest a)
 
 void Environment::EnergyExchange(Reproducable *on)
 {
-	//Ö»ÓÐËÀºó²ÅÄÜadd
+	//Ö»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½add
 	if (on->type == PLANT && on->active)
-	{ // Ö²ÎïÎüÊÕÍÁµØ 
-	  // @ TODO ÐÞ¸Ä²ÎÊý
+	{ // Ö²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 
+	  // @ TODO ï¿½Þ¸Ä²ï¿½ï¿½ï¿½
 		float abs = std::min(World::GetWorld().conf.Environment_plant_absorb_rate * energy, World::GetWorld().conf.Environment_step_max_absorb / World::GetWorld().conf.Organism_loss_rate);
 		abs = abs * World::GetWorld().conf.Organism_loss_rate;
 		on->energy += abs;
@@ -52,9 +55,17 @@ void Environment::EnergyExchange(Reproducable *on)
 		}
 }
 
+EnvironmentConfig Environment::FindEnvironmentConfig(const std::string& name) {
+	auto& animals = World::GetWorld().game_conf.The_Environments;
+	for (auto& a : animals) {
+		if (a.name == name) return a;
+	}
+	throw std::runtime_error("Unknown environment: " + name);
+}
+
 void Environment::Update(Weather)
 {
-	float gain = deadOrganismEnergy * World::GetWorld().conf.Organism_loss_rate; // Ôö¼ÓÊ¬ÌåÉÏµÄÄÜÁ¿
+	float gain = deadOrganismEnergy * World::GetWorld().conf.Organism_loss_rate; // ï¿½ï¿½ï¿½ï¿½Ê¬ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½ï¿½
 	if(energy<World::GetWorld().conf.Environment_single_chunk_max_energy*2) energy += std::min(gain,World::GetWorld().conf.Environment_single_chunk_max_energy-energy);
 	
 	deadOrganismEnergy = 0;
@@ -83,10 +94,7 @@ void Water::Update(Weather sky)
 GressLand::GressLand(std::pair<int, int> pos, float en, int mp)
 	: Environment(pos, en, "GressLand", 200, mp)
 {
-	CanLiveIn.push_back("Plant");
-	CanLiveIn.push_back("Animal");
-	CanLiveIn.push_back("Sheep");
-	CanLiveIn.push_back("Wolf");
+	
 }
 
 void GressLand::Update(Weather sky)

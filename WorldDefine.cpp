@@ -7,7 +7,10 @@
 #include <cstdio>
 #include "Animals.h"
 
-World::World(Config &conf) : conf(conf)
+static World* TheOnlyWord;//世界指针单例
+
+World::World(Config& Conf, TestConfig& Game_conf)
+    : conf(Conf), game_conf(Game_conf)
 {
     // ---- 植物: 30株分散在草地各处（生产者基础） ----
     auto addPlant = [&](int x, int y) {
@@ -167,11 +170,9 @@ float World::calculate_overlay(std::pair<int, int> pos)
     return (float)cnt / (8.0 * Environments[pos.second * width + pos.first]->maxPlant);
 }
 
-World &World::GetWorld()
+World& World::GetWorld()
 {
-    static Config conf(100, 100);
-    static World Instance(conf);
-    return Instance;
+    return *(TheOnlyWord);
 }
 
 void World::Reset()

@@ -3,28 +3,6 @@
     "length": 50,
     "width": 50
   },
-  "The_Environments": [
-    {
-      "name": "GressLand",
-      "habitat_types": [ "Plant", "Sheep", "Wolf" ],
-      "max_Plant": 2,
-      "Environment_energy_absorb_rate": 0.01,
-      "Environment_plant_absorb_rate": 0.4,
-      "Environment_step_max_absorb": 2,
-      "Environment_single_chunk_max_energy": 50,
-      "Environment_original_energy": 100
-    },
-    {
-      "name": "Water",
-      "habitat_types": [],
-      "max_Plant": 0,
-      "Environment_energy_absorb_rate": 0.01,
-      "Environment_plant_absorb_rate": 0.4,
-      "Environment_step_max_absorb": 2,
-      "Environment_single_chunk_max_energy": 50,
-      "Environment_original_energy": 50
-    }
-  ],
   "Default_Animal_Config": {
     "name": "Animal",
     "diet": [],
@@ -39,6 +17,16 @@
     "reproduce_original_energy": 10,
     "step_energy_cost": 0.01
   },
+  "The_Environments": [
+    {
+      "name": "GressLand",
+      "habitat_types": [ "Plant", "Sheep", "Wolf" ]
+    },
+    {
+      "name": "Water",
+      "habitat_types": []
+    }
+  ],
   "The_Animals": [
     {
       "name": "Wolf",

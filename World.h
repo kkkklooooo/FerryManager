@@ -13,10 +13,9 @@ class World
     std::vector<Environment*>Environments;
 
 public:
-    TestConfig game_conf;
     Config conf;
     Weather CurrentWeather;
-    World(Config&conf);
+    World(Config&Conf, TestConfig& Game_conf);
     void AddLeftEnergyRequest(const LeftEnergyRequest& request);
     // ��������״̬�����绷���仯�ȣ�
     void Update();

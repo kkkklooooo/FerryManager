@@ -19,6 +19,10 @@ struct AnimalConfig {
 
 };
 
+struct EnvironmentConfig{
+    std::string name;
+    std::vector<std::string> CanLive;
+};
 
 //ֲ��ֻ���޸ĳ�ʼ��������ʼ����
 struct PlantConfig{
@@ -41,6 +45,7 @@ public:
     WordConfig The_Word;//����
     AnimalConfig Default_Animal_Config;//Ĭ�ϵĶ������ڲ������
     PlantConfig  Default_Plant_Config;
+    std::vector<EnvironmentConfig>The_Environments;
     std::vector<AnimalConfig>The_Animals;
     std::vector<PlantConfig>The_Plants;
     //����
@@ -63,7 +68,9 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AnimalConfig,
     step_energy_cost,  
     energy_rate)
 
-
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(EnvironmentConfig,
+    name,
+    CanLive)
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(PlantConfig,
     name,
@@ -74,6 +81,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TestConfig,
     The_Word,
     Default_Animal_Config,
     Default_Plant_Config,
+    The_Environments,
     The_Animals,
     The_Plants)
 
