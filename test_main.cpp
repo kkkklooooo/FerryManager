@@ -73,8 +73,8 @@ static void DrawWorldGrid(const World& world) {
     int w = world.GetWidth(), h = world.GetHeight();
 
     ImVec2 avail = ImGui::GetContentRegionAvail();
-    float cellSize = std::min(avail.x / w, avail.y / h);
-    cellSize = std::max(cellSize, 3.0f);
+    float cellSize = min(avail.x / w, avail.y / h);
+    cellSize = max(cellSize, 3.0f);
 
     float maxE = 0.001f;
     for (auto* e : envs) if (e->energy > maxE) maxE = e->energy;
@@ -99,6 +99,9 @@ static void DrawWorldGrid(const World& world) {
 
     float maxPlantE = 0.001f, maxAnimalE = 0.001f;
     for (auto* org : orgs) {
+
+
+
         if (org->type == PLANT) {
             if (org->energy > maxPlantE) maxPlantE = org->energy;
         } else {
@@ -231,7 +234,7 @@ static void DrawAnimalList(const World& world) {
 
     int n = 0;
     for (auto* org : orgs) {
-        if (org->type == PLANT) continue;
+        if (org->type == PLANT ) continue;
         ImGui::TableNextRow();
         const Animal* a = static_cast<const Animal*>(org);
         ImGui::TableSetColumnIndex(0); ImGui::Text("%d",   a->id);
@@ -258,7 +261,10 @@ static void DrawStats(const World& world, int frame, int total) {
     int plants = 0, animals = 0, wolves = 0, sheep = 0;
     float pE = 0, aE = 0, envE = 0;
     for (auto* o : orgs) {
-        if (o->type == PLANT) { ++plants;  pE += o->energy; }
+
+        if (!o)break;
+
+        if (o->type == PLANT ) { ++plants;  pE += o->energy; }
         else {
             ++animals; aE += o->energy;
             if (o->name == Wolf_Name)  ++wolves;
