@@ -1,7 +1,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-#include "World.h"
+#include "Word.h"
 #include "Organism.h"
 #include "Environment.h"
 #include "imgui/imgui.h"

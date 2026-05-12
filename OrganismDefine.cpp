@@ -2,7 +2,7 @@
 #include <cassert>
 #include "MyOperator.h"
 #include <cmath>
-#include "World.h"
+#include "Word.h"
 #include "Environment.h"
 #include <algorithm>
 #include <cstdio>

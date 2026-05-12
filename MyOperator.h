@@ -1,5 +1,5 @@
 #pragma once
-#include"World.h"
+#include"Word.h"
 #include<functional>
 #include<map>
 class MyOperator {
