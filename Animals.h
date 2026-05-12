@@ -1,25 +1,48 @@
 #pragma once
 #include"Organism.h"
 #include"MyOperator.h"
-#include"Config.h"
-#include"World.h"
+
 //动物的签名都一样！！
-class UserAnimal :public Animal {
+
+
+
+
+class Wolf :public Animal {
 public:
-	UserAnimal(int iD,int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost, AnimalConfig org)
-		:Animal(iD, x, y, radius, reproduce_energy_threshold, reproduce_energy_cost,org)
-	{}
-	static AnimalConfig FindAnimalConfig(const std::string& name) {
-		auto& animals = World::GetWorld().game_conf.The_Animals;
-		for (auto& a : animals) {
-			if (a.name == name) return a;
-		}
-		return World::GetWorld().game_conf.Default_Animal_Config;
+	Wolf(int id, int x, int y, int radius)
+		:Animal(id,x,y,radius,100,50,0.01f)
+	{
+		rate = SetRate();
+		name = "Wolf";
+		diet.push_back("Sheep");
+		eat_intrval = 5;
+		
+	}
+	float SetRate() override {
+		return 0.5f;
+	}
+	void  SetRate(Animal* a)override {
+
 	}
 };
 
-//系统的原有用注册表
+static AnimalRegistrator wolf("Wolf", [](int id, int x, int y, int radius) {return new Wolf(id, x, y, radius); });
 
-static AnimalRegistrator wolf("Wolf", [](int id, int x, int y, int radius) {return new UserAnimal(id, x, y,radius,World::GetWorld().conf.Organism_reproduce_energy_threshold, World::GetWorld().conf.Organism_reproduce_energy_cost,UserAnimal::FindAnimalConfig("Wolf")); });
+class Sheep :public Animal {
+public:
+	Sheep( int id,int x, int y, int radius)
+		:Animal(id,x, y, radius, 50,20,0.01f) 
+	{
+		rate = SetRate();
+		name = "Sheep";
+		diet.push_back("Plant");
+	}
+	float SetRate() override {
+		return 0.5f;
+	}
+	void  SetRate(Animal* a) override {
 
-static AnimalRegistrator sheep("Sheep", [](int id, int x, int y, int radius) {return new UserAnimal(id, x, y, radius,World::GetWorld().conf.Organism_reproduce_energy_threshold, World::GetWorld().conf.Organism_reproduce_energy_cost, UserAnimal::FindAnimalConfig("Sheep")); });
+	}
+};
+
+static AnimalRegistrator sheep("Sheep", [](int id, int x, int y, int radius) {return new Sheep(id, x, y, radius); });

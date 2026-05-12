@@ -1,8 +1,7 @@
 #pragma once
-#include"World.h"
+#include"Word.h"
 #include<functional>
 #include<map>
-//没想到最早淘汰的是注册表 只有最石山的才能存活？
 class MyOperator {
 public:
 	using Creator = std::function<Animal*( int id, int x, int y, int radius)>;

@@ -2,15 +2,13 @@
 #include <cassert>
 #include "MyOperator.h"
 #include <cmath>
-#include "World.h"
+#include "Word.h"
 #include "Environment.h"
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <random>
-#include<corecrt_math_defines.h>
-#include"Animals.h"
-#include"Plants.h"
+// #include<corecrt_math_defines.h>
 int Plant_id = 0;
 int Animal_id = 0;
 // 全局唯一标识，用于给新生植物和动物分配ID
@@ -25,9 +23,9 @@ Reproducable *ReprodueNewOrganism(ReproduceRequest request)
 {
     if (request.type == PLANT)
     {
-        return new UserPlant(Plant_id++, request.pos.first, request.pos.second, request.radius, World::GetWorld().conf.Organism_reproduce_energy_threshold, World::GetWorld().conf.Organism_reproduce_energy_cost, UserPlant::FindPlantConfig(request.name));
+        return new Plant(Plant_id++, request.pos.first, request.pos.second, request.radius, World::GetWorld().conf.Organism_reproduce_energy_threshold, World::GetWorld().conf.Organism_reproduce_energy_cost, World::GetWorld().conf.Organism_step_energy_cost);
     }
-    return new UserAnimal(Animal_id++, request.pos.first, request.pos.second, request.radius,  World::GetWorld().conf.Organism_reproduce_energy_threshold, World::GetWorld().conf.Organism_reproduce_energy_cost, UserAnimal::FindAnimalConfig(request.name));
+    return MyOperator::GetOp()(request, Animal_id++);
 }
 
 // 以下为被注释掉的 ReproduceManager 单例实现，暂未使用
@@ -124,15 +122,6 @@ Plant::Plant(int id, int x, int y, int radius, float reproduce_energy_threshold,
     reproduce_able = true; // 植物始终可以繁殖（只要能量足够）
 }
 
-Plant::Plant(int iD, int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost,PlantConfig& org) :id(iD),
-Reproducable(reproduce_energy_threshold, reproduce_energy_cost, radius, org.step_energy_cost, PLANT)
-{
-    energy = org.reproduce_original_energy;
-    name = org.name;
-    Pos = std::make_pair(x, y);
-    reproduce_able = true;
-}
-
 /**
  * @brief 植物的繁殖行为：在半径范围内随机生成一个新位置，并向世界请求添加新植物
  */
@@ -187,8 +176,10 @@ float Plant::calculate_overlay_cost()
     return factor;
 }
 
-Animal::Animal(int iD, int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost, float step_energy_cost)
-    : id(iD), Reproducable(reproduce_energy_threshold, reproduce_energy_cost, radius, step_energy_cost, ANIMAL)
+
+
+Animal::Animal(int id, int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost, float step_energy_cost)
+    : id(id), Reproducable(reproduce_energy_threshold, reproduce_energy_cost, radius, step_energy_cost, ANIMAL)
 {
     rate = SetRate();
     name = "Animal";
@@ -196,19 +187,6 @@ Animal::Animal(int iD, int x, int y, int radius, float reproduce_energy_threshol
     Pos = std::make_pair(x, y);
     // reproduce_able = (id % 2) ? true : false; // 就是和植物抢id了
     reproduce_able = true; // 就是和植物抢id了//当前靠id区分很容易导致集体不育,先暂时关闭
-}
-
-Animal::Animal(int iD,int x, int y, int radius,float reproduce_energy_threshold, float reproduce_energy_cost,AnimalConfig& org):id(iD),
-Reproducable(reproduce_energy_threshold, reproduce_energy_cost, radius, org.step_energy_cost,ANIMAL)
-{
-    energy = org.reproduce_original_energy;
-    rate = org.reproduce_original_rate;
-    name = org.name;
-    diet = org.diet;
-    _energy_rate = org.energy_rate;
-    max_rate = org.max_rate;
-    Pos = std::make_pair(x, y);
-    reproduce_able = (id % 2) ? true : false;
 }
 
 void Animal::Reproduce()

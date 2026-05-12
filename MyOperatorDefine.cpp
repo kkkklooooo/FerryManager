@@ -1,5 +1,4 @@
 #include"MyOperator.h"
-#include"World.h"
 #include<cassert>
 #include<cstdio>
 #include<algorithm>

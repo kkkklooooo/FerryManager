@@ -1,7 +1,6 @@
 #pragma once
 #include "Registry.h"
 #include "Organism.h"
-#include"Config.h"
 #include <utility>
 // const float EnvironmentEnergyAbsorbRate=0.01;
 // const float PlantAbsortRate = 0.4;
@@ -17,7 +16,6 @@ public:
 				std::string na,
 				int sin, 
 				int mp);
-
 	std::pair<int, int> Pos;
 	float energy;//初始能量
 	float deadOrganismEnergy=0;//当前区块死亡生物的剩余能量,未被吸收的
@@ -33,8 +31,6 @@ public:
 
 	bool canPlant(ReproduceRequest);//能生
 	void EnergyExchange(Reproducable* on);//能量交换
-	void getDeadOrgnismEnergy(float dead) { deadOrganismEnergy += (dead > 0) ? dead : 0.0; }
-
 	virtual void Update(Weather);//更新
 };
 

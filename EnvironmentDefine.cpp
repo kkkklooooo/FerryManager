@@ -2,7 +2,7 @@
 #include<cstdio>
 #include <cassert>
 #include "Registry.h"
-#include "World.h"
+#include "Word.h"
 #include "Environment.h"
 #include <algorithm>
 
@@ -12,16 +12,15 @@ Environment::Environment(std::pair<int, int> pos,
 						 int sin,
 						 int mp)
 	: Pos(pos), energy(en), type(ENVIRONMENT), name(na), SingleEnvironmentMaxEnergy(sin), maxPlant(mp), havePlant(0)
-{}
-
-
+{
+}
 bool Environment::canPlant(ReproduceRequest a)
 {
 	if (havePlant < maxPlant)
 	{
 		if (std::find(CanLiveIn.begin(), CanLiveIn.end(), a.name) != CanLiveIn.end())
 		{
-			if(a.type==PLANT)havePlant++;//植物才++ 因为植物不会动
+			havePlant++;
 			return true;
 		}
 		else
@@ -36,6 +35,8 @@ bool Environment::canPlant(ReproduceRequest a)
 void Environment::EnergyExchange(Reproducable *on)
 {
 	//只有死后才能add
+	// float add=std::min(World::GetWorld().conf.Environmrnt_step_max_absorb, on->energy * World::GetWorld().conf.Environment_energy_absorb_rate);
+	// energy += add;
 	if (on->type == PLANT && on->active)
 	{ // 植物吸收土地 
 	  // @ TODO 修改参数
