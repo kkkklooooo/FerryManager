@@ -166,7 +166,7 @@ float World::calculate_overlay(std::pair<int, int> pos)
 
 World &World::GetWorld()
 {
-    static Config conf(50, 50);
+    static Config conf(100, 100);
     static World Instance(conf);
     return Instance;
 }

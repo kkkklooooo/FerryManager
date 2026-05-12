@@ -212,3 +212,288 @@ Phase 1 的第一步（1.1）具体操作：
 5. 尝试写一个测试：创建一个 JSON 对象，序列化到字符串，再解析回来
 
 **不需要改任何现有代码就能验证这一步。**
+
+---
+
+## 八、Boids 遗传算法 + 空间网格繁殖 实施计划
+
+### 概述
+
+**目标：**
+1. 用 boids 算法替代动物随机移动，让同种羊/狼自然聚拢，解决低密度时繁殖靠运气的问题
+2. boids 的三个权重 + 感知半径作为可突变基因，产生自然选择压力
+3. 空间网格同时服务于 boids 邻居查询和繁殖/捕食交互，O(n) 复杂度
+
+**当前问题：** 动物随机走位，同种相遇纯靠运气，低密度时几乎无法繁殖。
+
+**解决思路：** Boids 的 cohesion 规则倾向聚群 → 同种必然靠近 → 繁殖自然发生。三个权重可遗传 → 进化选择。
+
+---
+
+### 文件改动清单
+
+| 文件 | 改什么 |
+|------|--------|
+| `Organism.h` | 加 `BoidGenes` 结构体, `Animal` 加 `vx/vy`/`genes`/`BoidsMove()`; `ReproduceRequest` 加 `genes` |
+| `OrganismDefine.cpp` | 实现 `BoidsMove()`, `Animal::Step()` 调用 boids, `Animal::Reproduce()` 加突变 |
+| `Animals.h` | Wolf/Sheep 构造函数设初始基因默认值 |
+| `MyOperatorDefine.cpp` | 工厂创建后注入基因 (`a->genes = x.genes`) |
+| `WordDefine.cpp` | `Update()` 调整步骤顺序（植物solo繁殖拆分、动物交互循环） |
+| `test_main.cpp` | Animal tooltip 显示基因值（可选） |
+
+---
+
+### Step 1: 数据结构 (`Organism.h`)
+
+```cpp
+// 新增基因结构体
+struct BoidGenes {
+    float cohesion   = 1.0f;   // 范围 0.2 ~ 3.0
+    float alignment  = 0.5f;   // 范围 0.2 ~ 3.0
+    float separation = 1.0f;   // 范围 0.2 ~ 3.0
+    int   vision     = 3;      // 感知半径(格子), 范围 2 ~ 8
+};
+
+// Animal 类新增成员
+class Animal : public Reproducable {
+    // ... 现有成员保持 ...
+    float vx = 0, vy = 0;   // 速度向量
+    BoidGenes genes;         // 遗传性状
+
+    void BoidsMove();        // 新增方法
+};
+
+// ReproduceRequest 加基因字段
+struct ReproduceRequest {
+    OrganismType type;
+    std::string  name;
+    std::pair<int,int> pos;
+    int radius;
+    BoidGenes genes;  // 新增
+};
+```
+
+---
+
+### Step 2: Boids 移动逻辑 (`OrganismDefine.cpp`)
+
+`BoidsMove()` 复用 `Environment::Organisms` 空间网格查邻居：
+
+```cpp
+void Animal::BoidsMove() {
+    World& w = World::GetWorld();
+    int ww = w.GetWidth(), hh = w.GetHeight();
+    int vr = genes.vision;
+
+    float cx = 0, cy = 0;   // cohesion
+    float ax = 0, ay = 0;   // alignment
+    float sx = 0, sy = 0;   // separation
+    int count = 0;
+
+    int gx0 = std::max(0, Pos.first  - vr);
+    int gy0 = std::max(0, Pos.second - vr);
+    int gx1 = std::min(ww-1, Pos.first  + vr);
+    int gy1 = std::min(hh-1, Pos.second + vr);
+
+    for (int gy = gy0; gy <= gy1; gy++) {
+        for (int gx = gx0; gx <= gx1; gx++) {
+            auto* env = w.GetEnvironments()[gy * ww + gx];
+            for (auto* other : env->Organisms) {
+                if (other == this || other->name != name) continue;
+                float dx = (float)(other->Pos.first  - Pos.first);
+                float dy = (float)(other->Pos.second - Pos.second);
+                float dist = std::sqrt(dx*dx + dy*dy);
+                if (dist < 0.01f || dist > vr) continue;
+
+                count++;
+                cx += dx; cy += dy;                          // cohesion
+                auto* a = static_cast<Animal*>(other);
+                ax += a->vx; ay += a->vy;                    // alignment
+                sx -= dx / (dist*dist); sy -= dy / (dist*dist); // separation
+            }
+        }
+    }
+
+    if (count > 0) {
+        cx = (cx / count) * genes.cohesion;
+        cy = (cy / count) * genes.cohesion;
+        ax = (ax / count) * genes.alignment;
+        ay = (ay / count) * genes.alignment;
+        sx *= genes.separation;
+        sy *= genes.separation;
+    }
+
+    // 噪声防止死锁
+    float nx = ((float)rand()/RAND_MAX - 0.5f) * 0.4f;
+    float ny = ((float)rand()/RAND_MAX - 0.5f) * 0.4f;
+
+    vx = vx * 0.7f + cx + ax + sx + nx;  // 惯性衰减
+    vy = vy * 0.7f + cy + ay + sy + ny;
+
+    float len = std::sqrt(vx*vx + vy*vy);
+    if (len > 0.001f) { vx = vx / len * rate; vy = vy / len * rate; }
+    else              { vx = rate; vy = 0; }
+
+    Pos.first  = std::clamp(Pos.first  + (int)std::round(vx), 0, ww-1);
+    Pos.second = std::clamp(Pos.second + (int)std::round(vy), 0, hh-1);
+}
+```
+
+`Animal::Step()` 改为：
+
+```cpp
+void Animal::Step() {
+    float ori = step_energy_cost;
+    step_energy_cost *= calculate_overlay_cost();
+    Organism::Step();
+    step_energy_cost = ori;
+
+    if (eat_intrval-- <= 0)
+        BoidsMove();  // 替代原来的随机移动
+}
+```
+
+---
+
+### Step 3: 初始基因值 (`Animals.h`)
+
+```cpp
+// Wolf: 独猎型 — 低 cohesion, 中 alignment, 中 separation, 大 vision
+Wolf::Wolf(...) : Animal(...) {
+    genes.cohesion   = 0.3f;
+    genes.alignment  = 0.6f;
+    genes.separation = 0.8f;
+    genes.vision     = 5;
+}
+
+// Sheep: 聚群型 — 高 cohesion, 中 alignment, 高 separation, 中 vision
+Sheep::Sheep(...) : Animal(...) {
+    genes.cohesion   = 1.5f;
+    genes.alignment  = 0.5f;
+    genes.separation = 1.5f;
+    genes.vision     = 3;
+}
+```
+
+---
+
+### Step 4: 基因突变 (`OrganismDefine.cpp`)
+
+`Animal::Reproduce()` 中拷贝父基因并随机扰动：
+
+```cpp
+void Animal::Reproduce() {
+    // ... 现有检查不变 ...
+
+    BoidGenes childGenes = genes;
+    childGenes.cohesion   = std::clamp(genes.cohesion   + rnd(-0.15f, 0.15f), 0.2f, 3.0f);
+    childGenes.alignment  = std::clamp(genes.alignment  + rnd(-0.15f, 0.15f), 0.2f, 3.0f);
+    childGenes.separation = std::clamp(genes.separation + rnd(-0.15f, 0.15f), 0.2f, 3.0f);
+    childGenes.vision     = (int)std::clamp((float)genes.vision + rnd(-1.0f, 1.0f), 2.0f, 8.0f);
+
+    ReproduceRequest req = {ANIMAL, name, {x_new, y_new}, r_int, childGenes};
+    if (!World::GetWorld().AddReproduceRequest(req))
+        energy -= reproduce_energy_cost;
+}
+```
+
+---
+
+### Step 5: 工厂注入基因 (`MyOperatorDefine.cpp`)
+
+```cpp
+Reproducable* MyOperator::operator()(ReproduceRequest& x, int id) {
+    auto it = registry().find(x.name);
+    if (it != registry().end()) {
+        auto* a = it->second(id, x.pos.first, x.pos.second, x.radius);
+        a->genes = x.genes;  // 注入突变后的基因
+        return a;
+    }
+    return nullptr;
+}
+```
+
+---
+
+### Step 6: Update 调序 (`WordDefine.cpp`)
+
+```cpp
+void World::Update() {
+    // 1. 清网格 + 清死生物
+    for (auto& env : Environments) env->Organisms.clear();
+    RemoveDeadOrganisms();
+
+    // 2. 环境更新、能量交换、生物 Step(含 boids 移动)、填网格
+    for (auto& org : Reproducas) {
+        auto* env = Environments[org->Pos.second * GetWidth() + org->Pos.first];
+        env->Organisms.push_back(org);
+        env->EnergyExchange(org);
+        org->Step();  // boids 移动在这里面
+    }
+    for (auto& env : Environments) env->Update(CurrentWeather);
+
+    // 3. 繁殖 + 捕食
+    for (int y = 0; y < GetHeight(); y++)
+    for (int x = 0; x < GetWidth(); x++) {
+        auto* env = Environments[y * GetWidth() + x];
+        for (auto* a : env->Organisms) {
+            // 植物自繁殖
+            if (a->type == PLANT && a->reproduce_able)
+                a->Reproduce();
+            // 动物: 查 9 邻格
+            for (int dy = -1; dy <= 1; dy++)
+            for (int dx = -1; dx <= 1; dx++) {
+                int ny = y + dy, nx = x + dx;
+                if (ny < 0 || ny >= GetHeight() || nx < 0 || nx >= GetWidth()) continue;
+                for (auto* b : Environments[ny * GetWidth() + nx]->Organisms) {
+                    if (a < b) PredationOrFuck(a, b);
+                }
+            }
+        }
+    }
+
+    // 4. 执行繁殖请求
+    Reproduce();
+}
+```
+
+---
+
+### Step 7: UI 展示基因 (`test_main.cpp`)
+
+Animal 列表的 tooltip 里显示基因值：
+
+```cpp
+if (ImGui::IsItemHovered()) {
+    ImGui::BeginTooltip();
+    auto* a = static_cast<const Animal*>(org);
+    ImGui::Text("%s #%d", OrganismDisplayName(org->name), a->id);
+    ImGui::Text("Cohesion:   %.2f", a->genes.cohesion);
+    ImGui::Text("Alignment:  %.2f", a->genes.alignment);
+    ImGui::Text("Separation: %.2f", a->genes.separation);
+    ImGui::Text("Vision:     %d",   a->genes.vision);
+    ImGui::EndTooltip();
+}
+```
+
+---
+
+### 选择压力（自然形成）
+
+| 性状 | 太低的问题 | 太高的问题 | 平衡点 |
+|------|-----------|-----------|--------|
+| cohesion | 找不到配偶, 灭绝 | 全挤一块吃光资源 | 中偏高 |
+| alignment | 群体散开各自为战 | 全群冲进贫瘠区 | 中 |
+| separation | 挤死(拥挤惩罚) | 繁殖邻居不够 | 中偏高 |
+| vision | 找不到同伴 | 成本高(可选: 加能耗) | 中 |
+
+---
+
+### 实施顺序
+
+1. `Organism.h` - 加 `BoidGenes`, `vx`/`vy`, `BoidsMove()` 声明, `ReproduceRequest` 加 genes
+2. `OrganismDefine.cpp` - 实现 `BoidsMove()`, 改 `Step()`, `Reproduce()` 加突变
+3. `Animals.h` - Wolf/Sheep 设初始基因
+4. `MyOperatorDefine.cpp` - 工厂注入基因
+5. `WordDefine.cpp` - `Update()` 调整顺序
+6. `test_main.cpp` - 基因 UI
