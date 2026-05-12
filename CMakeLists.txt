@@ -36,3 +36,24 @@ target_link_libraries(ecosim PRIVATE opengl32 gdi32 dwmapi)
 if(MSVC)
     target_compile_options(ecosim PRIVATE /EHsc)
 endif()
+
+# ---- standalone boids test ----
+add_executable(boids_test
+    boids/test.cpp
+    ${IMGUI_SOURCES}
+    imgui/backends/imgui_impl_win32.cpp
+    imgui/backends/imgui_impl_opengl3.cpp
+)
+
+target_include_directories(boids_test PRIVATE
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/boids
+    ${CMAKE_SOURCE_DIR}/imgui
+    ${CMAKE_SOURCE_DIR}/imgui/backends
+)
+
+target_link_libraries(boids_test PRIVATE opengl32 gdi32 dwmapi)
+
+if(MSVC)
+    target_compile_options(boids_test PRIVATE /EHsc)
+endif()
