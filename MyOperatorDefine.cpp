@@ -14,19 +14,23 @@ void MyOperator::operator()(Reproducable* a, Reproducable* b) {
         bEa = true;
     }
     if (aEb && !bEa) {
+        Animal *aAnimal = dynamic_cast<Animal*>(a);
+        if(aAnimal->eat_intrval>0) return;// 正在eat,不进行下一个eat
         a->energy += b->energy * World::GetWorld().conf.Organism_animal_absorb_rate * World::GetWorld().conf.Organism_loss_rate;
         b->energy -= b->energy * World::GetWorld().conf.Organism_animal_absorb_rate;
         b->active = false;
-        dynamic_cast<Animal*>(a)->OnEatInterval();
+        aAnimal->OnEatInterval();
         // assert(a->energy >= -100&& b->energy >= -100);
         // printf("\033[31m%s eat %s\033[0m\n", a->name, b->name);
         return;
     }
     if (bEa && !aEb) {
+        Animal *bAnimal = dynamic_cast<Animal*>(b);
+        if(bAnimal->eat_intrval>0) return;
         b->energy += a->energy * World::GetWorld().conf.Organism_animal_absorb_rate * World::GetWorld().conf.Organism_loss_rate;
         a->energy -= a->energy * World::GetWorld().conf.Organism_animal_absorb_rate;
         a->active = false;
-        dynamic_cast<Animal*>(b)->OnEatInterval();
+        bAnimal->OnEatInterval();
         // assert(a->energy >= -100&& b->energy >= -100);
         // printf("\033[31m%s eat %s\033[0m\n", b->name, a->name);
         return;
