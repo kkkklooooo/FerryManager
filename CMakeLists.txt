@@ -9,7 +9,7 @@ file(GLOB IMGUI_SOURCES imgui/*.cpp)
 set(SOURCES
     OrganismDefine.cpp
     EnvironmentDefine.cpp
-    WordDefine.cpp
+    WorldDefine.cpp
     test_main.cpp
     ${IMGUI_SOURCES}
     imgui/backends/imgui_impl_win32.cpp
@@ -20,7 +20,7 @@ set(HEADERS
     Registry.h
     Organism.h
     Environment.h
-    Word.h
+    World.h
 )
 
 add_executable(ecosim ${SOURCES} ${HEADERS} "MyOperator.h" "MyOperatorDefine.cpp" "Animals.h"  "ConflgDefine.cpp")

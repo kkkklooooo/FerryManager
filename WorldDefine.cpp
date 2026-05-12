@@ -1,4 +1,4 @@
-#include "Word.h"
+#include "World.h"
 #include "MyOperator.h"
 #include "Organism.h"
 #include "Environment.h"

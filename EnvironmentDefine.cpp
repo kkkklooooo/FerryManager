@@ -2,7 +2,7 @@
 #include<cstdio>
 #include <cassert>
 #include "Registry.h"
-#include "Word.h"
+#include "World.h"
 #include "Environment.h"
 #include <algorithm>
 
