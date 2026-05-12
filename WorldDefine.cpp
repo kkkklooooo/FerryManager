@@ -10,7 +10,7 @@
 static World* TheOnlyWord;//世界指针单例
 
 World::World(Config& Conf, TestConfig& Game_conf)
-    : conf(Conf), game_conf(Game_conf)
+    :World::conf(Conf),game_conf(Game_conf)
 {
     // ---- 植物: 30株分散在草地各处（生产者基础） ----
     auto addPlant = [&](int x, int y) {

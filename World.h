@@ -13,6 +13,7 @@ class World
     std::vector<Environment*>Environments;
 
 public:
+    TestConfig& game_cof;
     Config conf;
     Weather CurrentWeather;
     World(Config&Conf, TestConfig& Game_conf);
