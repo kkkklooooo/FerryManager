@@ -213,3 +213,4 @@ World 构造期间，如果某个代码路径（如 FindAnimalConfig）内部调
 - [ ] 提供用户编辑 TestConfig 的 UI（游戏前）
 - [ ] World 构造后填充 Environment::CanLiveIn
 - [ ] 补齐存档系统（World 序列化/反序列化）
+- [ ] 把植物（草）的注册也加入

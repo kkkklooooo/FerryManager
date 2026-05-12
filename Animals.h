@@ -20,7 +20,7 @@ public:
 };
 
 //系统的原有用注册表
-//此时的clonfg都没有创建只能硬编码？
-static AnimalRegistrator wolf("Wolf", [](int id, int x, int y, int radius) {return new UserAnimal(id, x, y,radius, 25, World::GetWorld().conf.Organism_reproduce_energy_cost,UserAnimal::FindAnimalConfig("Wolf")); });
+//此时就有Config了
+static AnimalRegistrator wolf("Wolf", [](int id, int x, int y, int radius) {return new UserAnimal(id, x, y,radius, Config::GetConfig().Organism_reproduce_energy_threshold, Config::GetConfig().Organism_reproduce_energy_cost, UserAnimal::FindAnimalConfig("Wolf")); });
 
-static AnimalRegistrator sheep("Sheep", [](int id, int x, int y, int radius) {return new UserAnimal(id, x, y, radius, 25, World::GetWorld().conf.Organism_reproduce_energy_cost, UserAnimal::FindAnimalConfig("Sheep")); });
+static AnimalRegistrator sheep("Sheep", [](int id, int x, int y, int radius) {return new UserAnimal(id, x, y, radius, Config::GetConfig().Organism_reproduce_energy_threshold, Config::GetConfig().Organism_reproduce_energy_cost, UserAnimal::FindAnimalConfig("Sheep")); });
