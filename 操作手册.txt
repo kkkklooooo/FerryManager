@@ -72,7 +72,7 @@
 8.关键改动记录 (自ce67777之后)
  1) 界面从控制台字符画改为ImGui+OpenGL图形窗口
  2) 新增植物拥挤成本(overlay cost)机制
- 3) 死亡生物能量回归环境(deadOrganismEnergy)  ？？真？？ 未正常实现（在RemoveDeadOrganisms，PredationOrFuck，EnergyExchange（已经修改）没找到）
+ 3) 死亡生物能量回归环境(deadOrganismEnergy) 
  4) 环境能量上限 修改为每个环境各异
  5) 植物吸收上限(StepMaxAbsorb=2)
  6) 世界从100x100缩小到50x50
@@ -83,3 +83,7 @@
 11) 我添加了MyOperator 便于让工厂函数可扩展(有一点点石山和没有逻辑的重载）
     两个动物输入就是要吃 ，一个Request 输入就是要返回新动物 
 
+7.TODO
+  1)要给环境加上吸收死了的动物的方法（加入step更新按比例吸收deadOrganismEnergy）
+  2)用config计算的所以东西要修改（已经成为石山之王）！@@ ！
+  3)config.jason的参数要修改不能有-1;

@@ -13,24 +13,22 @@ World::World(Config &conf) : conf(conf)
     Reproducas.push_back(new Plant(Plant_id++, 7, 5, conf.Plant_init_radius, conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
     Reproducas.push_back(new Plant(Plant_id++, 6, 5, conf.Plant_init_radius, conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
     Reproducas.push_back(new Plant(Plant_id++, 4, 5, conf.Plant_init_radius, conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
-    Reproducas.push_back(MyOperator()(10,13,OrganismName::Wolf_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,15,OrganismName::Wolf_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,22,OrganismName::Sheep_Name,Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 13, 3, OrganismName::Wolf_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 22, 3, OrganismName::Sheep_Name, Animal_id++));
     for (int i = 0; i < conf.length; i++)
     {
         for (int j = 0; j < conf.width; j++)
@@ -48,21 +46,18 @@ void World::AddLeftEnergyRequest(const LeftEnergyRequest &request)
 
 void World::Update()
 {
-    // ɱ�����˵Ķ���
     RemoveDeadOrganisms();
 
-    // ���ƶ�
     for (auto &i : Reproducas)
     {
         i->Step();
     }
 
-    // ������������Ӱ��
     for (auto &i : Environments)
     {
         if (i->energy < 0)
         {
-            printf("����%d %d %f\n", i->Pos.first, i->Pos.second, i->energy);
+            printf("error %d %d %f\n", i->Pos.first, i->Pos.second, i->energy);
         }
         i->Update(CurrentWeather);
         if (i->energy < 0)
@@ -70,15 +65,13 @@ void World::Update()
             printf("FUCK");
         }
     }
-    // ����
+
     std::sort(Reproducas.begin(), Reproducas.end(), [](Reproducable *a, Reproducable *b)
               {
         if (a->Pos.first != b->Pos.first)
             return a->Pos.first < b->Pos.first;
         return a->Pos.second < b->Pos.second; });
 
-    // ��ֲ��ͻ�������
-    
     for (auto i : Reproducas)
     {
         if(i->energy < -10){
@@ -86,8 +79,7 @@ void World::Update()
         }
         Environments[i->Pos.second * GetWidth() + i->Pos.first]->EnergyExchange(i);
     }
-    
-    // ��ʳ��������
+
     for (auto i = Reproducas.begin(); i != Reproducas.end(); i++)
     {
         for (auto j = i + 0; j != Reproducas.end(); j++)
@@ -98,26 +90,23 @@ void World::Update()
             }
         }
     }
-    // ����
+
     World::Reproduce();
 }
 void World::Reproduce()
 {
     for (auto &request : reproduce_requests)
     {
-        Reproducas.push_back(ReprodueNewOrganism(request)); // ���ù�������
+        auto* org = ReprodueNewOrganism(request);
+        if (org)
+            Reproducas.push_back(org);
     }
-    reproduce_requests.clear(); // ����Ѵ���������
+    reproduce_requests.clear();
 }
 
-/**
- * @brief ����������һ����ֳ����
- * @param request ��ֳ����ṹ��
- */
 bool World::AddReproduceRequest(const ReproduceRequest &request)
 {
-    // ����
-    if (Environments[request.pos.first * GetWidth() + request.pos.second]->canPlant(request))
+    if (Environments[request.pos.second * GetWidth() + request.pos.first]->canPlant(request))
     {
         reproduce_requests.push_back(request);
         return true;
@@ -125,24 +114,22 @@ bool World::AddReproduceRequest(const ReproduceRequest &request)
     return false;
 }
 
-/**
- * @brief �Ƴ���������Ϊ0������
- */
 void World::RemoveDeadOrganisms()
 {
-    // �Ƴ�����Ϊ0������
     Reproducas.erase(std::remove_if(Reproducas.begin(), Reproducas.end(), [&](Reproducable *organism)
                                     {
+                                        if (organism == nullptr) return true;
                                         if (!(organism->energy > 0))
                                         {
-                                            Environments[organism->Pos.second * GetWidth() + organism->Pos.first]->havePlant--;
+                                            if (organism->type == PLANT)
+                                                Environments[organism->Pos.second * GetWidth() + organism->Pos.first]->havePlant--;
+                                            delete organism;
                                             return true;
                                         }
                                         else
                                         {
                                             return false;
                                         }
-                                        // return !(organism->energy>0);
                                     }),
                      Reproducas.end());
 }
@@ -169,10 +156,6 @@ float World::calculate_overlay(std::pair<int, int> pos)
     return (float)cnt / (8.0 * Environments[pos.second * width + pos.first]->maxPlant);
 }
 
-/**
- * @brief ��ȡ���絥��ʵ��
- * @return World& ������������
- */
 World &World::GetWorld()
 {
     static Config conf(50, 50);
@@ -195,22 +178,22 @@ void World::Reset()
     Reproducas.push_back(new Plant(Plant_id++, 7, 5, conf.Plant_init_radius, conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
     Reproducas.push_back(new Plant(Plant_id++, 6, 5, conf.Plant_init_radius, conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
     Reproducas.push_back(new Plant(Plant_id++, 4, 5, conf.Plant_init_radius, conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
-    Reproducas.push_back(MyOperator()(10,13,OrganismName::Wolf_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,15,OrganismName::Wolf_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,26,OrganismName::Sheep_Name,Animal_id++));
-    Reproducas.push_back(MyOperator()(10,22,OrganismName::Sheep_Name,Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 13, 3, OrganismName::Wolf_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 26, 3, OrganismName::Sheep_Name, Animal_id++));
+    Reproducas.push_back(MyOperator()(10, 22, 3, OrganismName::Sheep_Name, Animal_id++));
     for (int i = 0; i < conf.length; i++)
     {
         for (int j = 0; j < conf.width; j++)

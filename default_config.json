@@ -1,0 +1,97 @@
+{
+  "The_Word": {
+    "length": 50,
+    "width": 50
+  },
+  "The_Environments": [
+    {
+      "name": "GressLand",
+      "habitat_types": [ "Plant", "Sheep", "Wolf" ],
+      "max_Plant": 2,
+      "Environment_energy_absorb_rate": 0.01,
+      "Environment_plant_absorb_rate": 0.4,
+      "Environment_step_max_absorb": 2,
+      "Environment_single_chunk_max_energy": 50
+    },
+    {
+      "name": "Water",
+      "habitat_types": [],
+      "max_Plant": 0,
+      "Environment_energy_absorb_rate": 0.01,
+      "Environment_plant_absorb_rate": 0.4,
+      "Environment_step_max_absorb": 2,
+      "Environment_single_chunk_max_energy": 50
+    }
+  ],
+  "Default_Animal_Config": {
+    "name": "Animal",
+    "diet": [],
+    "absorb_rate": 0.5,
+    "loss_rate": 0.9,
+    "reproduce_energy_threshold": 25,
+    "reproduce_energy_cost": 10,
+    "reproduce_init_radius": 3,
+    "reproduce_original_rate": 15,
+    "reproduce_original_energy": 50,
+    "max_rate": 150,
+    "step_energy_cost": 0.01,
+    "overlay_param": 1.4,
+    "energy_rate": 0.3
+  },
+  "Default_Plant_Config": {
+    "name": "Plant",
+    "absorb_rate": 0.5,
+    "loss_rate": 0.9,
+    "reproduce_energy_threshold": 100,
+    "reproduce_energy_cost": 50,
+    "reproduce_init_radius": 3,
+    "reproduce_original_energy": 10,
+    "step_energy_cost": 0.01,
+    "overlay_param": 1.4
+  }
+  "The_Animals": [
+    {
+      "name": "Wolf",
+      "diet": [ "Sheep" ],
+      "absorb_rate": 0.5,
+      "loss_rate": 0.9,
+      "reproduce_energy_threshold": 100,
+      "reproduce_energy_cost": 50,
+      "reproduce_init_radius": 3,
+      "reproduce_original_rate": -1,
+      "reproduce_original_energy": -1,
+      "max_rate": 200,
+      "step_energy_cost": 0.01,
+      "overlay_param": 1.4,
+      "energy_rate": -1
+    },
+    {
+      "name": "Sheep",
+      "diet": [ "Plant" ],
+      "absorb_rate": 0.5,
+      "loss_rate": 0.9,
+      "reproduce_energy_threshold": 50,
+      "reproduce_energy_cost": 20,
+      "reproduce_init_radius": 3,
+      "reproduce_original_rate": -1,
+      "reproduce_original_energy": -1,
+      "max_rate": 100,
+      "step_energy_cost": 0.01,
+      "overlay_param": 1.4,
+      "energy_rate": -1
+    }
+  ],
+  "The_Plants": [
+    {
+      "name": "Plant",
+      "absorb_rate": 0.5,
+      "loss_rate": 0.9,
+      "reproduce_energy_threshold": 25,
+      "reproduce_energy_cost": 10,
+      "reproduce_init_radius": 3,
+      "reproduce_original_energy": -1,
+      "step_energy_cost": 1,
+      "overlay_param": 1.4
+    }
+  ]
+}

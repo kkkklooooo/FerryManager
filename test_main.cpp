@@ -1,3 +1,6 @@
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
 #include "Word.h"
 #include "Organism.h"
 #include "Environment.h"
@@ -5,8 +8,6 @@
 #include "imgui/imgui_internal.h"
 #include "imgui/backends/imgui_impl_win32.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
 #include <GL/gl.h>
 #include <algorithm>
 #include <cfloat>
@@ -99,7 +100,7 @@ static void DrawWorldGrid(const World& world) {
 
     float maxPlantE = 0.001f, maxAnimalE = 0.001f;
     for (auto* org : orgs) {
-
+        if (!org)continue;
 
 
         if (org->type == PLANT) {
@@ -110,6 +111,7 @@ static void DrawWorldGrid(const World& world) {
     }
 
     for (auto* org : orgs) {
+        if (!org)continue;
         int x = org->Pos.first, y = org->Pos.second;
         if (x < 0 || x >= w || y < 0 || y >= h) continue;
         ImVec2 c(base.x + x*cellSize + cellSize*0.5f,
@@ -200,6 +202,7 @@ static void DrawPlantList(const World& world) {
 
     int n = 0;
     for (auto* org : orgs) {
+        if (!org)continue;
         if (org->type != PLANT) continue;
         const Plant* p = static_cast<const Plant*>(org);
         ImGui::TableNextRow();
@@ -262,9 +265,9 @@ static void DrawStats(const World& world, int frame, int total) {
     float pE = 0, aE = 0, envE = 0;
     for (auto* o : orgs) {
 
-        if (!o)break;
+        if (!o) continue;
 
-        if (o->type == PLANT ) { ++plants;  pE += o->energy; }
+if (o->type == PLANT ) { ++plants;  pE += o->energy; }
         else {
             ++animals; aE += o->energy;
             if (o->name == Wolf_Name)  ++wolves;

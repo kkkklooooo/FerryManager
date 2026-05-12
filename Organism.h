@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <vector>
+#include<string>
 #include"Registry.h"
 // 全局变量：用于生成生物的唯一ID
 // const float AnimalAbsorbRate=0.5;
@@ -27,7 +28,7 @@ struct LeftEnergyRequest{
 struct ReproduceRequest
 {
     OrganismType type;           // 请求生成的生物名称
-    OrganismName name;           //生成生物的具体名称
+    std::string name;           //生成生物的具体名称
     std::pair<int, int> pos;     // 生成位置 (x, y)
     int radius;                  // 子代生物的初始半径
 };
@@ -44,7 +45,7 @@ public:
     std::pair<int, int> Pos;         // 位置坐标 (x, y)
     bool active = true;             // 是否活跃（false表示死亡）
     OrganismType type;              // 生物类型
-    OrganismName name;              //生物名称
+    std::string name;              //生物名称
     // 构造函数：初始化每步能量消耗和获得以及类型
     Organism(float step_energy_cost, OrganismType type);
     // 检查能量，若能量≤0则设置active为false
@@ -63,7 +64,7 @@ public:
     Reproducable(float energy_threshold, float energy_cost, int radius, float sec, OrganismType type);
     virtual ~Reproducable() = default;
     std::vector<EnvironmentType> live_environment;
-    std::vector<OrganismName>diet;
+    std::vector<std::string>diet;
     float reproduce_energy_threshold;
     float reproduce_energy_cost;
     int reproduce_radius;
@@ -99,7 +100,7 @@ public:
     int eat_intrval=0;
     int id; //动物唯一标符
 
-    static  float _energy_rate;
+    float _energy_rate;
 
     virtual  float SetRate();//由世界返回动物的速度区间
     virtual  void  SetRate(Animal* a);//由能量改变速度大小

@@ -6,6 +6,7 @@ using Creator = std::function<Animal*( int id, int x, int y, int radius)>;
 void MyOperator::operator()(Reproducable* a, Reproducable* b) {
     bool aEb = false;
     bool bEa = false;
+    //TODO 给环境加上吃死了的动物的能量的方法
     if (find(a->diet.begin(), a->diet.end(), b->name) != a->diet.end()) {
         aEb = true;
     }
@@ -45,15 +46,15 @@ void MyOperator::operator()(Reproducable* a, Reproducable* b) {
 }
 
 
-void MyOperator::register_Animal_Create(OrganismName name, Creator creator) {
+void MyOperator::register_Animal_Create(std::string  name, Creator creator) {
     registry()[name] = std::move(creator);
 }
 
 
-Reproducable* MyOperator::operator()(int x,int y,OrganismName n,int id) { 
+Reproducable* MyOperator::operator()(int x,int y,int r, std::string  n,int id) {
     auto it = registry().find(n);
     if (it != registry().end()) {// 调用注册的创建函数
-        return it->second( id, x, y, 0); 
+        return it->second( id, x, y,r); 
     }
     return nullptr;
 
@@ -66,8 +67,8 @@ Reproducable* MyOperator::operator()(ReproduceRequest& x,int id) {
     return nullptr;
 }
 
-std::unordered_map <OrganismName, Creator>& MyOperator::registry() {
-    static std::unordered_map<OrganismName, Creator> reg;
+std::unordered_map <std::string, Creator>& MyOperator::registry() {
+    static std::unordered_map<std::string, Creator> reg;
     return reg;
 }
 

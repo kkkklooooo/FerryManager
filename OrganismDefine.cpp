@@ -17,7 +17,7 @@ std::mt19937 gen(rd()); // 随机旋转种子
 const double pi = std::acos(-1.0);
 std::uniform_real_distribution<double> dist(0.0, 2.0 * pi); // 范围
 
-// 工厂函数 根据request返回对应指针 //可以退休了
+// 工厂函数 根据request返回对应指针 
 Reproducable *ReprodueNewOrganism(ReproduceRequest request)
 {
     if (request.type == PLANT)
@@ -51,7 +51,7 @@ Reproducable *ReprodueNewOrganism(ReproduceRequest request)
  * @param type              生物类型（植物、被捕食者、捕食者等）
  */
 Organism::Organism(float step_energy_cost, OrganismType type)
-    : step_energy_cost(step_energy_cost), type(type), name(Organism_Name)
+    : step_energy_cost(step_energy_cost), type(type)
 {
 }
 
@@ -115,7 +115,7 @@ Reproducable::Reproducable(float energy_threshold, float energy_cost, int radius
 Plant::Plant(int id, int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost, float step_energy_cost)
     : Reproducable(reproduce_energy_threshold, reproduce_energy_cost, radius, step_energy_cost, PLANT)
 {
-    name = Plant_Name;
+    name = "Plant";
     this->id = id;
     Pos = std::make_pair(x, y);
     reproduce_able = true; // 植物始终可以繁殖（只要能量足够）
@@ -175,13 +175,13 @@ float Plant::calculate_overlay_cost()
     return factor;
 }
 
-float Animal::_energy_rate = World::GetWorld().conf.Animal_energy_rate;
+
 
 Animal::Animal(int id, int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost, float step_energy_cost)
     : id(id), Reproducable(reproduce_energy_threshold, reproduce_energy_cost, radius, step_energy_cost, ANIMAL)
 {
     rate = SetRate();
-    name = Animal_Name;
+    name = "Animal";
     energy = 20; // 测试用 每个动物初始能量应该不同
     Pos = std::make_pair(x, y);
     reproduce_able = (id % 2) ? true : false; // 就是和植物抢id了
@@ -189,7 +189,7 @@ Animal::Animal(int id, int x, int y, int radius, float reproduce_energy_threshol
 
 void Animal::Reproduce()
 {
-    if(name==Wolf_Name){
+    if(name=="Wolf") {
         printf("Wolf %d reproduce\n",id);
     }
     if (!active || !reproduce_able)
@@ -206,7 +206,7 @@ void Animal::Reproduce()
     // 在 [-reproduce_radius, +reproduce_radius] 范围内随机偏移
     int x_new = x + std::rand() % (2 * reproduce_radius + 1) - reproduce_radius;
     int y_new = y + std::rand() % (2 * reproduce_radius + 1) - reproduce_radius;
-    if(name==Wolf_Name){
+    if(name== "Wolf"){
         printf("Wolf %d reproduce\n",id);
     }
     printf("\033[31mAnimal request at (%d, %d) with radius %d\033[0m\n", x_new, y_new);
