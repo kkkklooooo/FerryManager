@@ -12,82 +12,37 @@
 #include <ctime>
 
 // ============================================================
-//  corrected boids force (fixes division-by-zero & make_pair bug in boids.h)
-// ============================================================
-static void ComputeBoidsForce(
-    const boids::Particle& self,
-    const std::vector<boids::Particle>& flock,
-    float& outFx, float& outFy)
-{
-    float cx = 0, cy = 0;  // cohesion: avg position of neighbors
-    float ax = 0, ay = 0;  // alignment: avg velocity of neighbors
-    float sx = 0, sy = 0;  // separation: steer away from close neighbors
-    int   count = 0;
-
-    for (auto& n : flock) {
-        if (&n == &self) continue;
-        if (n.species != self.species) continue;
-
-        float dx = n.x - self.x;
-        float dy = n.y - self.y;
-        float dist = std::sqrt(dx*dx + dy*dy);
-        if (dist < 0.001f || dist > self.genes.vision) continue;
-
-        count++;
-        cx += n.x;
-        cy += n.y;
-        ax += n.vx;
-        ay += n.vy;
-        sx -= dx / (dist * dist);  // 1/r^2 falloff
-        sy -= dy / (dist * dist);
-    }
-
-    if (count == 0) { outFx = outFy = 0; return; }
-
-    // steer toward center of mass
-    float cohX = (cx / count - self.x) * self.genes.cohesion;
-    float cohY = (cy / count - self.y) * self.genes.cohesion;
-
-    // steer toward avg velocity
-    float aliX = (ax / count - self.vx) * self.genes.alignment;
-    float aliY = (ay / count - self.vy) * self.genes.alignment;
-
-    float sepX = sx * self.genes.separation;
-    float sepY = sy * self.genes.separation;
-
-    float nx = ((float)rand() / RAND_MAX - 0.5f) * 0.3f;
-    float ny = ((float)rand() / RAND_MAX - 0.5f) * 0.3f;
-
-    outFx = cohX + aliX + sepX + nx;
-    outFy = cohY + aliY + sepY + ny;
-}
-
-// ============================================================
-//  update flock (brute-force O(n²), fine for <200 particles)
+//  update flock using boids::ComputeFinalForce from boids.h
 // ============================================================
 static void UpdateFlock(std::vector<boids::Particle>& flock, int w, int h, float dt)
 {
-    for (auto& p : flock) {
-        float fx, fy;
-        ComputeBoidsForce(p, flock, fx, fy);
-
-        p.vx += fx * dt;
-        p.vy += fy * dt;
-
-        float spd = std::sqrt(p.vx*p.vx + p.vy*p.vy);
-        if (spd > p.speed) {
-            p.vx = p.vx / spd * p.speed;
-            p.vy = p.vy / spd * p.speed;
+    for (size_t i = 0; i < flock.size(); ++i) {
+        // build neighbor list excluding self
+        std::vector<boids::Particle> neighbors;
+        neighbors.reserve(flock.size() - 1);
+        for (size_t j = 0; j < flock.size(); ++j) {
+            if (j != i) neighbors.push_back(flock[j]);
         }
 
-        p.x += p.vx * dt;
-        p.y += p.vy * dt;
+        auto [fx, fy] = boids::ComputeFinalForce(flock[i], neighbors);
+
+        flock[i].vx += fx * dt;
+        flock[i].vy += fy * dt;
+
+        float spd = std::sqrt(flock[i].vx*flock[i].vx + flock[i].vy*flock[i].vy);
+        if (spd > flock[i].speed) {
+            flock[i].vx = flock[i].vx / spd * flock[i].speed;
+            flock[i].vy = flock[i].vy / spd * flock[i].speed;
+        }
+
+        flock[i].x += flock[i].vx * dt;
+        flock[i].y += flock[i].vy * dt;
 
         // toroidal wrap
-        if (p.x < 0)       p.x += (float)w;
-        if (p.x >= (float)w) p.x -= (float)w;
-        if (p.y < 0)       p.y += (float)h;
-        if (p.y >= (float)h) p.y -= (float)h;
+        if (flock[i].x < 0)          flock[i].x += (float)w;
+        if (flock[i].x >= (float)w)  flock[i].x -= (float)w;
+        if (flock[i].y < 0)          flock[i].y += (float)h;
+        if (flock[i].y >= (float)h)  flock[i].y -= (float)h;
     }
 }
 
@@ -212,12 +167,9 @@ static void RenderBoidsUI() {
         int gy = (int)p.y;
         if (gx < 0 || gx >= g_worldW || gy < 0 || gy >= g_worldH) continue;
 
-        // sub-cell offset for smooth movement within a cell
-        float fx = p.x - (float)gx;
-        float fy = p.y - (float)gy;
-
-        ImVec2 c(base.x + (gx + fx) * cellSize,
-                 base.y + (gy + fy) * cellSize);
+        // snap to grid center — discrete cell-aligned display
+        ImVec2 c(base.x + (gx + 0.5f) * cellSize,
+                 base.y + (gy + 0.5f) * cellSize);
         float r = cellSize * 0.35f;
 
         ImU32 col = (p.species == 0)
