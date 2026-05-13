@@ -55,6 +55,10 @@ void MyOperator::register_Animal_Create(std::string  name, Creator creator) {
     registry()[name] = std::move(creator);
 }
 
+void MyOperator::register_Plant_Create(std::string  name, PlantCreator creator) {
+    Plantregistry()[name] = std::move(creator);
+}
+
 
 Reproducable* MyOperator::operator()(int x,int y,int r, std::string  n,int id) {
     auto it = registry().find(n);

@@ -239,7 +239,7 @@ void Animal::Reproduce()
         // 子代植动物物的半径在父半径的[0.25,2.0]倍之间随机，并取整
         float r = reproduce_radius * std::min(2.0, std::max(0.25, (double)std::rand() / RAND_MAX));
         int r_int = std::max(1, (int)r);
-        printf("%d\n",r_int);
+       // printf("%d\n",r_int);
         if (!(World::GetWorld().AddReproduceRequest({ANIMAL, name, std::make_pair(x_new, y_new), r_int})))
         {
             energy -= reproduce_energy_cost;
