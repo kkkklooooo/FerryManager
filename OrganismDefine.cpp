@@ -120,6 +120,7 @@ Plant::Plant(int id, int x, int y, int radius, float reproduce_energy_threshold,
     name = "Plant";
     this->id = id;
     Pos = std::make_pair(x, y);
+    explicit_pos = std::make_pair(x, y);
     reproduce_able = true; // 植物始终可以繁殖（只要能量足够）
 }
 
@@ -129,6 +130,7 @@ Plant::Plant(int iD, int x, int y, int radius, float reproduce_energy_threshold,
     energy = org.reproduce_original_energy;
     name = org.name;
     Pos = std::make_pair(x, y);
+    explicit_pos = std::make_pair(x, y);
     reproduce_able = true;
 }
 
@@ -194,6 +196,7 @@ Animal::Animal(int id, int x, int y, int radius, float reproduce_energy_threshol
     name = "Animal";
     energy = 20; // 测试用 每个动物初始能量应该不同
     Pos = std::make_pair(x, y);
+    explicit_pos = std::make_pair(x, y);
     reproduce_able = true;
 }
 
@@ -207,6 +210,7 @@ Animal::Animal(int iD, int x, int y, int radius, float reproduce_energy_threshol
     _energy_rate = org.energy_rate;
     max_rate = org.max_rate;
     Pos = std::make_pair(x, y);
+    explicit_pos = std::make_pair(x, y);
     reproduce_able = true;
 }
 
@@ -264,21 +268,23 @@ void Animal::Step()
     Organism::Step();
     step_energy_cost = ori;
     // 移动
-    if(eat_intrval-- <= 0){
-        double angle = dist(gen);
-        int x_move = rate * sin(angle);
-        int y_move = rate * cos(angle);
-        if (x_move == 0 && y_move == 0)
-        {
-            // 至少移动一格
-            x_move = (angle < pi) ? 1 : -1;
-            y_move = (angle < pi / 2 || angle > 3 * pi / 2) ? 1 : -1;
-        }
+    // if(eat_intrval-- <= 0){
+    //     double angle = dist(gen);
+    //     int x_move = rate * sin(angle);
+    //     int y_move = rate * cos(angle);
+    //     if (x_move == 0 && y_move == 0)
+    //     {
+    //         // 至少移动一格
+    //         x_move = (angle < pi) ? 1 : -1;
+    //         y_move = (angle < pi / 2 || angle > 3 * pi / 2) ? 1 : -1;
+    //     }
 
-        x_move += Pos.first;
-        y_move += Pos.second;
-        Pos = std::make_pair(std::max(std::min(x_move, TestConfig::GetTestConfig().The_Word.length - 1), 0), std::max(std::min(y_move, TestConfig::GetTestConfig().The_Word.width - 1), 0));
-    }
+    //     x_move += Pos.first;
+    //     y_move += Pos.second;
+    //     Pos = std::make_pair(std::max(std::min(x_move, TestConfig::GetTestConfig().The_Word.length - 1), 0), std::max(std::min(y_move, TestConfig::GetTestConfig().The_Word.width - 1), 0));
+    // }
+    boids::Particle self={explicit_pos.first,explicit_pos.second,velocity.first,velocity.second,0,name=="Wolf"?0:1,genes};
+    
 }
 
 float Animal::calculate_overlay_cost() // 同植物

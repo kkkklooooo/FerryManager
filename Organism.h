@@ -6,6 +6,7 @@
 #include<string>
 #include"Registry.h"
 #include"Config.h"
+#include"boids/boids.h"
 // 全局变量：用于生成生物的唯一ID
 // const float AnimalAbsorbRate=0.5;
 // const float lossRate = 0.9;
@@ -44,6 +45,8 @@ public:
     float energy = 5;               // 当前能量值
     float step_energy_cost;         // 每帧消耗的能量
     std::pair<int, int> Pos;         // 位置坐标 (x, y)
+    std::pair<float,float>explicit_pos;
+    std::pair<float,float>velocity={0,0};
     bool active = true;             // 是否活跃（false表示死亡）
     OrganismType type;              // 生物类型
     std::string name;              //生物名称
@@ -105,6 +108,7 @@ public:
 
     float _energy_rate;
     float max_rate=10000;
+    boids::Genes genes;
 
     virtual  float SetRate();//由世界返回动物的速度区间
     virtual  void  SetRate(Animal* a);//由能量改变速度大小

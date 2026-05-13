@@ -3,36 +3,28 @@
 #include "Organism.h"
 #include"Config.h"
 #include <utility>
-// const float EnvironmentEnergyAbsorbRate=0.01;
-// const float PlantAbsortRate = 0.4;
-// const float StepMaxAbsorb = 2;
-// const float SingleEnvironmentMaxEnergy = 50;
 
 class Environment
-{ // ��������
-
+{
 public:
 	Environment(std::pair<int, int> pos,
 		float en,
 		std::string na,
-		int sin,
-		int mp);
+		int sin);
 
 	std::pair<int, int> Pos;
-	float energy;//初始能量
-	float deadOrganismEnergy = 0;//当前区块死亡生物的剩余能量,未被吸收的
+	float energy;
+	float deadOrganismEnergy = 0;
 	OrganismType type;
 	std::string name;
-	int SingleEnvironmentMaxEnergy;//水和草地的能量上限肯定不同的
-	std::vector<std::string> CanLiveIn;//能活着
-	int maxPlant;//草最多有多少
-	int havePlant;//现在有多少
+	int SingleEnvironmentMaxEnergy;
+	std::vector<std::string> CanLiveIn;
 	std::vector<Reproducable*> Organisms;
-	bool canPlant(ReproduceRequest);//能生
-	void EnergyExchange(Reproducable* on);//能量交换
+	bool canPlant(ReproduceRequest);
+	void EnergyExchange(Reproducable* on);
 	void getDeadOrgnismEnergy(float dead) { deadOrganismEnergy += (dead > 0) ? dead : 0.0; }
 	static EnvironmentConfig FindEnvironmentConfig(const std::string& name);
-	virtual void Update(Weather);//更新
+	virtual void Update(Weather);
 };
 
 
@@ -40,15 +32,13 @@ public:
 class Water : public Environment
 {
 public:
-	Water(std::pair<int, int> pos, float en, int mp, float V);
-	float Valum; // 水的多少
+	Water(std::pair<int, int> pos, float en, float V);
+	float Valum;
 	void Update(Weather) override;
 };
 
 class GressLand :public Environment {
 public:
-	GressLand(std::pair<int, int> pos,
-		float en,
-		int maxPlant);
+	GressLand(std::pair<int, int> pos, float en);
 	void Update(Weather)override;
 };

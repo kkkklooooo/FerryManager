@@ -1,4 +1,4 @@
-
+#include"World.h"
 #include <cmath>
 #include <vector>
 #include <algorithm>
@@ -11,7 +11,7 @@ namespace boids
         float cohesion = 1.0f;
         float alignment = 0.5f;
         float separation = 1.0f;
-        float vision = 3.0f;
+        float vision = 6.0f;
     };
     // ---- 独立测试用的粒子 (自包含) ----
     struct Particle
@@ -20,7 +20,7 @@ namespace boids
         float vx, vy;
         float speed;
         int species; // 0=Wolf, 1=Sheep (同种聚群)
-        Genes genes;
+        Genes &genes;
     };
     std::pair<float, float> ComputeFinalForce(Particle self, std::vector<Particle> &neighbors)
     {
@@ -57,5 +57,17 @@ namespace boids
         return std::make_pair(
             self.genes.cohesion * (cx-self.x) + self.genes.alignment * (ax-self.vx) + self.genes.separation * (sx) + nx,
             self.genes.cohesion * (cy-self.y) + self.genes.alignment * (ay-self.vy) + self.genes.separation * (sy) + ny);
+    }
+    //适配工作
+    void fillNeighbors( std::pair<int,int>pos,float vision, std::vector<Particle> &neighbors,World& world){
+        neighbors.clear();;
+        for (int i = (int)vision*2; i < (int)vision*2; i++)
+        for (int j = (int)vision*2; j < (int)vision*2; j++)
+        {
+            world
+        }
+        
+
+
     }
 }
