@@ -52,7 +52,7 @@
   ],
   "The_Plants": [
     {
-      "name": "Plant",
+      "name": "Gress",
       "reproduce_original_energy": -1,
       "step_energy_cost": 0.2
     }

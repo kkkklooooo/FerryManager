@@ -7,10 +7,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 file(GLOB IMGUI_SOURCES imgui/*.cpp)
 
 set(SOURCES
-    OrganismDefine.cpp
-    EnvironmentDefine.cpp
-    WorldDefine.cpp
-    SetupUI.cpp
+    core/OrganismDefine.cpp
+    core/EnvironmentDefine.cpp
+    core/WorldDefine.cpp
+    ui/SetupUI.cpp
     test_main.cpp
     boids/boids.cpp
     ${IMGUI_SOURCES}
@@ -19,16 +19,24 @@ set(SOURCES
 )
 
 set(HEADERS
-    Registry.h
-    Organism.h
-    Environment.h
-    World.h
+    core/Registry.h
+    core/Organism.h
+    core/Environment.h
+    core/World.h
 )
 
-add_executable(ecosim ${SOURCES} ${HEADERS} "MyOperator.h" "MyOperatorDefine.cpp" "Animals.h"  "ConflgDefine.cpp")
+add_executable(ecosim ${SOURCES} ${HEADERS}
+    "operator/MyOperator.h" "operator/MyOperatorDefine.cpp"
+    "core/Animals.h" "core/Plants.h"
+    "config/ConflgDefine.cpp" "config/Config.h" "imguMe/myui.cpp")
 
 target_include_directories(ecosim PRIVATE
     ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/core
+    ${CMAKE_SOURCE_DIR}/config
+    ${CMAKE_SOURCE_DIR}/ui
+    ${CMAKE_SOURCE_DIR}/operator
+    ${CMAKE_SOURCE_DIR}/vendor
     ${CMAKE_SOURCE_DIR}/imgui
     ${CMAKE_SOURCE_DIR}/imgui/backends
 )
@@ -36,10 +44,19 @@ target_include_directories(ecosim PRIVATE
 target_link_libraries(ecosim PRIVATE opengl32 gdi32 dwmapi)
 
 # ---- headless debug sim ----
-add_executable(debug_sim debug_main.cpp "MyOperator.h" "MyOperatorDefine.cpp" "Animals.h" "Plants.h"
-    OrganismDefine.cpp EnvironmentDefine.cpp WorldDefine.cpp ConflgDefine.cpp boids/boids.cpp)
+add_executable(debug_sim debug_main.cpp
+    "operator/MyOperator.h" "operator/MyOperatorDefine.cpp"
+    "core/Animals.h" "core/Plants.h"
+    core/OrganismDefine.cpp core/EnvironmentDefine.cpp core/WorldDefine.cpp
+    config/ConflgDefine.cpp config/Config.h boids/boids.cpp "imguMe/myui.cpp")
 
-target_include_directories(debug_sim PRIVATE ${CMAKE_SOURCE_DIR})
+target_include_directories(debug_sim PRIVATE
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/core
+    ${CMAKE_SOURCE_DIR}/config
+    ${CMAKE_SOURCE_DIR}/operator
+    ${CMAKE_SOURCE_DIR}/vendor
+)
 
 # ---- standalone boids test ----
 add_executable(boids_test
@@ -48,10 +65,14 @@ add_executable(boids_test
     ${IMGUI_SOURCES}
     imgui/backends/imgui_impl_win32.cpp
     imgui/backends/imgui_impl_opengl3.cpp
-)
+ "imguMe/myui.cpp")
 
 target_include_directories(boids_test PRIVATE
     ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/core
+    ${CMAKE_SOURCE_DIR}/config
+    ${CMAKE_SOURCE_DIR}/operator
+    ${CMAKE_SOURCE_DIR}/vendor
     ${CMAKE_SOURCE_DIR}/boids
     ${CMAKE_SOURCE_DIR}/imgui
     ${CMAKE_SOURCE_DIR}/imgui/backends
@@ -68,12 +89,12 @@ endif()
 # Copy default_config.json to build directory so the exe can find it
 add_custom_command(TARGET ecosim POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_SOURCE_DIR}/default_config.json"
+        "${CMAKE_SOURCE_DIR}/config/default_config.json"
         "$<TARGET_FILE_DIR:ecosim>/default_config.json"
 )
 
 add_custom_command(TARGET debug_sim POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_SOURCE_DIR}/default_config.json"
+        "${CMAKE_SOURCE_DIR}/config/default_config.json"
         "$<TARGET_FILE_DIR:debug_sim>/default_config.json"
 )

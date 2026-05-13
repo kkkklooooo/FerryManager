@@ -17,3 +17,5 @@ public:
 		return TestConfig::GetTestConfig().Default_Plant_Config;
 	}
 };
+
+static PlantRegistrator Gress("Gress", [](int id, int x, int y, int radius) {return new UserPlant(id, x, y, radius, Config::GetConfig().Organism_reproduce_energy_threshold, Config::GetConfig().Organism_reproduce_energy_cost, UserPlant::FindPlantConfig("Gress")); });
