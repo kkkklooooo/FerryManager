@@ -10,6 +10,7 @@ set(SOURCES
     OrganismDefine.cpp
     EnvironmentDefine.cpp
     WorldDefine.cpp
+    SetupUI.cpp
     test_main.cpp
     ${IMGUI_SOURCES}
     imgui/backends/imgui_impl_win32.cpp
@@ -36,3 +37,10 @@ target_link_libraries(ecosim PRIVATE opengl32 gdi32 dwmapi)
 if(MSVC)
     target_compile_options(ecosim PRIVATE /EHsc)
 endif()
+
+# Copy default_config.json to build directory so the exe can find it
+add_custom_command(TARGET ecosim POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/default_config.json"
+        "$<TARGET_FILE_DIR:ecosim>/default_config.json"
+)

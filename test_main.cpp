@@ -1,6 +1,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
+#include "SetupUI.h"
 #include "World.h"
 #include "Organism.h"
 #include "Environment.h"
@@ -48,7 +49,7 @@ static ImU32 OrganismColor(const std::string& name, float energy, float maxE) {
     i = std::clamp(i, 0.25f, 1.0f);
     if (name == "Plant")       return IM_COL32(0,            (int)(220*i), (int)(80*i),  210);
     if (name == "Wolf")        return IM_COL32((int)(220*i), (int)(60*i),  (int)(50*i),  210);
-    if (name == "Sheep")       return IM_COL32((int)(180*i), (int)(180*i), (int)(220*i), 210);
+    if (name == "Sheep")       return IM_COL32((int)(255*i), (int)(245*i), (int)(200*i), 240);
     if (name == "Animal")      return IM_COL32((int)(255*i), (int)(90*i),  (int)(70*i),  210);
     return IM_COL32((int)(128*i), (int)(128*i), (int)(128*i), 210);
 }
@@ -56,7 +57,7 @@ static ImU32 OrganismColor(const std::string& name, float energy, float maxE) {
 // ============================================================
 //  World grid
 // ============================================================
-static void DrawWorldGrid(const World& world) {
+static void DrawWorldGrid(const World& world, bool flat, bool showReq) {
     const auto& envs = world.GetEnvironments();
     const auto& orgs = world.GetReproducas();
     int w = world.GetWidth(), h = world.GetHeight();
@@ -77,19 +78,23 @@ static void DrawWorldGrid(const World& world) {
             ImVec2 p0(base.x + x*cellSize, base.y + y*cellSize);
             ImVec2 p1(p0.x + cellSize, p0.y + cellSize);
 
-            ImU32 col = IM_COL32(20, 20, 20, 255);
-            if (idx < (int)envs.size())
-                col = EnvColor(envs[idx]->name, envs[idx]->energy, maxE);
+            ImU32 col;
+            if (flat) {
+                col = IM_COL32(35, 35, 38, 255);
+            } else {
+                col = IM_COL32(20, 20, 20, 255);
+                if (idx < (int)envs.size())
+                    col = EnvColor(envs[idx]->name, envs[idx]->energy, maxE);
+            }
 
             dl->AddRectFilled(p0, p1, col);
-            dl->AddRect(p0, p1, IM_COL32(50, 50, 50, 255), 0, 0, 1.0f);
+            dl->AddRect(p0, p1, IM_COL32(55, 55, 58, 255), 0, 0, 1.0f);
         }
     }
 
     float maxPlantE = 0.001f, maxAnimalE = 0.001f;
     for (auto* org : orgs) {
         if (!org)continue;
-
 
         if (org->type == PLANT) {
             if (org->energy > maxPlantE) maxPlantE = org->energy;
@@ -98,17 +103,47 @@ static void DrawWorldGrid(const World& world) {
         }
     }
 
-    for (auto* org : orgs) {
-        if (!org)continue;
+    auto drawOrg = [&](Reproducable* org, bool flat, float maxPlantE, float maxAnimalE) {
         int x = org->Pos.first, y = org->Pos.second;
-        if (x < 0 || x >= w || y < 0 || y >= h) continue;
+        if (x < 0 || x >= w || y < 0 || y >= h) return;
         ImVec2 c(base.x + x*cellSize + cellSize*0.5f,
                  base.y + y*cellSize + cellSize*0.5f);
         float r = cellSize * 0.38f;
-        float maxE = (org->type == PLANT) ? maxPlantE : maxAnimalE;
-        ImU32 fill = OrganismColor(org->name, org->energy, maxE);
-        dl->AddCircleFilled(c, r, fill);
-        dl->AddCircle(c, r, IM_COL32(0, 0, 0, 80), 0, 1.5f);
+        if (flat) {
+            ImU32 fill = OrganismColor(org->name, 1.0f, 1.0f);
+            dl->AddCircleFilled(c, r, fill);
+            dl->AddCircle(c, r, IM_COL32(0, 0, 0, 180), 0, 1.5f);
+        } else {
+            float maxE = (org->type == PLANT) ? maxPlantE : maxAnimalE;
+            ImU32 fill = OrganismColor(org->name, org->energy, maxE);
+            dl->AddCircleFilled(c, r, fill);
+            dl->AddCircle(c, r, IM_COL32(0, 0, 0, 80), 0, 1.5f);
+        }
+    };
+    // plants first (bottom layer)
+    for (auto* org : orgs) {
+        if (org && org->type == PLANT) drawOrg(org, flat, maxPlantE, maxAnimalE);
+    }
+    // animals on top
+    for (auto* org : orgs) {
+        if (org && org->type == ANIMAL) drawOrg(org, flat, maxPlantE, maxAnimalE);
+    }
+
+    // reproduction request markers
+    if (showReq) {
+        const auto& requests = world.GetReproduceRequests();
+        for (auto& req : requests) {
+            int rx = req.pos.first, ry = req.pos.second;
+            if (rx < 0 || rx >= w || ry < 0 || ry >= h) continue;
+            ImVec2 c(base.x + rx*cellSize + cellSize*0.5f,
+                     base.y + ry*cellSize + cellSize*0.5f);
+            float r = cellSize * 0.25f;
+            ImU32 col = req.type == PLANT ? IM_COL32(0, 255, 100, 220) : IM_COL32(255, 220, 50, 220);
+            // draw X marker
+            float s = r * 0.7f;
+            dl->AddLine(ImVec2(c.x-s, c.y-s), ImVec2(c.x+s, c.y+s), col, 2.0f);
+            dl->AddLine(ImVec2(c.x+s, c.y-s), ImVec2(c.x-s, c.y+s), col, 2.0f);
+        }
     }
 
     ImGui::Dummy(ImVec2(w*cellSize, h*cellSize));
@@ -282,6 +317,8 @@ static bool showHeatmap  = false;
 static bool showPlants   = true;
 static bool showAnimals  = false;
 static bool showQuery    = false;
+static bool flatColors   = true;
+static bool showRequests  = true;
 
 void RenderUI(World& world, int* pFrame, int total,
               bool paused, bool* pPaused, bool* pStep, float* pSpeed, bool* pUnlimited,
@@ -293,6 +330,9 @@ void RenderUI(World& world, int* pFrame, int total,
             ImGui::MenuItem("Animals",     nullptr, &showAnimals);
             ImGui::MenuItem("Heatmap",     nullptr, &showHeatmap);
             ImGui::MenuItem("Query Panel", nullptr, &showQuery);
+            ImGui::Separator();
+            ImGui::MenuItem("Flat Colors", nullptr, &flatColors);
+            ImGui::MenuItem("Repro Requests", nullptr, &showRequests);
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();
@@ -318,6 +358,7 @@ void RenderUI(World& world, int* pFrame, int total,
     ImGui::SliderInt("Batch", pMaxSteps, 1, 500);
 
     ImGui::Spacing();
+    ImGui::Checkbox("Flat Colors", &flatColors);
     ImGui::Separator();
     DrawStats(world, *pFrame, total);
     ImGui::End();
@@ -327,8 +368,56 @@ void RenderUI(World& world, int* pFrame, int total,
     ImGui::SetNextWindowSize(ImVec2(500, 520), ImGuiCond_FirstUseEver);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(6, 6));
     ImGui::Begin("World", nullptr, ImGuiWindowFlags_NoScrollbar);
-    DrawWorldGrid(world);
+    DrawWorldGrid(world, flatColors, showRequests);
     ImGui::End();
+
+    // ---- reproduce requests grid ----
+    if (showRequests) {
+        static bool reqPlant = true, reqSheep = true, reqWolf = true;
+        ImGui::SetNextWindowSize(ImVec2(320, 380), ImGuiCond_FirstUseEver);
+        ImGui::Begin("Repro Requests", &showRequests);
+        ImGui::Checkbox("Plant", &reqPlant); ImGui::SameLine();
+        ImGui::Checkbox("Sheep", &reqSheep); ImGui::SameLine();
+        ImGui::Checkbox("Wolf",  &reqWolf);
+
+        const auto& reqs = world.GetReproduceRequests();
+        int w = world.GetWidth(), h = world.GetHeight();
+        ImVec2 avail = ImGui::GetContentRegionAvail();
+        float cs = std::min(avail.x / w, avail.y / h);
+        cs = std::max(cs, 4.0f);
+
+        ImDrawList* dl = ImGui::GetWindowDrawList();
+        ImVec2 base = ImGui::GetCursorScreenPos();
+
+        // grey grid background
+        for (int y = 0; y < h; ++y)
+            for (int x = 0; x < w; ++x) {
+                ImVec2 p0(base.x + x*cs, base.y + y*cs);
+                dl->AddRectFilled(p0, ImVec2(p0.x+cs, p0.y+cs), IM_COL32(30,30,32,255));
+                dl->AddRect(p0, ImVec2(p0.x+cs, p0.y+cs), IM_COL32(50,50,54,255));
+            }
+
+        // draw request markers
+        for (auto& r : reqs) {
+            if (r.name == "Plant" && !reqPlant) continue;
+            if (r.name == "Sheep" && !reqSheep) continue;
+            if (r.name == "Wolf"  && !reqWolf)  continue;
+            int rx = r.pos.first, ry = r.pos.second;
+            if (rx < 0 || rx >= w || ry < 0 || ry >= h) continue;
+            ImVec2 c(base.x + rx*cs + cs*0.5f, base.y + ry*cs + cs*0.5f);
+            float rad = cs * 0.4f;
+            ImU32 col;
+            if (r.name == "Plant")      col = IM_COL32(0, 220, 80, 230);
+            else if (r.name == "Sheep") col = IM_COL32(255, 245, 200, 230);
+            else if (r.name == "Wolf")  col = IM_COL32(220, 60, 50, 230);
+            else                        col = IM_COL32(200, 200, 200, 230);
+            dl->AddCircleFilled(c, rad, col);
+            dl->AddCircle(c, rad, IM_COL32(0, 0, 0, 180), 0, 1.5f);
+        }
+
+        ImGui::Dummy(ImVec2(w*cs, h*cs));
+        ImGui::End();
+    }
     ImGui::PopStyleVar();
 
     // ---- heatmap ----
@@ -473,6 +562,14 @@ int main() {
 
     ImGui_ImplWin32_Init(g_hWnd);
     ImGui_ImplOpenGL3_Init();
+
+    if (!RunSetupPhase(g_hWnd, g_done)) {
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplWin32_Shutdown();
+        ImGui::DestroyContext();
+        CleanupWindow();
+        return 0;
+    }
 
     World& world = World::GetWorld();
     world.CurrentWeather = SUN;

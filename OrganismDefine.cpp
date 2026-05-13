@@ -180,9 +180,8 @@ void Plant::Step()
 float Plant::calculate_overlay_cost()
 {
     float overlay = World::GetWorld().calculate_overlay(Pos);
-    float fuck = World::GetWorld().conf.Orgianism_overlay_param;
-    float factor = (float)1 / (abs(overlay - fuck)) + (fuck - 1) / fuck;
-    //    printf("Plant %d overlay %f\n",id,factor);
+    float overlay_p = World::GetWorld().conf.Organism_overlay_param;
+    float factor = (float)1 / (abs(overlay - overlay_p)) + (overlay_p - 1) / overlay_p;
     return factor;
 }
 
@@ -285,9 +284,8 @@ void Animal::Step()
 float Animal::calculate_overlay_cost() // 同植物
 {
     float overlay = World::GetWorld().calculate_overlay(Pos);
-    float fuck = World::GetWorld().conf.Orgianism_overlay_param;
-    float factor = (float)1 / (abs(overlay - fuck)) + (fuck - 1) / fuck;
-    //    printf("Plant %d overlay %f\n",id,factor);
+    float overlay_p = World::GetWorld().conf.Organism_overlay_param;
+    float factor = (float)1 / (abs(overlay - overlay_p)) + (overlay_p - 1) / overlay_p;
     return factor;
 }
 
