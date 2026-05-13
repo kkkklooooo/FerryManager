@@ -44,19 +44,19 @@ World::World(Config& Conf, TestConfig& Game_conf)
     addPlant(cx+w/5, cy+h/5); addPlant(cx-w/5, cy-h/5); addPlant(lx+w/5, cy);
 
     // sheep: 2 groups
-    // auto addSheep = [&](int x, int y) {
-    //     Reproducas.push_back(MyOperator()(x, y, 5, "Sheep", Animal_id++));
-    // };
-    // addSheep(cx+2, cy+3); addSheep(cx+4, cy);   addSheep(cx+1, cy+4); addSheep(cx+3, cy+1);
-    // addSheep(rx-3, by-3); addSheep(rx-5, by-1); addSheep(rx-2, by-5); addSheep(rx-4, by-2);
+    auto addSheep = [&](int x, int y) {
+        Reproducas.push_back(MyOperator()(x, y, 5, "Sheep", Animal_id++));
+    };
+    addSheep(cx+2, cy+3); addSheep(cx+4, cy);   addSheep(cx+1, cy+4); addSheep(cx+3, cy+1);
+    addSheep(rx-3, by-3); addSheep(rx-5, by-1); addSheep(rx-2, by-5); addSheep(rx-4, by-2);
 
-    // // wolves: scattered
-    // auto addWolf = [&](int x, int y) {
-    //     Reproducas.push_back(MyOperator()(x, y, 5, "Wolf", Animal_id++));
-    // };
-    // addWolf(cx, cy);
-    // addWolf(lx+5, ty+5);
-    // addWolf(rx-5, by-5);
+    // wolves: scattered
+    auto addWolf = [&](int x, int y) {
+        Reproducas.push_back(MyOperator()(x, y, 5, "Wolf", Animal_id++));
+    };
+    addWolf(cx, cy);
+    addWolf(lx+5, ty+5);
+    addWolf(rx-5, by-5);
 
     // environment: energy peaks at center, falls off toward edges
     float falloff = std::max(w, h) / 3.0f;
