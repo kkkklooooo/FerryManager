@@ -24,6 +24,7 @@ AnimalConfig TestConfig::Check_Animal(AnimalConfig &fu) {
 	if (fu.reproduce_original_energy < 0)fu.reproduce_original_energy = Default_Animal_Config.reproduce_original_energy;
 	if (fu.step_energy_cost < 0)fu.step_energy_cost = Default_Animal_Config.step_energy_cost;
 	if (fu.energy_rate < 0)fu.energy_rate = Default_Animal_Config.energy_rate;
+	if (fu.eat_intrval_max < 0)fu.eat_intrval_max = Default_Animal_Config.eat_intrval_max;
 	return fu;
 }
 
@@ -44,8 +45,6 @@ void TestConfig::User_AddNew_Plant(PlantConfig& fuck) {
 TestConfig& TestConfig::GetTestConfig() {
 	return *g_GameConf;
 }
-
-//��World�ȼ���
 
 Config& Config::GetConfig() {
 	static Config The_Config;

@@ -3,6 +3,7 @@
 #include "MyOperator.h"
 #include <cmath>
 #include "World.h"
+#include"boids/boids.h"
 #include "Environment.h"
 #include <algorithm>
 #include <cstdio>
@@ -194,7 +195,8 @@ Animal::Animal(int id, int x, int y, int radius, float reproduce_energy_threshol
 {
     rate = SetRate();
     name = "Animal";
-    energy = 20; // 测试用 每个动物初始能量应该不同
+    energy = 20;
+    eat_intrval_max = 20;
     Pos = std::make_pair(x, y);
     explicit_pos = std::make_pair(x, y);
     reproduce_able = true;
@@ -209,6 +211,7 @@ Animal::Animal(int iD, int x, int y, int radius, float reproduce_energy_threshol
     diet = org.diet;
     _energy_rate = org.energy_rate;
     max_rate = org.max_rate;
+    eat_intrval_max = org.eat_intrval_max;
     Pos = std::make_pair(x, y);
     explicit_pos = std::make_pair(x, y);
     reproduce_able = true;
@@ -267,24 +270,25 @@ void Animal::Step()
     step_energy_cost *= calculate_overlay_cost();
     Organism::Step();
     step_energy_cost = ori;
-    // 移动
-    // if(eat_intrval-- <= 0){
-    //     double angle = dist(gen);
-    //     int x_move = rate * sin(angle);
-    //     int y_move = rate * cos(angle);
-    //     if (x_move == 0 && y_move == 0)
-    //     {
-    //         // 至少移动一格
-    //         x_move = (angle < pi) ? 1 : -1;
-    //         y_move = (angle < pi / 2 || angle > 3 * pi / 2) ? 1 : -1;
-    //     }
+    if(eat_intrval > 0) eat_intrval--;
+    const float dt = 0.25f;
+        float maxSpd = std::min(rate, max_rate);
+        // printf("MaxSpd: %f maxRate: %f\n",maxSpd,max_rate);
+        boids::Particle self={explicit_pos.first,explicit_pos.second,velocity.first,velocity.second,0,name=="Wolf"?0:1,genes};
+        FillNeighbors(Pos, genes.vision, neighbors, World::GetWorld());
+        std::pair<float,float> force=ComputeFinalForce(self,neighbors);
+        velocity.first+=force.first * dt;
+        velocity.second+=force.second * dt;
+        float spd = std::sqrt(velocity.first*velocity.first + velocity.second*velocity.second);
+        if (spd > maxSpd && spd > 0.001f) {
+            velocity.first = velocity.first / spd * maxSpd;
+            velocity.second = velocity.second / spd * maxSpd;
+        }
+        explicit_pos.first+=velocity.first * dt;
+        explicit_pos.second+=velocity.second * dt;
+        Pos=std::make_pair(std::max(std::min((int)explicit_pos.first, TestConfig::GetTestConfig().The_Word.length - 1), 0), std::max(std::min((int)explicit_pos.second, TestConfig::GetTestConfig().The_Word.width - 1), 0));
+        
 
-    //     x_move += Pos.first;
-    //     y_move += Pos.second;
-    //     Pos = std::make_pair(std::max(std::min(x_move, TestConfig::GetTestConfig().The_Word.length - 1), 0), std::max(std::min(y_move, TestConfig::GetTestConfig().The_Word.width - 1), 0));
-    // }
-    boids::Particle self={explicit_pos.first,explicit_pos.second,velocity.first,velocity.second,0,name=="Wolf"?0:1,genes};
-    
 }
 
 float Animal::calculate_overlay_cost() // 同植物

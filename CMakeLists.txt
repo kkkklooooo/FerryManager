@@ -12,6 +12,7 @@ set(SOURCES
     core/WorldDefine.cpp
     ui/SetupUI.cpp
     test_main.cpp
+    boids/boids.cpp
     ${IMGUI_SOURCES}
     imgui/backends/imgui_impl_win32.cpp
     imgui/backends/imgui_impl_opengl3.cpp
@@ -47,7 +48,7 @@ add_executable(debug_sim debug_main.cpp
     "operator/MyOperator.h" "operator/MyOperatorDefine.cpp"
     "core/Animals.h" "core/Plants.h"
     core/OrganismDefine.cpp core/EnvironmentDefine.cpp core/WorldDefine.cpp
-    config/ConflgDefine.cpp config/Config.h "imguMe/myui.cpp")
+    config/ConflgDefine.cpp config/Config.h boids/boids.cpp "imguMe/myui.cpp")
 
 target_include_directories(debug_sim PRIVATE
     ${CMAKE_SOURCE_DIR}
@@ -60,6 +61,7 @@ target_include_directories(debug_sim PRIVATE
 # ---- standalone boids test ----
 add_executable(boids_test
     boids/test.cpp
+    boids/boids.cpp
     ${IMGUI_SOURCES}
     imgui/backends/imgui_impl_win32.cpp
     imgui/backends/imgui_impl_opengl3.cpp

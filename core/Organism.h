@@ -6,7 +6,7 @@
 #include<string>
 #include"Registry.h"
 #include"Config.h"
-#include"boids/boids.h"
+#include"boids/Genes.h"
 // 全局变量：用于生成生物的唯一ID
 // const float AnimalAbsorbRate=0.5;
 // const float lossRate = 0.9;
@@ -89,7 +89,6 @@ public:
     Plant(int id, int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost, PlantConfig& org);
 
     int id;   // 植物唯一标识符
-
     // 重写繁殖方法：随机生成子代位置并向世界提交繁殖请求
     void Reproduce() override;
     void Step() override;
@@ -104,8 +103,10 @@ public:
 
     float rate;
     int eat_intrval=0;
+    int eat_intrval_max=20;
+    
     int id; //动物唯一标符
-
+    std::vector<boids::Particle> neighbors;
     float _energy_rate;
     float max_rate=10000;
     boids::Genes genes;
@@ -116,7 +117,7 @@ public:
     void Step() override;
     float calculate_overlay_cost();
     void OnEatInterval(){
-        eat_intrval=20;
+        eat_intrval=eat_intrval_max;
     }
   
 };
