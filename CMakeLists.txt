@@ -12,6 +12,7 @@ set(SOURCES
     WorldDefine.cpp
     SetupUI.cpp
     test_main.cpp
+    boids/boids.cpp
     ${IMGUI_SOURCES}
     imgui/backends/imgui_impl_win32.cpp
     imgui/backends/imgui_impl_opengl3.cpp
@@ -36,13 +37,14 @@ target_link_libraries(ecosim PRIVATE opengl32 gdi32 dwmapi)
 
 # ---- headless debug sim ----
 add_executable(debug_sim debug_main.cpp "MyOperator.h" "MyOperatorDefine.cpp" "Animals.h" "Plants.h"
-    OrganismDefine.cpp EnvironmentDefine.cpp WorldDefine.cpp ConflgDefine.cpp)
+    OrganismDefine.cpp EnvironmentDefine.cpp WorldDefine.cpp ConflgDefine.cpp boids/boids.cpp)
 
 target_include_directories(debug_sim PRIVATE ${CMAKE_SOURCE_DIR})
 
 # ---- standalone boids test ----
 add_executable(boids_test
     boids/test.cpp
+    boids/boids.cpp
     ${IMGUI_SOURCES}
     imgui/backends/imgui_impl_win32.cpp
     imgui/backends/imgui_impl_opengl3.cpp

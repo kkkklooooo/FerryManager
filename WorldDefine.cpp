@@ -43,12 +43,14 @@ World::World(Config& Conf, TestConfig& Game_conf)
     // scattered
     addPlant(cx+w/5, cy+h/5); addPlant(cx-w/5, cy-h/5); addPlant(lx+w/5, cy);
 
-    // sheep: 2 groups
+    // sheep: 4 groups of 4
     auto addSheep = [&](int x, int y) {
         Reproducas.push_back(MyOperator()(x, y, 5, "Sheep", Animal_id++));
     };
     addSheep(cx+2, cy+3); addSheep(cx+4, cy);   addSheep(cx+1, cy+4); addSheep(cx+3, cy+1);
     addSheep(rx-3, by-3); addSheep(rx-5, by-1); addSheep(rx-2, by-5); addSheep(rx-4, by-2);
+    addSheep(lx+3, ty+3); addSheep(lx+5, ty+1); addSheep(lx+2, ty+5); addSheep(lx+4, ty+2);
+    addSheep(lx+3, by-3); addSheep(lx+5, by-1); addSheep(lx+2, by-5); addSheep(lx+4, by-2);
 
     // wolves: scattered
     auto addWolf = [&](int x, int y) {
@@ -224,6 +226,8 @@ void World::Reset()
     };
     addSheep(cx+2, cy+3); addSheep(cx+4, cy);   addSheep(cx+1, cy+4); addSheep(cx+3, cy+1);
     addSheep(rx-3, by-3); addSheep(rx-5, by-1); addSheep(rx-2, by-5); addSheep(rx-4, by-2);
+    addSheep(lx+3, ty+3); addSheep(lx+5, ty+1); addSheep(lx+2, ty+5); addSheep(lx+4, ty+2);
+    addSheep(lx+3, by-3); addSheep(lx+5, by-1); addSheep(lx+2, by-5); addSheep(lx+4, by-2);
 
     auto addWolf = [&](int x, int y) {
         Reproducas.push_back(MyOperator()(x, y, 5, "Wolf", Animal_id++));

@@ -15,7 +15,8 @@ struct AnimalConfig {
     int   reproduce_original_energy = -1;
     float max_rate=-1;
     float step_energy_cost = -1.0f;
-    float energy_rate = -1.0f; //�ٶ��������й�  Ҫͨ��������
+    float energy_rate = -1.0f;
+    int   eat_intrval_max = -1;
 };
 
 struct EnvironmentConfig{
@@ -67,7 +68,8 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AnimalConfig,
     reproduce_original_energy,
     max_rate,
     step_energy_cost,
-    energy_rate)
+    energy_rate,
+    eat_intrval_max)
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(EnvironmentConfig,
     name,

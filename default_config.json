@@ -10,7 +10,8 @@
     "reproduce_original_energy": 18,
     "max_rate": 3,
     "step_energy_cost": 0.3,
-    "energy_rate": 0.2
+    "energy_rate": 0.2,
+    "eat_intrval_max": 10
   },
   "Default_Plant_Config": {
     "name": "Plant",
@@ -35,7 +36,8 @@
       "reproduce_original_energy": -1,
       "max_rate": 3,
       "step_energy_cost": 0.35,
-      "energy_rate": -1
+      "energy_rate": -1,
+      "eat_intrval_max": 8
     },
     {
       "name": "Sheep",
@@ -44,7 +46,8 @@
       "reproduce_original_energy": -1,
       "max_rate": 2,
       "step_energy_cost": 0.12,
-      "energy_rate": -1
+      "energy_rate": -1,
+      "eat_intrval_max": 4
     }
   ],
   "The_Plants": [
