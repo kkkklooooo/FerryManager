@@ -7,6 +7,7 @@ class World
 {
     // �������ķ�ֳ�����б�
     std::vector<ReproduceRequest> reproduce_requests;
+    std::vector<ReproduceRequest> last_requests; // 上一帧的请求，供UI读取
     // ���пɷ�ֳ����ָ���б�
     std::vector<Reproducable*> Reproducas;
     //���л�������
@@ -30,10 +31,11 @@ public:
     void Reset();
     // ��ȡ���絥��ʵ��
     static World& GetWorld();
-    static World& GetWorld(Config conf,TestConfig& Game_conf);
+    static World& GetWorld(TestConfig& Game_conf);
     //ֻ������ ���������Ĵ���
     const std::vector<Reproducable*>& GetReproducas() const { return Reproducas; }
     const std::vector<Environment*>& GetEnvironments() const { return Environments; }
+    const std::vector<ReproduceRequest>& GetReproduceRequests() const { return last_requests; }
     int GetWidth() const { return game_conf.The_Word.width; }
     int GetHeight() const { return game_conf.The_Word.length; }
 };

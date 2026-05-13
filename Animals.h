@@ -13,7 +13,7 @@ public:
 	static AnimalConfig FindAnimalConfig(const std::string& name) {
 		auto& animals = TestConfig::GetTestConfig().The_Animals;
 		for (auto& a : animals) {
-			if (a.name == name) return a;
+			if (a.name == name) return TestConfig::GetTestConfig().Check_Animal(a);
 		}
 		return TestConfig::GetTestConfig().Default_Animal_Config;
 	}

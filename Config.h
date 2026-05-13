@@ -56,6 +56,8 @@ public:
     WordConfig   Check_Word(WordConfig &fuck);
 };
 
+void InitGameConfig(const TestConfig& cfg);
+
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(WordConfig, length, width)
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AnimalConfig,
@@ -93,15 +95,16 @@ class Config{
     int length=50;*/
     int width=50;
     float Environment_energy_absorb_rate=0.01f;
-    float Environment_plant_absorb_rate=0.4f;
-    float Environment_step_max_absorb=2;
-    float Environment_single_chunk_max_energy=50;
-    float Organism_animal_absorb_rate=0.5f;
-    float Organism_loss_rate=0.9f;
-    float Organism_reproduce_energy_threshold=25;
-    float Organism_reproduce_energy_cost=10;
-    float Organism_step_energy_cost=1;
-    float Orgianism_overlay_param=1.4;
+    float Environment_plant_absorb_rate=0.2f;
+    float Environment_step_max_absorb=1.5f;
+    float Environment_single_chunk_max_energy=25;
+    float Organism_animal_absorb_rate=0.4f;
+    float Organism_loss_rate=0.85f;
+    float Organism_reproduce_energy_threshold=35;
+    float Organism_reproduce_energy_cost=18;
+    float Organism_step_energy_cost=0.2f;
+    float Organism_overlay_param=1.0f;
     int Plant_init_radius=3;
+    int Organism_interact_radius=2;
     static Config& GetConfig();
 };

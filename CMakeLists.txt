@@ -10,6 +10,7 @@ set(SOURCES
     OrganismDefine.cpp
     EnvironmentDefine.cpp
     WorldDefine.cpp
+    SetupUI.cpp
     test_main.cpp
     ${IMGUI_SOURCES}
     imgui/backends/imgui_impl_win32.cpp
@@ -33,6 +34,44 @@ target_include_directories(ecosim PRIVATE
 
 target_link_libraries(ecosim PRIVATE opengl32 gdi32 dwmapi)
 
+# ---- headless debug sim ----
+add_executable(debug_sim debug_main.cpp "MyOperator.h" "MyOperatorDefine.cpp" "Animals.h" "Plants.h"
+    OrganismDefine.cpp EnvironmentDefine.cpp WorldDefine.cpp ConflgDefine.cpp)
+
+target_include_directories(debug_sim PRIVATE ${CMAKE_SOURCE_DIR})
+
+# ---- standalone boids test ----
+add_executable(boids_test
+    boids/test.cpp
+    ${IMGUI_SOURCES}
+    imgui/backends/imgui_impl_win32.cpp
+    imgui/backends/imgui_impl_opengl3.cpp
+)
+
+target_include_directories(boids_test PRIVATE
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/boids
+    ${CMAKE_SOURCE_DIR}/imgui
+    ${CMAKE_SOURCE_DIR}/imgui/backends
+)
+
+target_link_libraries(boids_test PRIVATE opengl32 gdi32 dwmapi)
+
 if(MSVC)
     target_compile_options(ecosim PRIVATE /EHsc)
+    target_compile_options(debug_sim PRIVATE /EHsc)
+    target_compile_options(boids_test PRIVATE /EHsc)
 endif()
+
+# Copy default_config.json to build directory so the exe can find it
+add_custom_command(TARGET ecosim POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/default_config.json"
+        "$<TARGET_FILE_DIR:ecosim>/default_config.json"
+)
+
+add_custom_command(TARGET debug_sim POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/default_config.json"
+        "$<TARGET_FILE_DIR:debug_sim>/default_config.json"
+)

@@ -1,4 +1,5 @@
 #include "World.h"
+#include<exception>
 #include "MyOperator.h"
 #include "Organism.h"
 #include "Environment.h"
@@ -13,50 +14,60 @@ World::World(Config& Conf, TestConfig& Game_conf)
     :conf(Conf),game_conf(Game_conf)
 {
     TheOnlyWord = this;
-    // ---- 植物: 30株分散在草地各处（生产者基础） ----
+    int w = game_conf.The_Word.width;
+    int h = game_conf.The_Word.length;
+    int cx = w/2, cy = h/2;
+    int lx = std::max(2, w/10), rx = std::min(w-3, w - w/10);
+    int ty = std::max(2, h/10), by = std::min(h-3, h - h/10);
+
+    // plants: 5 clusters spread across the map
     auto addPlant = [&](int x, int y) {
         Reproducas.push_back(new Plant(Plant_id++, x, y, conf.Plant_init_radius,
             conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
     };
-    // 左下集群
-    addPlant(5,5); addPlant(7,4); addPlant(4,7); addPlant(8,6); addPlant(6,8);
-    // 中部集群
-    addPlant(45,50); addPlant(47,48); addPlant(44,51); addPlant(48,52); addPlant(46,53);
-    addPlant(49,49); addPlant(43,47);
-    // 右上集群
-    addPlant(85,85); addPlant(87,83); addPlant(84,87); addPlant(88,86); addPlant(86,88);
-    addPlant(83,84);
-    // 左上集群
-    addPlant(8,85); addPlant(10,83); addPlant(7,87); addPlant(11,86); addPlant(9,88);
-    // 右下集群
-    addPlant(87,8); addPlant(89,6); addPlant(85,9); addPlant(88,10); addPlant(86,7);
-    // 中央散落
-    addPlant(55,20); addPlant(60,70); addPlant(30,60);
+    // center
+    addPlant(cx, cy); addPlant(cx+2, cy-1); addPlant(cx-1, cy+2);
+    addPlant(cx+3, cy+1); addPlant(cx-2, cy-2); addPlant(cx+1, cy-3);
+    // bottom-left
+    addPlant(lx, ty); addPlant(lx+2, ty); addPlant(lx, ty+2);
+    addPlant(lx+3, ty+1); addPlant(lx+1, ty+3);
+    // top-right
+    addPlant(rx, by); addPlant(rx-2, by); addPlant(rx, by-2);
+    addPlant(rx-3, by-1); addPlant(rx-1, by-3);
+    // top-left
+    addPlant(lx, by); addPlant(lx+2, by-1); addPlant(lx-1, by+1);
+    addPlant(lx+3, by); addPlant(lx, by-3);
+    // bottom-right
+    addPlant(rx, ty); addPlant(rx-2, ty+1); addPlant(rx+1, ty-1);
+    addPlant(rx, ty+3); addPlant(rx-1, ty-2);
+    // scattered
+    addPlant(cx+w/5, cy+h/5); addPlant(cx-w/5, cy-h/5); addPlant(lx+w/5, cy);
 
-    // ---- 绵羊: 8只, 分2群 (初级消费者) ----
+    // sheep: 2 groups
     auto addSheep = [&](int x, int y) {
-        Reproducas.push_back(MyOperator()(x, y, 3, "Sheep", Animal_id++));
+        Reproducas.push_back(MyOperator()(x, y, 5, "Sheep", Animal_id++));
     };
-    addSheep(45, 48); addSheep(47, 49); addSheep(46, 51); addSheep(48, 50);
-    addSheep(85, 83); addSheep(87, 84); addSheep(86, 86); addSheep(84, 85);
+    addSheep(cx+2, cy+3); addSheep(cx+4, cy);   addSheep(cx+1, cy+4); addSheep(cx+3, cy+1);
+    addSheep(rx-3, by-3); addSheep(rx-5, by-1); addSheep(rx-2, by-5); addSheep(rx-4, by-2);
 
-    // ---- 狼: 3只, 分散巡逻 (顶级捕食者) ----
+    // wolves: scattered
     auto addWolf = [&](int x, int y) {
-        Reproducas.push_back(MyOperator()(x, y, 3, "Wolf", Animal_id++));
+        Reproducas.push_back(MyOperator()(x, y, 5, "Wolf", Animal_id++));
     };
-    addWolf(50, 50);
-    addWolf(20, 20);
-    addWolf(89, 87);
+    addWolf(cx, cy);
+    addWolf(lx+5, ty+5);
+    addWolf(rx-5, by-5);
 
-    // ---- 环境: 100x100 草地, 初始能量有自然波动 ----
-    for (int i = 0; i < game_conf.The_Word.length; i++)
+    // environment: energy peaks at center, falls off toward edges
+    float falloff = std::max(w, h) / 3.0f;
+    for (int i = 0; i < h; i++)
     {
-        for (int j = 0; j < game_conf.The_Word.width; j++)
+        for (int j = 0; j < w; j++)
         {
-            float distX = (i - 50) * (i - 50);
-            float distY = (j - 50) * (j - 50);
+            float distX = (i - cy) * (i - cy);
+            float distY = (j - cx) * (j - cx);
             float dist = std::sqrt(distX + distY);
-            float initEnergy = 3.0f + 15.0f * std::exp(-dist / 30.0f);
+            float initEnergy = 3.0f + 15.0f * std::exp(-dist / falloff);
             Environments.push_back(new GressLand(std::make_pair(i, j), initEnergy, 2));
         }
     }
@@ -87,13 +98,14 @@ void World::Update()
         i->Step();
     }
 
+    int R = conf.Organism_interact_radius;
     for(int x=0;x<GetWidth();x++)
     for(int y=0;y<GetHeight();y++)
     {
         Environment* e=Environments[y*GetWidth()+x];
         for(auto i:e->Organisms)
-        for(int dy=-1;dy<=1;dy++)
-        for(int dx=-1;dx<=1;dx++){
+        for(int dy=-R;dy<=R;dy++)
+        for(int dx=-R;dx<=R;dx++){
             int nx=x+dx;
             int ny=y+dy;
             if(ny<0||ny>=GetHeight()||nx<0||nx>=GetWidth()) continue;
@@ -110,6 +122,7 @@ void World::Update()
 }
 void World::Reproduce()
 {
+    last_requests = reproduce_requests;
     for (auto &request : reproduce_requests)
     {
         auto *org = ReprodueNewOrganism(request);
@@ -173,6 +186,7 @@ float World::calculate_overlay(std::pair<int, int> pos)
 
 World& World::GetWorld()
 {
+    if(!TheOnlyWord) throw std::runtime_error("World not exist,can't get it without config");
     return *(TheOnlyWord);
 }
 
@@ -185,49 +199,60 @@ void World::Reset()
     Reproducas.clear();
     Environments.clear();
     reproduce_requests.clear();
+    last_requests.clear();
     Plant_id = 0;
     Animal_id = 0;
+
+    int w = game_conf.The_Word.width;
+    int h = game_conf.The_Word.length;
+    int cx = w/2, cy = h/2;
+    int lx = std::max(2, w/10), rx = std::min(w-3, w - w/10);
+    int ty = std::max(2, h/10), by = std::min(h-3, h - h/10);
 
     auto addPlant = [&](int x, int y) {
         Reproducas.push_back(new Plant(Plant_id++, x, y, conf.Plant_init_radius,
             conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
     };
-    addPlant(5,5); addPlant(7,4); addPlant(4,7); addPlant(8,6); addPlant(6,8);
-    addPlant(45,50); addPlant(47,48); addPlant(44,51); addPlant(48,52); addPlant(46,53);
-    addPlant(49,49); addPlant(43,47);
-    addPlant(85,85); addPlant(87,83); addPlant(84,87); addPlant(88,86); addPlant(86,88);
-    addPlant(83,84);
-    addPlant(8,85); addPlant(10,83); addPlant(7,87); addPlant(11,86); addPlant(9,88);
-    addPlant(87,8); addPlant(89,6); addPlant(85,9); addPlant(88,10); addPlant(86,7);
-    addPlant(55,20); addPlant(60,70); addPlant(30,60);
+    addPlant(cx, cy); addPlant(cx+2, cy-1); addPlant(cx-1, cy+2);
+    addPlant(cx+3, cy+1); addPlant(cx-2, cy-2); addPlant(cx+1, cy-3);
+    addPlant(lx, ty); addPlant(lx+2, ty); addPlant(lx, ty+2);
+    addPlant(lx+3, ty+1); addPlant(lx+1, ty+3);
+    addPlant(rx, by); addPlant(rx-2, by); addPlant(rx, by-2);
+    addPlant(rx-3, by-1); addPlant(rx-1, by-3);
+    addPlant(lx, by); addPlant(lx+2, by-1); addPlant(lx-1, by+1);
+    addPlant(lx+3, by); addPlant(lx, by-3);
+    addPlant(rx, ty); addPlant(rx-2, ty+1); addPlant(rx+1, ty-1);
+    addPlant(rx, ty+3); addPlant(rx-1, ty-2);
+    addPlant(cx+w/5, cy+h/5); addPlant(cx-w/5, cy-h/5); addPlant(lx+w/5, cy);
 
     auto addSheep = [&](int x, int y) {
-        Reproducas.push_back(MyOperator()(x, y, 3, "Sheep", Animal_id++));
+        Reproducas.push_back(MyOperator()(x, y, 5, "Sheep", Animal_id++));
     };
-    addSheep(45, 48); addSheep(47, 49); addSheep(46, 51); addSheep(48, 50);
-    addSheep(85, 83); addSheep(87, 84); addSheep(86, 86); addSheep(84, 85);
+    addSheep(cx+2, cy+3); addSheep(cx+4, cy);   addSheep(cx+1, cy+4); addSheep(cx+3, cy+1);
+    addSheep(rx-3, by-3); addSheep(rx-5, by-1); addSheep(rx-2, by-5); addSheep(rx-4, by-2);
 
     auto addWolf = [&](int x, int y) {
-        Reproducas.push_back(MyOperator()(x, y, 3, "Wolf", Animal_id++));
+        Reproducas.push_back(MyOperator()(x, y, 5, "Wolf", Animal_id++));
     };
-    addWolf(50, 50);
-    addWolf(20, 20);
-    addWolf(89, 87);
+    addWolf(cx, cy);
+    addWolf(lx+5, ty+5);
+    addWolf(rx-5, by-5);
 
-    for (int i = 0; i < game_conf.The_Word.length; i++)
+    float falloff = std::max(w, h) / 3.0f;
+    for (int i = 0; i < h; i++)
     {
-        for (int j = 0; j < game_conf.The_Word.width; j++)
+        for (int j = 0; j < w; j++)
         {
-            float distX = (i - 50) * (i - 50);
-            float distY = (j - 50) * (j - 50);
+            float distX = (i - cy) * (i - cy);
+            float distY = (j - cx) * (j - cx);
             float dist = std::sqrt(distX + distY);
-            float initEnergy = 3.0f + 15.0f * std::exp(-dist / 30.0f);
+            float initEnergy = 3.0f + 15.0f * std::exp(-dist / falloff);
             Environments.push_back(new GressLand(std::make_pair(i, j), initEnergy, 2));
         }
     }
 }
 
-World& World::GetWorld(Config Cof,TestConfig& Game_conf) {
-    static World The_World(Cof, Game_conf);
+World& World::GetWorld(TestConfig& Game_conf) {
+    static World The_World(Config::GetConfig(), Game_conf);
     return The_World;
 }

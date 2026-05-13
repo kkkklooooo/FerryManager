@@ -2,6 +2,12 @@
 
 TestConfig* g_GameConf;
 
+void InitGameConfig(const TestConfig& cfg) {
+    static TestConfig s_config;
+    s_config = cfg;
+    g_GameConf = &s_config;
+}
+
 WordConfig TestConfig::Check_Word(WordConfig &fu) {
 	if (fu.length < 50)fu.length = 50;
 	if (fu.width < 50)fu.width = 50;
@@ -27,7 +33,7 @@ void TestConfig::User_AddNew_Animal(AnimalConfig& fuck) {
 
 PlantConfig TestConfig::Check_Plant(PlantConfig& fu) {
 	if (fu.reproduce_original_energy < 0)fu.reproduce_original_energy = Default_Plant_Config.reproduce_original_energy;
-	if (fu.step_energy_cost < 0)fu.step_energy_cost = Default_Animal_Config.step_energy_cost;
+	if (fu.step_energy_cost < 0)fu.step_energy_cost = Default_Plant_Config.step_energy_cost;
 	return fu;
 }
 
@@ -39,7 +45,7 @@ TestConfig& TestConfig::GetTestConfig() {
 	return *g_GameConf;
 }
 
-//±ÈWorldÏÈ¼ÓÔØ
+//ï¿½ï¿½Worldï¿½È¼ï¿½ï¿½ï¿½
 
 Config& Config::GetConfig() {
 	static Config The_Config;

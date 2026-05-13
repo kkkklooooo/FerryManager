@@ -38,21 +38,14 @@ bool Environment::canPlant(ReproduceRequest a)
 
 void Environment::EnergyExchange(Reproducable *on)
 {
-	//ֻ���������add
-	if (on->type == PLANT && on->active)
-	{ // ֲ���������� 
-	  // @ TODO �޸Ĳ���
+	if (on->type == PLANT && on->active && energy > 0)
+	{
 		float abs = std::min(World::GetWorld().conf.Environment_plant_absorb_rate * energy, World::GetWorld().conf.Environment_step_max_absorb / World::GetWorld().conf.Organism_loss_rate);
 		abs = abs * World::GetWorld().conf.Organism_loss_rate;
+		abs = std::min(abs, energy); // never drain below 0
 		on->energy += abs;
-		// assert(on->energy>=-100);
 		energy -= abs;
-		
 	}
-	if (energy < 0)
-		{
-			printf("error");
-		}
 }
 
 EnvironmentConfig Environment::FindEnvironmentConfig(const std::string& name) {
@@ -65,9 +58,9 @@ EnvironmentConfig Environment::FindEnvironmentConfig(const std::string& name) {
 
 void Environment::Update(Weather)
 {
-	float gain = deadOrganismEnergy * World::GetWorld().conf.Organism_loss_rate; // ����ʬ���ϵ�����
+	float gain = deadOrganismEnergy * World::GetWorld().conf.Organism_loss_rate;
 	if(energy<World::GetWorld().conf.Environment_single_chunk_max_energy*2) energy += std::min(gain,World::GetWorld().conf.Environment_single_chunk_max_energy-energy);
-	
+
 	deadOrganismEnergy = 0;
 }
 
@@ -94,7 +87,7 @@ void Water::Update(Weather sky)
 GressLand::GressLand(std::pair<int, int> pos, float en, int mp)
 	: Environment(pos, en, "GressLand", 200, mp)
 {
-	
+
 }
 
 void GressLand::Update(Weather sky)
@@ -103,7 +96,7 @@ void GressLand::Update(Weather sky)
 	{
 	case SUN:
 		if (World::GetWorld().conf.Environment_single_chunk_max_energy >= energy)
-			energy += 2;
+			energy += 0.8f;
 		break;
 	default:
 		break;
