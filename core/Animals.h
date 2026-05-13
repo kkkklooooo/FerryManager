@@ -1,7 +1,6 @@
 #pragma once
 #include"Organism.h"
-#include"MyOperator.h"
-#include"Config.h"
+#include"config/Config.h"
 #include"World.h"
 // 这里是标签二: 工厂
 
@@ -19,8 +18,4 @@ public:
 	}
 };
 
-//系统的原有用注册表
-//此时就有Config了
-static AnimalRegistrator wolf("Wolf", [](int id, int x, int y, int radius) {return new UserAnimal(id, x, y,radius, Config::GetConfig().Organism_reproduce_energy_threshold, Config::GetConfig().Organism_reproduce_energy_cost, UserAnimal::FindAnimalConfig("Wolf")); });
 
-static AnimalRegistrator sheep("Sheep", [](int id, int x, int y, int radius) {return new UserAnimal(id, x, y, radius, Config::GetConfig().Organism_reproduce_energy_threshold, Config::GetConfig().Organism_reproduce_energy_cost, UserAnimal::FindAnimalConfig("Sheep")); });

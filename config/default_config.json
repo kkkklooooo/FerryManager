@@ -21,7 +21,7 @@
   "The_Environments": [
     {
       "name": "GressLand",
-      "CanLive": [ "Plant", "Sheep", "Wolf" ]
+      "CanLive": [ "Gress", "Sheep", "Wolf" ]
     },
     {
       "name": "Water",
@@ -41,7 +41,7 @@
     },
     {
       "name": "Sheep",
-      "diet": [ "Plant" ],
+      "diet": [ "Gress" ],
       "reproduce_original_rate": -1,
       "reproduce_original_energy": -1,
       "max_rate": 2,

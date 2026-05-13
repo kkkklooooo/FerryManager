@@ -2,7 +2,7 @@
 #include"Registry.h"
 #include"Organism.h"
 #include"Environment.h"
-#include"Config.h"
+#include"config/Config.h"
 class World
 {
     // �������ķ�ֳ�����б�

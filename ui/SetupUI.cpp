@@ -48,8 +48,10 @@ static bool LoadConfig(TestConfig& cfg, const char* path) {
     std::ifstream f(path);
     if (!f.is_open()) return false;
     json j;
-    f >> j;
+
+    j=json::parse(f);
     cfg = j.get<TestConfig>();
+    printf("%s\n\n", cfg.Default_Plant_Config.name.data());
     return true;
 }
 

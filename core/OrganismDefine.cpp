@@ -118,6 +118,7 @@ Reproducable::Reproducable(float energy_threshold, float energy_cost, int radius
 Plant::Plant(int id, int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost, float step_energy_cost)
     : Reproducable(reproduce_energy_threshold, reproduce_energy_cost, radius, step_energy_cost, PLANT)
 {
+
     name = "Plant";
     this->id = id;
     Pos = std::make_pair(x, y);
@@ -152,6 +153,7 @@ void Plant::Reproduce()
     }
     int x = Pos.first;
     int y = Pos.second;
+    printf("156");
     // 在 [-reproduce_radius, +reproduce_radius] 范围内随机偏移
     int x_new = x + std::rand() % (2 * reproduce_radius + 1) - reproduce_radius;
     int y_new = y + std::rand() % (2 * reproduce_radius + 1) - reproduce_radius;
@@ -162,8 +164,9 @@ void Plant::Reproduce()
         // 子代植物的半径在父半径的[0.25,2.0]倍之间随机，并取整
         float r = reproduce_radius * std::min(2.0, std::max(0.25, (double)std::rand() / RAND_MAX));
         int r_int = std::max(1, (int)r);
-        if (!(World::GetWorld().AddReproduceRequest({PLANT, name, std::make_pair(x_new, y_new), r_int})))
+        if ((World::GetWorld().AddReproduceRequest({PLANT, name, std::make_pair(x_new, y_new), r_int})))
         {
+            printf("169");
             energy -= reproduce_energy_cost;
             // assert(energy >= -100);
             return;

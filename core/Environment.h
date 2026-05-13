@@ -1,7 +1,7 @@
 #pragma once
 #include "Registry.h"
 #include "Organism.h"
-#include"Config.h"
+#include"config/Config.h"
 #include <utility>
 
 class Environment

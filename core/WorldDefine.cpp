@@ -7,7 +7,7 @@
 #include <cmath>
 #include <cstdio>
 #include "Animals.h"
-
+#include"Plants.h"
 static World* TheOnlyWord;//世界指针单例
 
 World::World(Config& Conf, TestConfig& Game_conf)
@@ -22,8 +22,7 @@ World::World(Config& Conf, TestConfig& Game_conf)
 
     // plants: 5 clusters spread across the map
     auto addPlant = [&](int x, int y) {
-        Reproducas.push_back(new Plant(Plant_id++, x, y, conf.Plant_init_radius,
-            conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
+        Reproducas.push_back(MyOperator::GetOp()(x, y,conf.Plant_init_radius, "Gress", Plant_id++));
     };
     // center
     addPlant(cx, cy); addPlant(cx+2, cy-1); addPlant(cx-1, cy+2);
@@ -45,7 +44,7 @@ World::World(Config& Conf, TestConfig& Game_conf)
 
     // sheep: 4 groups of 4
     auto addSheep = [&](int x, int y) {
-        Reproducas.push_back(MyOperator()(x, y, 5, "Sheep", Animal_id++));
+        Reproducas.push_back(MyOperator::GetOp()(x, y, 5, "Sheep", Animal_id++));
     };
     addSheep(cx+2, cy+3); addSheep(cx+4, cy);   addSheep(cx+1, cy+4); addSheep(cx+3, cy+1);
     addSheep(rx-3, by-3); addSheep(rx-5, by-1); addSheep(rx-2, by-5); addSheep(rx-4, by-2);
@@ -54,7 +53,7 @@ World::World(Config& Conf, TestConfig& Game_conf)
 
     // wolves: scattered
     auto addWolf = [&](int x, int y) {
-        Reproducas.push_back(MyOperator()(x, y, 5, "Wolf", Animal_id++));
+        Reproducas.push_back(MyOperator::GetOp()(x, y, 5, "Wolf", Animal_id++));
     };
     addWolf(cx, cy);
     addWolf(lx+5, ty+5);
@@ -89,7 +88,7 @@ void World::Update()
     {
         if (i->energy < 0)
         {
-            printf("error %d %d %f\n", i->Pos.first, i->Pos.second, i->energy);
+            printf_s("error %d %d %f\n", i->Pos.first, i->Pos.second, i->energy);
         }
         i->Update(CurrentWeather);
     }
@@ -127,6 +126,7 @@ void World::Reproduce()
     last_requests = reproduce_requests;
     for (auto &request : reproduce_requests)
     {
+        printf("128 %s\n", request.name.data());
         auto *org = ReprodueNewOrganism(request);
         if (org)
             Reproducas.push_back(org);
@@ -206,8 +206,7 @@ void World::Reset()
     int ty = std::max(2, h/10), by = std::min(h-3, h - h/10);
 
     auto addPlant = [&](int x, int y) {
-        Reproducas.push_back(new Plant(Plant_id++, x, y, conf.Plant_init_radius,
-            conf.Organism_reproduce_energy_threshold, conf.Organism_reproduce_energy_cost, conf.Organism_step_energy_cost));
+        Reproducas.push_back(MyOperator::GetOp()(x, y, conf.Plant_init_radius, "Gress", Plant_id++));
     };
     addPlant(cx, cy); addPlant(cx+2, cy-1); addPlant(cx-1, cy+2);
     addPlant(cx+3, cy+1); addPlant(cx-2, cy-2); addPlant(cx+1, cy-3);

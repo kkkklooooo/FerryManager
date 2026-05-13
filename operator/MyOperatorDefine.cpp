@@ -3,8 +3,8 @@
 #include<cassert>
 #include<cstdio>
 #include<algorithm>
-using Creator = std::function<Animal*( int id, int x, int y, int radius)>;
-using PlantCreator = std::function<Plant* (int id, int x, int y, int radius)>; //注册官方植物的
+using Creator = std::function<UserAnimal*( int id, int x, int y, int radius)>;
+using PlantCreator = std::function<UserPlant* (int id, int x, int y, int radius)>; //注册官方植物的
 
 void MyOperator::operator()(Reproducable* a, Reproducable* b) {
     bool aEb = false;
@@ -64,11 +64,17 @@ void MyOperator::register_Plant_Create(std::string  name, PlantCreator creator) 
 
 
 Reproducable* MyOperator::operator()(int x,int y,int r, std::string  n,int id) {
-    auto it = registry().find(n);
-    if (it != registry().end()) {// ����ע��Ĵ�������
-        return it->second( id, x, y,r); 
-    }
-    return nullptr;
+       auto it_1 = registry().find(n);
+       if (it_1 != registry().end()) {// ����ע��Ĵ�������
+          
+           return it_1->second(id, x, y, r);
+       }
+       auto it_2 = Plantregistry().find(n);
+       if (it_2 != Plantregistry().end()) {// ����ע��Ĵ�������
+           return it_2->second(id, x, y, r);
+       }
+       printf("77 %s\n", n.data());
+       return nullptr;
 
 } 
 Reproducable* MyOperator::operator()(ReproduceRequest& x,int id) {  

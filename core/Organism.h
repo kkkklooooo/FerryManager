@@ -5,7 +5,7 @@
 #include <vector>
 #include<string>
 #include"Registry.h"
-#include"Config.h"
+#include"config/Config.h"
 #include"boids/Genes.h"
 // 全局变量：用于生成生物的唯一ID
 // const float AnimalAbsorbRate=0.5;
