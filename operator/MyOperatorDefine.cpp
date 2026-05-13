@@ -4,6 +4,8 @@
 #include<cstdio>
 #include<algorithm>
 using Creator = std::function<Animal*( int id, int x, int y, int radius)>;
+using PlantCreator = std::function<Plant* (int id, int x, int y, int radius)>; //注册官方植物的
+
 void MyOperator::operator()(Reproducable* a, Reproducable* b) {
     bool aEb = false;
     bool bEa = false;
@@ -60,6 +62,7 @@ void MyOperator::register_Plant_Create(std::string  name, PlantCreator creator) 
 }
 
 
+
 Reproducable* MyOperator::operator()(int x,int y,int r, std::string  n,int id) {
     auto it = registry().find(n);
     if (it != registry().end()) {// ����ע��Ĵ�������
@@ -81,7 +84,10 @@ std::unordered_map <std::string, Creator>& MyOperator::registry() {
     return reg;
 }
 
-
+std::unordered_map<std::string, PlantCreator>& MyOperator::Plantregistry() {
+    static std::unordered_map<std::string, PlantCreator> reg;
+    return reg;
+}
 
 MyOperator& MyOperator::GetOp() {
     static MyOperator Instance;
