@@ -68,7 +68,7 @@ World::World(Config& Conf, TestConfig& Game_conf)
             float distY = (j - cx) * (j - cx);
             float dist = std::sqrt(distX + distY);
             float initEnergy = 3.0f + 15.0f * std::exp(-dist / falloff);
-            Environments.push_back(new GressLand(std::make_pair(i, j), initEnergy, 2));
+            Environments.push_back(new GressLand(std::make_pair(i, j), initEnergy));
         }
     }
 }
@@ -150,8 +150,6 @@ void World::RemoveDeadOrganisms()
                                         if (!(organism->active))
                                         {
                                             Environments[organism->Pos.second * GetWidth() + organism->Pos.first]->getDeadOrgnismEnergy(organism->energy);
-                                            if (organism->type == PLANT)
-                                                Environments[organism->Pos.second * GetWidth() + organism->Pos.first]->havePlant--;
                                             delete organism;
                                             return true;
                                         }
@@ -172,16 +170,12 @@ float World::calculate_overlay(std::pair<int, int> pos)
     {
         int x = pos.first + i.first;
         int y = pos.second + i.second;
-        if (x >= 0 && x < len && y >= 0 && y < width)
-        {
-            cnt += Environments[y * width + x]->havePlant;
-        }
+        if (x >= 0 && x < width && y >= 0 && y < len)
+            cnt += (int)Environments[y * width + x]->Organisms.size();
         else
-        {
-            cnt += Environments[pos.second * width + pos.first]->maxPlant;
-        }
+            cnt += conf.max_organisms_per_cell;
     }
-    return (float)cnt / (8.0 * Environments[pos.second * width + pos.first]->maxPlant);
+    return (float)cnt / (8.0f * conf.max_organisms_per_cell);
 }
 
 World& World::GetWorld()
@@ -247,7 +241,7 @@ void World::Reset()
             float distY = (j - cx) * (j - cx);
             float dist = std::sqrt(distX + distY);
             float initEnergy = 3.0f + 15.0f * std::exp(-dist / falloff);
-            Environments.push_back(new GressLand(std::make_pair(i, j), initEnergy, 2));
+            Environments.push_back(new GressLand(std::make_pair(i, j), initEnergy));
         }
     }
 }

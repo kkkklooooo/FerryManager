@@ -106,5 +106,6 @@ class Config{
     float Organism_overlay_param=1.0f;
     int Plant_init_radius=3;
     int Organism_interact_radius=2;
+    int max_organisms_per_cell=2;
     static Config& GetConfig();
 };
