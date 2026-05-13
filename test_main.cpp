@@ -16,6 +16,10 @@
 #include <vector>
 #include <string>
 #include <chrono>
+#include<iostream>
+#include<fstream>
+
+using json = nlohmann::json;
 
 // ============================================================
 //  helper: environment -> colour
@@ -552,6 +556,9 @@ static void CleanupWindow() {
 // ============================================================
 //  main
 // ============================================================
+
+static  Config conf = Config::GetConfig();
+
 int main() {
     if (!InitWindow()) return 1;
 

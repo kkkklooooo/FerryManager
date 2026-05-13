@@ -23,7 +23,7 @@ bool Environment::canPlant(ReproduceRequest a)
 	for (auto* org : Organisms) {
 		if (org && org->name == a.name) sameSpecies++;
 	}
-	if (sameSpecies >= World::GetWorld().conf.max_organisms_per_cell)
+	if (sameSpecies >= Config::GetConfig().max_organisms_per_cell)
 		return false;
 
 	if (std::find(CanLiveIn.begin(), CanLiveIn.end(), a.name) != CanLiveIn.end())
@@ -36,11 +36,11 @@ void Environment::EnergyExchange(Reproducable *on)
 {
 	if (on->type == PLANT && on->active && energy > 0)
 	{
-		float abs = std::min(World::GetWorld().conf.Environment_plant_absorb_rate * energy, World::GetWorld().conf.Environment_step_max_absorb / World::GetWorld().conf.Organism_loss_rate);
-		abs = abs * World::GetWorld().conf.Organism_loss_rate;
+		float abs = std::min(Config::GetConfig().Environment_plant_absorb_rate * energy, Config::GetConfig().Environment_step_max_absorb / World::GetWorld().conf.Organism_loss_rate);
+		abs = abs * Config::GetConfig().Organism_loss_rate;
 		abs = std::min(abs, energy);
 		on->energy += abs;
-		energy -= abs;
+		this->energy -= abs;
 	}
 }
 
@@ -55,7 +55,7 @@ EnvironmentConfig Environment::FindEnvironmentConfig(const std::string& name) {
 void Environment::Update(Weather)
 {
 	float gain = deadOrganismEnergy * World::GetWorld().conf.Organism_loss_rate;
-	if(energy<World::GetWorld().conf.Environment_single_chunk_max_energy*2) energy += std::min(gain,World::GetWorld().conf.Environment_single_chunk_max_energy-energy);
+	if(energy< Config::GetConfig().Environment_single_chunk_max_energy*2) energy += std::min(gain, Config::GetConfig().Environment_single_chunk_max_energy-energy);
 	deadOrganismEnergy = 0;
 }
 
@@ -70,7 +70,7 @@ void Water::Update(Weather sky)
 	{
 	case SUN:
 		Valum -= 0.1;
-		if (energy < World::GetWorld().conf.Environment_single_chunk_max_energy)
+		if (energy < Config::GetConfig().Environment_single_chunk_max_energy)
 			energy += 0.1;
 		break;
 	default:
@@ -89,7 +89,7 @@ void GressLand::Update(Weather sky)
 	switch (sky)
 	{
 	case SUN:
-		if (World::GetWorld().conf.Environment_single_chunk_max_energy >= energy)
+		if (Config::GetConfig().Environment_single_chunk_max_energy >= energy)
 			energy += 0.8f;
 		break;
 	default:

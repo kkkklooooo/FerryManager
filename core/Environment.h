@@ -22,7 +22,7 @@ public:
 	std::vector<Reproducable*> Organisms;
 	bool canPlant(ReproduceRequest);
 	void EnergyExchange(Reproducable* on);
-	void getDeadOrgnismEnergy(float dead) { deadOrganismEnergy += (dead > 0) ? dead : 0.0; }
+	//void getDeadOrgnismEnergy(float dead) { deadOrganismEnergy += (dead > 0) ? dead : 0.0; }
 	static EnvironmentConfig FindEnvironmentConfig(const std::string& name);
 	virtual void Update(Weather);
 };

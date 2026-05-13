@@ -7,7 +7,7 @@ int main() {
     // load config
     TestConfig tc;
     {
-        std::ifstream f("default_config.json");
+        std::ifstream f("config/default_config.json");
         if (f.is_open()) {
             json j; f >> j;
             tc = j.get<TestConfig>();
