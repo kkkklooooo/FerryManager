@@ -95,16 +95,16 @@ class Config{
     int length=50;*/
     int width=50;
     float Environment_energy_absorb_rate=0.01f;
-    float Environment_plant_absorb_rate=0.3f;
+    float Environment_plant_absorb_rate=0.2f;
     float Environment_step_max_absorb=1.5f;
-    float Environment_single_chunk_max_energy=40;
+    float Environment_single_chunk_max_energy=25;
     float Organism_animal_absorb_rate=0.4f;
     float Organism_loss_rate=0.85f;
-    float Organism_reproduce_energy_threshold=30;
-    float Organism_reproduce_energy_cost=15;
-    float Organism_step_energy_cost=0.3f;
-    float Organism_overlay_param=1.2f;
-    int Plant_init_radius=5;
+    float Organism_reproduce_energy_threshold=35;
+    float Organism_reproduce_energy_cost=18;
+    float Organism_step_energy_cost=0.2f;
+    float Organism_overlay_param=1.0f;
+    int Plant_init_radius=3;
     int Organism_interact_radius=2;
     static Config& GetConfig();
 };

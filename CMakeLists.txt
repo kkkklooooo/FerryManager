@@ -26,6 +26,9 @@ set(HEADERS
 
 add_executable(ecosim ${SOURCES} ${HEADERS} "MyOperator.h" "MyOperatorDefine.cpp" "Animals.h"  "ConflgDefine.cpp")
 
+add_executable(debug_sim debug_main.cpp "MyOperator.h" "MyOperatorDefine.cpp" "Animals.h" "Plants.h"
+    OrganismDefine.cpp EnvironmentDefine.cpp WorldDefine.cpp ConflgDefine.cpp)
+
 target_include_directories(ecosim PRIVATE
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/imgui
@@ -34,8 +37,11 @@ target_include_directories(ecosim PRIVATE
 
 target_link_libraries(ecosim PRIVATE opengl32 gdi32 dwmapi)
 
+target_include_directories(debug_sim PRIVATE ${CMAKE_SOURCE_DIR})
+
 if(MSVC)
     target_compile_options(ecosim PRIVATE /EHsc)
+    target_compile_options(debug_sim PRIVATE /EHsc)
 endif()
 
 # Copy default_config.json to build directory so the exe can find it
@@ -43,4 +49,10 @@ add_custom_command(TARGET ecosim POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${CMAKE_SOURCE_DIR}/default_config.json"
         "$<TARGET_FILE_DIR:ecosim>/default_config.json"
+)
+
+add_custom_command(TARGET debug_sim POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/default_config.json"
+        "$<TARGET_FILE_DIR:debug_sim>/default_config.json"
 )

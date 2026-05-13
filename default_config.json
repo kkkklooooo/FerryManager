@@ -14,8 +14,8 @@
   },
   "Default_Plant_Config": {
     "name": "Plant",
-    "reproduce_original_energy": 8,
-    "step_energy_cost": 0.1
+    "reproduce_original_energy": 5,
+    "step_energy_cost": 0.2
   },
   "The_Environments": [
     {
@@ -51,7 +51,7 @@
     {
       "name": "Plant",
       "reproduce_original_energy": -1,
-      "step_energy_cost": 0.1
+      "step_energy_cost": 0.2
     }
   ]
 }
