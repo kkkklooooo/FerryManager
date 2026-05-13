@@ -27,10 +27,10 @@ Output columns: Step, Plants, P.min, P.avg, P.max, EnvE, Req
 
 | File | What |
 |------|------|
-| `Config.h` | Engine parameters (absorption rates, thresholds, costs) |
-| `default_config.json` | Species config (energies, speeds, diets) |
-| `EnvironmentDefine.cpp` | Per-step environment behavior (solar gain, absorption logic) |
-| `WorldDefine.cpp` | World init & Update loop |
+| `config/Config.h` | Engine parameters (absorption rates, thresholds, costs) |
+| `config/default_config.json` | Species config (energies, speeds, diets) |
+| `core/EnvironmentDefine.cpp` | Per-step environment behavior (solar gain, absorption logic) |
+| `core/WorldDefine.cpp` | World init & Update loop |
 
 ### Energy flow per step
 
