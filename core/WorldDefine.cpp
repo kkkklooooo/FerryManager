@@ -52,12 +52,12 @@ World::World(Config& Conf, TestConfig& Game_conf)
     addSheep(lx+3, by-3); addSheep(lx+5, by-1); addSheep(lx+2, by-5); addSheep(lx+4, by-2);
 
     // wolves: scattered
-    auto addWolf = [&](int x, int y) {
-        Reproducas.push_back(MyOperator::GetOp()(x, y, 5, "Wolf", Animal_id++));
-    };
-    addWolf(cx, cy);
-    addWolf(lx+5, ty+5);
-    addWolf(rx-5, by-5);
+    // auto addWolf = [&](int x, int y) {
+    //     Reproducas.push_back(MyOperator::GetOp()(x, y, 5, "Wolf", Animal_id++));
+    // };
+    // addWolf(cx, cy);
+    // addWolf(lx+5, ty+5);
+    // addWolf(rx-5, by-5);
 
     // environment: energy peaks at center, falls off toward edges
     float falloff = std::max(w, h) / 3.0f;

@@ -353,6 +353,74 @@ static void DrawPopulationChart() {
 }
 
 // ============================================================
+//  Gene statistics for sheep
+// ============================================================
+static std::vector<float> s_geneCoh;   // avg cohesion
+static std::vector<float> s_geneAli;   // avg alignment
+static std::vector<float> s_geneSep;   // avg separation
+static std::vector<float> s_geneVis;   // avg vision
+static bool showGeneChart = false;
+
+static void RecordGeneStats(const World& world) {
+    const auto& orgs = world.GetReproducas();
+    float coh = 0, ali = 0, sep = 0, vis = 0;
+    int sheep = 0;
+    for (auto* o : orgs) {
+        if (!o || !o->active || o->type == PLANT) continue;
+        if (o->name != "Sheep") continue;
+        const Animal* a = static_cast<const Animal*>(o);
+        coh += a->genes.cohesion;
+        ali += a->genes.alignment;
+        sep += a->genes.separation;
+        vis += a->genes.vision;
+        sheep++;
+    }
+    if (sheep > 0) { coh /= sheep; ali /= sheep; sep /= sheep; vis /= sheep; }
+    else { coh = ali = sep = vis = 0; }
+    s_geneCoh.push_back(coh);
+    s_geneAli.push_back(ali);
+    s_geneSep.push_back(sep);
+    s_geneVis.push_back(vis);
+}
+
+static void ResetGeneHistory() {
+    s_geneCoh.clear();
+    s_geneAli.clear();
+    s_geneSep.clear();
+    s_geneVis.clear();
+}
+
+static void DrawGeneChart() {
+    ImGui::SetNextWindowSize(ImVec2(520, 380), ImGuiCond_FirstUseEver);
+    if (!ImGui::Begin("Sheep Gene Stats", &showGeneChart)) {
+        ImGui::End();
+        return;
+    }
+
+    int count = (int)s_geneCoh.size();
+    if (count < 2) {
+        ImGui::TextDisabled("Waiting for data...");
+        ImGui::End();
+        return;
+    }
+
+    if (ImPlot::BeginPlot("##GenePlot", ImVec2(-1, -1))) {
+        ImPlot::SetupAxes("Frame", "Value");
+        ImPlot::SetupAxisLimits(ImAxis_X1, 0, (double)(count + 10), ImGuiCond_Once);
+        ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 0, ImGuiCond_Once); // auto-fit
+
+        ImPlot::PlotLine("Cohesion",  s_geneCoh.data(), count);
+        ImPlot::PlotLine("Alignment", s_geneAli.data(), count);
+        ImPlot::PlotLine("Separation", s_geneSep.data(), count);
+        ImPlot::PlotLine("Vision",    s_geneVis.data(), count);
+
+        ImPlot::EndPlot();
+    }
+
+    ImGui::End();
+}
+
+// ============================================================
 //  Stats bar
 // ============================================================
 static void DrawStats(const World& world, int frame, int total) {
@@ -408,6 +476,7 @@ void RenderUI(World& world, int* pFrame, int total,
             ImGui::MenuItem("Flat Colors", nullptr, &flatColors);
             ImGui::MenuItem("Repro Requests", nullptr, &showRequests);
             ImGui::MenuItem("Pop Chart", nullptr, &showPopChart);
+            ImGui::MenuItem("Gene Chart", nullptr, &showGeneChart);
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();
@@ -423,7 +492,7 @@ void RenderUI(World& world, int* pFrame, int total,
     ImGui::SameLine();
     if (ImGui::Button("Step")) *pStep = true;
     ImGui::SameLine();
-    if (ImGui::Button("Reset")) { world.Reset(); *pFrame = 0; ResetPopulationHistory(); }
+    if (ImGui::Button("Reset")) { world.Reset(); *pFrame = 0; ResetPopulationHistory(); ResetGeneHistory(); }
     ImGui::SetNextItemWidth(120);
     ImGui::SliderFloat("Speed", pSpeed, 0.1f, 100.0f, "%.1fx");
     ImGui::SameLine();
@@ -559,6 +628,9 @@ void RenderUI(World& world, int* pFrame, int total,
     if (showPopChart) {
         DrawPopulationChart();
     }
+    if (showGeneChart) {
+        DrawGeneChart();
+    }
 }
 
 // ============================================================
@@ -660,7 +732,7 @@ int main() {
 
     World& world = World::GetWorld();
     world.CurrentWeather = SUN;
-    RecordPopulation(world); // record initial state
+    RecordPopulation(world); RecordGeneStats(world); // record initial state
 
     const int totalFrames = 30000;
     int   frame    = 0;
@@ -696,7 +768,7 @@ int main() {
         if (stepReq) {
             world.Update();
             ++frame;
-            RecordPopulation(world);
+            RecordPopulation(world); RecordGeneStats(world);
             stepReq = false;
             lastStep = now;
         } else if (!paused) {
@@ -705,12 +777,12 @@ int main() {
                     world.Update();
                     ++frame;
                 }
-                RecordPopulation(world);
+                RecordPopulation(world); RecordGeneStats(world);
                 lastStep = now;
             } else if (elapsed >= stepInterval) {
                 world.Update();
                 ++frame;
-                RecordPopulation(world);
+                RecordPopulation(world); RecordGeneStats(world);
                 lastStep = now;
             }
         }
