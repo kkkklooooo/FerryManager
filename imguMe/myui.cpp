@@ -8,6 +8,7 @@
 #include "../imgui/imgui_internal.h"
 #include "../imgui/backends/imgui_impl_win32.h"
 #include "../imgui/backends/imgui_impl_opengl3.h"
+#include"../boids/Genes.h"
 #include <GL/gl.h>
 #include <algorithm>
 #include <cfloat>
@@ -48,6 +49,7 @@ static const char* OrganismDisplayName(const std::string& name) {
     return name.c_str();
 }
 
+static std::unordered_map<std::string, ImVec4>OrganismColor;
 
 // ============================================================
 //  World grid
@@ -88,51 +90,7 @@ static void DrawWorldGrid(const World& world, bool flat, bool showReq) {
         }
     }
 
-    //设置每个动植物的颜色的区域
-    const auto& AllAnaimals = world.game_conf.The_Animals;
-    const auto& AllPlants = world.game_conf.The_Plants;
-    static std::unordered_map<std::string, ImVec4>OrganismColor;
-    static int id = 0;
-    static float rab_color[4];
-    ImGui::Begin("OrganismColor");
-    ImGui::BeginTable ("##Color", 5, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg |
-        ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingFixedFit,ImVec2(w,0));
-    ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, 40);
-    ImGui::TableSetupColumn("Color", ImGuiTableColumnFlags_WidthFixed, 40);
-    for (auto TheAnimal : AllAnaimals) {
-        ImGui::PushID(id);
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0); ImGui::Text("%s", TheAnimal.name.data());
-        ImGui::ColorPicker4("", rab_color);
-        ImGui::TableSetColumnIndex(1); ImGui::Text("%f", rab_color[0]);
-        ImGui::TableSetColumnIndex(2); ImGui::Text("%f", rab_color[1]);
-        ImGui::TableSetColumnIndex(3); ImGui::Text("%f", rab_color[2]);
-        ImGui::TableSetColumnIndex(4); ImGui::Text("%f", rab_color[4]);
-        if (ImGui::Button("Set")) {
-            OrganismColor[TheAnimal.name] = ImVec4(rab_color[0], rab_color[1], rab_color[2],rab_color[3]);
-        }
-        ImGui::PopID();
-        id++;
-    }
-    for (auto ThePlant : AllPlants) {
-        ImGui::PushID(id);
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0); ImGui::Text("%s", ThePlant.name.data());
-        ImGui::ColorPicker4("", rab_color);
-        ImGui::TableSetColumnIndex(1); ImGui::Text("%f", rab_color[0]);
-        ImGui::TableSetColumnIndex(2); ImGui::Text("%f", rab_color[1]);
-        ImGui::TableSetColumnIndex(3); ImGui::Text("%f", rab_color[2]);
-        ImGui::TableSetColumnIndex(4); ImGui::Text("%f", rab_color[4]);
-        if (ImGui::Button("Set")) {
-            OrganismColor[ThePlant.name] = ImVec4(rab_color[0], rab_color[1], rab_color[2], rab_color[3]);
-        }
-        ImGui::PopID();
-        id++;
-    }
-    ImGui::End();
-
-
-
+    
     auto drawOrg = [&](Reproducable* org, bool flat) {
         ImVec4 Color = OrganismColor[org->name];
         int idx = org->Pos.second* w + org->Pos.first;
@@ -283,6 +241,7 @@ static void DrawStats(const World& world, int frame, int total) {
     static std::unordered_map<std::string, int>size;
     int plants = 0, animals = 0, wolves = 0, sheep = 0;
     float pE = 0, aE = 0, envE = 0;
+    size.clear();
     for (auto* o : orgs) {
 
         if (!o) continue;
@@ -316,32 +275,52 @@ static void DrawStats(const World& world, int frame, int total) {
 static void DrawAddList(World& world) {
     const auto& AllAnaimals = world.game_conf.The_Animals;
     const auto& AllPlants = world.game_conf.The_Plants;
-    int x;
-    int y;
-    ImGui::InputInt("x", &x, 0, world.GetWidth());
-    ImGui::InputInt("y", &y, 0, world.GetHeight());
-    ImGui::BeginListBox("Organism", { 0,world.GetWidth() });
-    static int id = 0;
+    static int x=0;
+    static int y=0;
+    ImGui::SliderInt("x", &x, 0, world.GetWidth()-1);
+    ImGui::SliderInt("y", &y, 0, world.GetHeight()-1);
+    ImGui::BeginListBox("Organism", ImVec2(0, 150));
     static int selected = 0;
+    int id = 0;
     for (auto TheAnimal : AllAnaimals) {
-        ImGui::PushID(id);
-        ImGui::RadioButton(TheAnimal.name.data(), &selected, id);
-        ImGui::PopID();
+        ImGui::RadioButton(TheAnimal.name.data(), &selected,id);
         id++;
     }
     for (auto ThePlant : AllPlants) {
-        ImGui::PushID(id);
-        ImGui::RadioButton(ThePlant.name.data(), &selected, id);
-        ImGui::PopID();
+        ImGui::RadioButton(ThePlant.name.data(), &selected,id);
         id++;
     }
+    ImGui::EndListBox();
     if (AllAnaimals.size() > selected) {
-       
-       world.AddReproduceRequest({ANIMAL,AllAnaimals[id].name,std::make_pair(x,y),world.conf.Organism_interact_radius});
+        static float cohesion;
+        static float alignment;
+        static float separation;
+        static float vision;
+        static bool change = false;
+        ImGui::Checkbox("Set Gen", &change);
+        if (change) {
+            ImGui::SliderFloat("cohesion", &cohesion, 0.0f, 2.0f);
+            ImGui::SliderFloat("alignment", &alignment, 0.0f, 2.0f);
+            ImGui::SliderFloat("separation", &separation, 0.0f, 2.0f);
+            ImGui::SliderFloat("vision", &vision, 3.0f, 12.0f);
+        }
+        if (ImGui::Button("Confirm")) {
+            if (change)
+            {
+                world.AddReproduceRequest({ ANIMAL,AllAnaimals[selected].name,std::make_pair(x,y),world.conf.Organism_interact_radius, {{cohesion, alignment, separation, vision}} });
+            }
+            else
+            {
+                world.AddReproduceRequest({ ANIMAL,AllAnaimals[selected].name,std::make_pair(x,y),world.conf.Organism_interact_radius,std::make_optional<boids::Genes>()});
+            }
+        }
     }
     else
     {
-
+        if (ImGui::Button("Confirm")) {
+           // printf("%d", selected - id);
+           world.AddReproduceRequest({ PLANT,AllPlants[1+selected - id].name,std::make_pair(x,y),world.conf.Plant_init_radius });
+        }
     }
 }
 
@@ -356,7 +335,7 @@ static bool showQuery = false;
 static bool flatColors = true;
 static bool showRequests = true;
 static bool showAddList = false;
-
+static bool showColorSet = true;
 void RenderUI(World& world, int* pFrame, int total,
     bool paused, bool* pPaused, bool* pStep, float* pSpeed, bool* pUnlimited,
     int* pMaxSteps)
@@ -367,6 +346,7 @@ void RenderUI(World& world, int* pFrame, int total,
             ImGui::MenuItem("Animals", nullptr, &showAnimals);
             //ImGui::MenuItem("Heatmap", nullptr, &showHeatmap);
             ImGui::MenuItem("Query Panel", nullptr, &showQuery);//搜索面板
+            ImGui::MenuItem("ColorSet", nullptr, &showColorSet);
             ImGui::Separator();
             ImGui::MenuItem("Flat Colors", nullptr, &flatColors);
             ImGui::MenuItem("Repro Requests", nullptr, &showRequests);
@@ -409,7 +389,7 @@ void RenderUI(World& world, int* pFrame, int total,
     ImGui::Begin("World", nullptr, ImGuiWindowFlags_NoScrollbar);
     DrawWorldGrid(world, flatColors, showRequests);
     ImGui::End();
-
+    ImGui::PopStyleVar();
     // ---- reproduce requests grid ----
 
     // ---- heatmap ----
@@ -474,10 +454,58 @@ void RenderUI(World& world, int* pFrame, int total,
     if (showAddList) {
         ImGui::SetNextWindowSize(ImVec2(260, 380), ImGuiCond_FirstUseEver);
         ImGui::Begin("Add new Organsim");
-
+        DrawAddList(world);
         ImGui::End();
     }
 
+    if (showColorSet) {
+        //设置每个动植物的颜色的区域
+        const auto& AllAnaimals = world.game_conf.The_Animals;
+        const auto& AllPlants = world.game_conf.The_Plants;
+
+        static float rab_color[4] = { 1.0f,1.0f,1.0f,1.0f };
+        ImGui::Begin("OrganismColor");
+        if (ImGui::BeginTable("##Color", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg |
+            ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingFixedFit, ImVec2(0, 0))) {
+            ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, 40);
+            ImGui::TableSetupColumn("Color", ImGuiTableColumnFlags_WidthFixed, 40);
+            ImGui::TableSetupColumn("Current", ImGuiTableColumnFlags_WidthFixed, 250);
+            for (auto TheAnimal : AllAnaimals) {
+                ImGui::PushID(TheAnimal.name.c_str());
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0); ImGui::Text("%s", TheAnimal.name.data());
+                ImGui::TableSetColumnIndex(1);
+                if (ImGui::ColorEdit4("##color", rab_color,
+                    ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel))
+                {
+                    // 颜色被修改后，更新映射表
+                    OrganismColor[TheAnimal.name] = ImVec4(rab_color[0], rab_color[1],
+                        rab_color[2], rab_color[3]);
+                }
+                ImGui::TableSetColumnIndex(2); ImGui::Text("%f %f %f %f", OrganismColor[TheAnimal.name].x, OrganismColor[TheAnimal.name].y,
+                    OrganismColor[TheAnimal.name].z, OrganismColor[TheAnimal.name].w);
+                ImGui::PopID();
+            }
+            for (auto ThePlant : AllPlants) {
+                ImGui::PushID(ThePlant.name.c_str());
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0); ImGui::Text("%s", ThePlant.name.data());
+                ImGui::TableSetColumnIndex(1);
+                if (ImGui::ColorEdit4("##color", rab_color,
+                    ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel))
+                {
+                    // 颜色被修改后，更新映射表
+                    OrganismColor[ThePlant.name] = ImVec4(rab_color[0], rab_color[1],
+                        rab_color[2], rab_color[3]);
+                }
+                ImGui::TableSetColumnIndex(2); ImGui::Text("%f %f %f %f", OrganismColor[ThePlant.name].x, OrganismColor[ThePlant.name].y,
+                    OrganismColor[ThePlant.name].z, OrganismColor[ThePlant.name].w);
+                ImGui::PopID();
+            }
+            ImGui::EndTable();
+        }
+        ImGui::End();
+    }
 }
 
 // ============================================================

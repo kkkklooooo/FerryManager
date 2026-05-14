@@ -334,7 +334,7 @@ static void DrawPopulationChart() {
         if (s_wolfHistory[i] > m) m = s_wolfHistory[i];
         if (m > yMax) yMax = m;
     }
-    yMax = std::max(yMax * 1.15f, 10.0f);
+    yMax = max(yMax * 1.15f, 10.0f);
 
     if (ImPlot::BeginPlot("##PopPlot", ImVec2(-1, -1))) {
         ImPlot::SetupAxes("Frame", "Count");

@@ -28,12 +28,8 @@ Reproducable *ReprodueNewOrganism(ReproduceRequest request)
     {
         return new UserPlant(Plant_id++, request.pos.first, request.pos.second, request.radius, World::GetWorld().conf.Organism_reproduce_energy_threshold, World::GetWorld().conf.Organism_reproduce_energy_cost, UserPlant::FindPlantConfig(request.name));
     }
-    if(request.new_genes.has_value()){
-        // return new UserAnimal(Animal_id++, request.pos.first, request.pos.second, request.radius, World::GetWorld().conf.Organism_reproduce_energy_threshold, World::GetWorld().conf.Organism_reproduce_energy_cost, UserAnimal::FindAnimalConfig(request.name));
-        return MyOperator::GetOp()(request,Animal_id++);
-    }else{
-        throw new std::runtime_error("no new genes");
-    }
+    // return new UserAnimal(Animal_id++, request.pos.first, request.pos.second, request.radius, World::GetWorld().conf.Organism_reproduce_energy_threshold, World::GetWorld().conf.Organism_reproduce_energy_cost, UserAnimal::FindAnimalConfig(request.name));
+    return MyOperator::GetOp()(request,Animal_id++);
 }
 
 // 以下为被注释掉的 ReproduceManager 单例实现，暂未使用
