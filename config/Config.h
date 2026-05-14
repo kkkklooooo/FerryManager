@@ -102,12 +102,12 @@ class Config{
     float Environment_single_chunk_max_energy=25;
     float Organism_animal_absorb_rate=0.4f;
     float Organism_loss_rate=0.85f;
-    float Organism_reproduce_energy_threshold=35;
-    float Organism_reproduce_energy_cost=18;
+    float Organism_reproduce_energy_threshold=22;
+    float Organism_reproduce_energy_cost=10;
     float Organism_step_energy_cost=0.2f;
     float Organism_overlay_param=1.0f;
     int Plant_init_radius=3;
     int Organism_interact_radius=2;
-    int max_organisms_per_cell=2;
+    int max_organisms_per_cell=4;
     static Config& GetConfig();
 };

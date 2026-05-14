@@ -14,8 +14,8 @@
     "eat_intrval_max": 10
   },
   "Default_Plant_Config": {
-    "name": "Plant",
-    "reproduce_original_energy": 5,
+    "name": "Gress",
+    "reproduce_original_energy": 8,
     "step_energy_cost": 0.2
   },
   "The_Environments": [
@@ -33,7 +33,7 @@
       "name": "Wolf",
       "diet": [ "Sheep" ],
       "reproduce_original_rate": 10,
-      "reproduce_original_energy":20,
+      "reproduce_original_energy": 30,
       "max_rate": 3,
       "step_energy_cost": 0.35,
       "energy_rate": 0.5,
@@ -43,9 +43,9 @@
       "name": "Sheep",
       "diet": [ "Gress" ],
       "reproduce_original_rate": 3,
-      "reproduce_original_energy": 15,
+      "reproduce_original_energy": 18,
       "max_rate": 2,
-      "step_energy_cost": 0.12,
+      "step_energy_cost": 0.08,
       "energy_rate": 0.2,
       "eat_intrval_max": 4
     }
@@ -53,7 +53,7 @@
   "The_Plants": [
     {
       "name": "Gress",
-      "reproduce_original_energy": -1,
+      "reproduce_original_energy": 8,
       "step_energy_cost": 0.2
     }
   ]

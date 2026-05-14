@@ -17,47 +17,52 @@ World::World(Config& Conf, TestConfig& Game_conf)
     int w = game_conf.The_Word.width;
     int h = game_conf.The_Word.length;
     int cx = w/2, cy = h/2;
-    int lx = std::max(2, w/10), rx = std::min(w-3, w - w/10);
-    int ty = std::max(2, h/10), by = std::min(h-3, h - h/10);
 
-    // plants: 5 clusters spread across the map
+    // scatter seed points, then random-radius plants around each
+    int numSeeds = 7;
+    int plantsPerSeed = 8;
+    int scatterRadius = 6;
+
     auto addPlant = [&](int x, int y) {
-        Reproducas.push_back(MyOperator::GetOp()(x, y,conf.Plant_init_radius, "Gress", Plant_id++));
+        Reproducas.push_back(MyOperator::GetOp()(x, y, conf.Plant_init_radius, "Gress", Plant_id++));
     };
-    // center
-    addPlant(cx, cy); addPlant(cx+2, cy-1); addPlant(cx-1, cy+2);
-    addPlant(cx+3, cy+1); addPlant(cx-2, cy-2); addPlant(cx+1, cy-3);
-    // bottom-left
-    addPlant(lx, ty); addPlant(lx+2, ty); addPlant(lx, ty+2);
-    addPlant(lx+3, ty+1); addPlant(lx+1, ty+3);
-    // top-right
-    addPlant(rx, by); addPlant(rx-2, by); addPlant(rx, by-2);
-    addPlant(rx-3, by-1); addPlant(rx-1, by-3);
-    // top-left
-    addPlant(lx, by); addPlant(lx+2, by-1); addPlant(lx-1, by+1);
-    addPlant(lx+3, by); addPlant(lx, by-3);
-    // bottom-right
-    addPlant(rx, ty); addPlant(rx-2, ty+1); addPlant(rx+1, ty-1);
-    addPlant(rx, ty+3); addPlant(rx-1, ty-2);
-    // scattered
-    addPlant(cx+w/5, cy+h/5); addPlant(cx-w/5, cy-h/5); addPlant(lx+w/5, cy);
 
-    // sheep: 4 groups of 4
+    for (int s = 0; s < numSeeds; ++s) {
+        int sx = std::rand() % w;
+        int sy = std::rand() % h;
+        for (int p = 0; p < plantsPerSeed; ++p) {
+            int px = sx + std::rand() % (scatterRadius * 2 + 1) - scatterRadius;
+            int py = sy + std::rand() % (scatterRadius * 2 + 1) - scatterRadius;
+            if (px >= 0 && px < w && py >= 0 && py < h)
+                addPlant(px, py);
+        }
+    }
+
+    // sheep: scattered near random positions
     auto addSheep = [&](int x, int y) {
         Reproducas.push_back(MyOperator::GetOp()(x, y, 5, "Sheep", Animal_id++));
     };
-    addSheep(cx+2, cy+3); addSheep(cx+4, cy);   addSheep(cx+1, cy+4); addSheep(cx+3, cy+1);
-    addSheep(rx-3, by-3); addSheep(rx-5, by-1); addSheep(rx-2, by-5); addSheep(rx-4, by-2);
-    addSheep(lx+3, ty+3); addSheep(lx+5, ty+1); addSheep(lx+2, ty+5); addSheep(lx+4, ty+2);
-    addSheep(lx+3, by-3); addSheep(lx+5, by-1); addSheep(lx+2, by-5); addSheep(lx+4, by-2);
+    for (int s = 0; s < 4; ++s) {
+        int sx = std::rand() % w;
+        int sy = std::rand() % h;
+        for (int i = 0; i < 4; ++i) {
+            int px = sx + std::rand() % 7 - 3;
+            int py = sy + std::rand() % 7 - 3;
+            if (px >= 0 && px < w && py >= 0 && py < h)
+                addSheep(px, py);
+        }
+    }
 
-    // wolves: scattered
+    // wolves: scattered near center
     auto addWolf = [&](int x, int y) {
         Reproducas.push_back(MyOperator::GetOp()(x, y, 5, "Wolf", Animal_id++));
     };
-    addWolf(cx, cy);
-    addWolf(lx+5, ty+5);
-    addWolf(rx-5, by-5);
+    for (int i = 0; i < 3; ++i) {
+        int wx = cx + std::rand() % 11 - 5;
+        int wy = cy + std::rand() % 11 - 5;
+        if (wx >= 0 && wx < w && wy >= 0 && wy < h)
+            addWolf(wx, wy);
+    }
 
     // environment: energy peaks at center, falls off toward edges
     float falloff = std::max(w, h) / 3.0f;
@@ -202,38 +207,52 @@ void World::Reset()
     int w = game_conf.The_Word.width;
     int h = game_conf.The_Word.length;
     int cx = w/2, cy = h/2;
-    int lx = std::max(2, w/10), rx = std::min(w-3, w - w/10);
-    int ty = std::max(2, h/10), by = std::min(h-3, h - h/10);
+
+    // scatter seed points, then random-radius plants around each
+    int numSeeds = 7;
+    int plantsPerSeed = 8;
+    int scatterRadius = 6;
 
     auto addPlant = [&](int x, int y) {
         Reproducas.push_back(MyOperator::GetOp()(x, y, conf.Plant_init_radius, "Gress", Plant_id++));
     };
-    addPlant(cx, cy); addPlant(cx+2, cy-1); addPlant(cx-1, cy+2);
-    addPlant(cx+3, cy+1); addPlant(cx-2, cy-2); addPlant(cx+1, cy-3);
-    addPlant(lx, ty); addPlant(lx+2, ty); addPlant(lx, ty+2);
-    addPlant(lx+3, ty+1); addPlant(lx+1, ty+3);
-    addPlant(rx, by); addPlant(rx-2, by); addPlant(rx, by-2);
-    addPlant(rx-3, by-1); addPlant(rx-1, by-3);
-    addPlant(lx, by); addPlant(lx+2, by-1); addPlant(lx-1, by+1);
-    addPlant(lx+3, by); addPlant(lx, by-3);
-    addPlant(rx, ty); addPlant(rx-2, ty+1); addPlant(rx+1, ty-1);
-    addPlant(rx, ty+3); addPlant(rx-1, ty-2);
-    addPlant(cx+w/5, cy+h/5); addPlant(cx-w/5, cy-h/5); addPlant(lx+w/5, cy);
 
+    for (int s = 0; s < numSeeds; ++s) {
+        int sx = std::rand() % w;
+        int sy = std::rand() % h;
+        for (int p = 0; p < plantsPerSeed; ++p) {
+            int px = sx + std::rand() % (scatterRadius * 2 + 1) - scatterRadius;
+            int py = sy + std::rand() % (scatterRadius * 2 + 1) - scatterRadius;
+            if (px >= 0 && px < w && py >= 0 && py < h)
+                addPlant(px, py);
+        }
+    }
+
+    // sheep: scattered near random positions
     auto addSheep = [&](int x, int y) {
-        Reproducas.push_back(MyOperator()(x, y, 5, "Sheep", Animal_id++));
+        Reproducas.push_back(MyOperator::GetOp()(x, y, 5, "Sheep", Animal_id++));
     };
-    addSheep(cx+2, cy+3); addSheep(cx+4, cy);   addSheep(cx+1, cy+4); addSheep(cx+3, cy+1);
-    addSheep(rx-3, by-3); addSheep(rx-5, by-1); addSheep(rx-2, by-5); addSheep(rx-4, by-2);
-    addSheep(lx+3, ty+3); addSheep(lx+5, ty+1); addSheep(lx+2, ty+5); addSheep(lx+4, ty+2);
-    addSheep(lx+3, by-3); addSheep(lx+5, by-1); addSheep(lx+2, by-5); addSheep(lx+4, by-2);
+    for (int s = 0; s < 4; ++s) {
+        int sx = std::rand() % w;
+        int sy = std::rand() % h;
+        for (int i = 0; i < 4; ++i) {
+            int px = sx + std::rand() % 7 - 3;
+            int py = sy + std::rand() % 7 - 3;
+            if (px >= 0 && px < w && py >= 0 && py < h)
+                addSheep(px, py);
+        }
+    }
 
+    // wolves: scattered near center
     auto addWolf = [&](int x, int y) {
-        Reproducas.push_back(MyOperator()(x, y, 5, "Wolf", Animal_id++));
+        Reproducas.push_back(MyOperator::GetOp()(x, y, 5, "Wolf", Animal_id++));
     };
-    addWolf(cx, cy);
-    addWolf(lx+5, ty+5);
-    addWolf(rx-5, by-5);
+    for (int i = 0; i < 3; ++i) {
+        int wx = cx + std::rand() % 11 - 5;
+        int wy = cy + std::rand() % 11 - 5;
+        if (wx >= 0 && wx < w && wy >= 0 && wy < h)
+            addWolf(wx, wy);
+    }
 
     float falloff = std::max(w, h) / 3.0f;
     for (int i = 0; i < h; i++)

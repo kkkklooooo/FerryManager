@@ -159,11 +159,9 @@ void Plant::Reproduce(std::optional<Reproducable*> other)
     }
     int x = Pos.first;
     int y = Pos.second;
-    // printf("156");
     // 在 [-reproduce_radius, +reproduce_radius] 范围内随机偏移
     int x_new = x + std::rand() % (2 * reproduce_radius + 1) - reproduce_radius;
     int y_new = y + std::rand() % (2 * reproduce_radius + 1) - reproduce_radius;
-    // printf("\033[31mPlant request at (%d, %d) with radius %d\033[0m\n", x_new, y_new);
     // 确保新位置在有效世界边界内
     if (x_new >= 0 && x_new < World::GetWorld().GetHeight() && y_new >= 0 && y_new < World::GetWorld().GetWidth())
     {
@@ -172,12 +170,9 @@ void Plant::Reproduce(std::optional<Reproducable*> other)
         int r_int = std::max(1, (int)r);
         if ((World::GetWorld().AddReproduceRequest({PLANT, name, std::make_pair(x_new, y_new), r_int})))
         {
-            //printf("169");
             energy -= reproduce_energy_cost;
-            // assert(energy >= -100);
             return;
         }
-        // std::printf("Plant request at (%d, %d) %id\n", x_new, y_new,id);
     }
 }
 
@@ -224,7 +219,7 @@ Animal::Animal(int iD, int x, int y, int radius, float reproduce_energy_threshol
     Pos = std::make_pair(x, y);
     explicit_pos = std::make_pair(x, y);
     reproduce_able = true;
-    genes = genes.value_or(boids::Genes());
+    this->genes = genes.value_or(boids::Genes());
 }
 
 void Animal::Reproduce(std::optional<Reproducable*> other)
@@ -257,7 +252,7 @@ void Animal::Reproduce(std::optional<Reproducable*> other)
         }
         boids::Genes g=GA::Fusion(genes,static_cast<Animal*>(other.value())->genes);
        // printf("%d\n",r_int);
-        if (!(World::GetWorld().AddReproduceRequest({ANIMAL, name, std::make_pair(x_new, y_new), r_int,g})))
+        if ((World::GetWorld().AddReproduceRequest({ANIMAL, name, std::make_pair(x_new, y_new), r_int,g})))
         {
             energy -= reproduce_energy_cost;
             // printf("Animal Generating");

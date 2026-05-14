@@ -28,7 +28,8 @@ set(HEADERS
 add_executable(ecosim ${SOURCES} ${HEADERS}
     "operator/MyOperator.h" "operator/MyOperatorDefine.cpp"
     "core/Animals.h" "core/Plants.h"
-    "config/ConflgDefine.cpp" "config/Config.h" "imguMe/myui.cpp")
+    "config/ConflgDefine.cpp" "config/Config.h" "imguMe/myui.cpp"
+    "implot/implot.cpp" "implot/implot_items.cpp" "implot/implot.h")
 
 target_include_directories(ecosim PRIVATE
     ${CMAKE_SOURCE_DIR}
@@ -39,6 +40,7 @@ target_include_directories(ecosim PRIVATE
     ${CMAKE_SOURCE_DIR}/vendor
     ${CMAKE_SOURCE_DIR}/imgui
     ${CMAKE_SOURCE_DIR}/imgui/backends
+    ${CMAKE_SOURCE_DIR}/implot
 )
 
 target_link_libraries(ecosim PRIVATE opengl32 gdi32 dwmapi)
