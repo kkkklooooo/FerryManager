@@ -52,7 +52,6 @@ static ImU32 OrganismColor(const std::string& name, float energy, float maxE) {/
     float i = (maxE > 0.001f) ? energy / maxE : 0.5f;
     i = std::clamp(i, 0.25f, 1.0f);
     if (name == "Gress")       return IM_COL32(0,            (int)(220*i), (int)(80*i),  210);
-    if (name == "Gress")       return IM_COL32(0,            (int)(220*i), (int)(80*i),  210);
     if (name == "Wolf")        return IM_COL32((int)(220*i), (int)(60*i),  (int)(50*i),  210);
     if (name == "Sheep")       return IM_COL32((int)(255*i), (int)(245*i), (int)(200*i), 240);
     if (name == "Animal")      return IM_COL32((int)(255*i), (int)(90*i),  (int)(70*i),  210);
@@ -68,8 +67,8 @@ static void DrawWorldGrid(const World& world, bool flat, bool showReq) {
     int w = world.GetWidth(), h = world.GetHeight();
 
     ImVec2 avail = ImGui::GetContentRegionAvail();
-    float cellSize = std::min(avail.x / w, avail.y / h);
-    cellSize = std::max(cellSize, 3.0f);
+    float cellSize = min(avail.x / w, avail.y / h);
+    cellSize = max(cellSize, 3.0f);
 
     float maxE = 0.001f;
     for (auto* e : envs) if (e->energy > maxE) maxE = e->energy;
@@ -389,8 +388,8 @@ void RenderUI(World& world, int* pFrame, int total,
         const auto& reqs = world.GetReproduceRequests();
         int w = world.GetWidth(), h = world.GetHeight();
         ImVec2 avail = ImGui::GetContentRegionAvail();
-        float cs = std::min(avail.x / w, avail.y / h);
-        cs = std::max(cs, 4.0f);
+        float cs = min(avail.x / w, avail.y / h);
+        cs = max(cs, 4.0f);
 
         ImDrawList* dl = ImGui::GetWindowDrawList();
         ImVec2 base = ImGui::GetCursorScreenPos();
