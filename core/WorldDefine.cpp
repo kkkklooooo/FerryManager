@@ -126,7 +126,7 @@ void World::Reproduce()
     last_requests = reproduce_requests;
     for (auto &request : reproduce_requests)
     {
-        printf("128 %s\n", request.name.data());
+        //printf("128 %s\n", request.name.data());
         auto *org = ReprodueNewOrganism(request);
         if (org)
             Reproducas.push_back(org);

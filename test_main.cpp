@@ -36,7 +36,7 @@ static ImU32 EnvColor(const std::string& name, float energy, float maxE) {
     return IM_COL32((int)(r*i), (int)(g*i), (int)(b*i), 255);
 }
 
-static const char* EnvName(const std::string& name) {
+static const char* EnvName(const std::string& name) {//还没有呢 但是好像可以加
     if (name == "GressLand") return "Grassland";
     if (name == "Water")     return "Water";
     if (name == "Forest")    return "Forest";
@@ -48,14 +48,14 @@ static const char* OrganismDisplayName(const std::string& name) {
     return name.c_str();
 }
 
-static ImU32 OrganismColor(const std::string& name, float energy, float maxE) {
+static ImU32 OrganismColor(const std::string& name, float energy, float maxE) {//需要扩展
     float i = (maxE > 0.001f) ? energy / maxE : 0.5f;
     i = std::clamp(i, 0.25f, 1.0f);
-    if (name == "Plant")       return IM_COL32(0,            (int)(220*i), (int)(80*i),  210);
+    if (name == "Gress")       return IM_COL32(0,            (int)(220*i), (int)(80*i),  210);
     if (name == "Wolf")        return IM_COL32((int)(220*i), (int)(60*i),  (int)(50*i),  210);
     if (name == "Sheep")       return IM_COL32((int)(255*i), (int)(245*i), (int)(200*i), 240);
     if (name == "Animal")      return IM_COL32((int)(255*i), (int)(90*i),  (int)(70*i),  210);
-    return IM_COL32((int)(128*i), (int)(128*i), (int)(128*i), 210);
+    return IM_COL32((int)(128*i), (int)(128*i), (int)(128*i), 210);//默认的
 }
 
 // ============================================================
@@ -76,7 +76,7 @@ static void DrawWorldGrid(const World& world, bool flat, bool showReq) {
     ImDrawList* dl = ImGui::GetWindowDrawList();
     ImVec2 base = ImGui::GetCursorScreenPos();
 
-    for (int y = 0; y < h; ++y) {
+    for (int y = 0; y < h; ++y) {//画环境的格子
         for (int x = 0; x < w; ++x) {
             int idx = y * w + x;
             ImVec2 p0(base.x + x*cellSize, base.y + y*cellSize);
@@ -376,11 +376,11 @@ void RenderUI(World& world, int* pFrame, int total,
     ImGui::End();
 
     // ---- reproduce requests grid ----
-    if (showRequests) {
-        static bool reqPlant = true, reqSheep = true, reqWolf = true;
+    if (showRequests) {      //需要适配
+        static bool reqGress = true, reqSheep = true, reqWolf = true;
         ImGui::SetNextWindowSize(ImVec2(320, 380), ImGuiCond_FirstUseEver);
         ImGui::Begin("Repro Requests", &showRequests);
-        ImGui::Checkbox("Plant", &reqPlant); ImGui::SameLine();
+        ImGui::Checkbox("Gress", &reqGress); ImGui::SameLine();
         ImGui::Checkbox("Sheep", &reqSheep); ImGui::SameLine();
         ImGui::Checkbox("Wolf",  &reqWolf);
 
@@ -401,9 +401,9 @@ void RenderUI(World& world, int* pFrame, int total,
                 dl->AddRect(p0, ImVec2(p0.x+cs, p0.y+cs), IM_COL32(50,50,54,255));
             }
 
-        // draw request markers
+        // draw request markers 需要扩展
         for (auto& r : reqs) {
-            if (r.name == "Plant" && !reqPlant) continue;
+            if (r.name == "Gress" && !reqGress) continue;
             if (r.name == "Sheep" && !reqSheep) continue;
             if (r.name == "Wolf"  && !reqWolf)  continue;
             int rx = r.pos.first, ry = r.pos.second;
@@ -411,7 +411,7 @@ void RenderUI(World& world, int* pFrame, int total,
             ImVec2 c(base.x + rx*cs + cs*0.5f, base.y + ry*cs + cs*0.5f);
             float rad = cs * 0.4f;
             ImU32 col;
-            if (r.name == "Plant")      col = IM_COL32(0, 220, 80, 230);
+            if (r.name == "Gress")      col = IM_COL32(0, 220, 80, 230);
             else if (r.name == "Sheep") col = IM_COL32(255, 245, 200, 230);
             else if (r.name == "Wolf")  col = IM_COL32(220, 60, 50, 230);
             else                        col = IM_COL32(200, 200, 200, 230);

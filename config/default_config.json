@@ -32,21 +32,21 @@
     {
       "name": "Wolf",
       "diet": [ "Sheep" ],
-      "reproduce_original_rate": -1,
-      "reproduce_original_energy": -1,
+      "reproduce_original_rate": 10,
+      "reproduce_original_energy":20,
       "max_rate": 3,
       "step_energy_cost": 0.35,
-      "energy_rate": -1,
+      "energy_rate": 0.5,
       "eat_intrval_max": 8
     },
     {
       "name": "Sheep",
       "diet": [ "Gress" ],
-      "reproduce_original_rate": -1,
-      "reproduce_original_energy": -1,
+      "reproduce_original_rate": 3,
+      "reproduce_original_energy": 15,
       "max_rate": 2,
       "step_energy_cost": 0.12,
-      "energy_rate": -1,
+      "energy_rate": 0.2,
       "eat_intrval_max": 4
     }
   ],

@@ -14,8 +14,8 @@ public:
 			if (a.name == name) return TestConfig::GetTestConfig().Check_Plant(a);
 			else
 			{
-				printf("%s\n", a.name.data());
-				printf_s("lll %s\n", name.data());
+				//printf("%s\n", a.name.data());
+				//printf_s("lll %s\n", name.data());
 			}
 		}
 		return TestConfig::GetTestConfig().Default_Plant_Config;

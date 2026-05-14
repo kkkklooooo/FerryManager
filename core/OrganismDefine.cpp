@@ -153,7 +153,7 @@ void Plant::Reproduce()
     }
     int x = Pos.first;
     int y = Pos.second;
-    printf("156");
+    //printf("156");
     // 在 [-reproduce_radius, +reproduce_radius] 范围内随机偏移
     int x_new = x + std::rand() % (2 * reproduce_radius + 1) - reproduce_radius;
     int y_new = y + std::rand() % (2 * reproduce_radius + 1) - reproduce_radius;
@@ -166,7 +166,7 @@ void Plant::Reproduce()
         int r_int = std::max(1, (int)r);
         if ((World::GetWorld().AddReproduceRequest({PLANT, name, std::make_pair(x_new, y_new), r_int})))
         {
-            printf("169");
+            //printf("169");
             energy -= reproduce_energy_cost;
             // assert(energy >= -100);
             return;

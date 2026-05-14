@@ -17,6 +17,7 @@ struct AnimalConfig {
     float step_energy_cost = -1.0f;
     float energy_rate = -1.0f;
     int   eat_intrval_max = -1;
+
 };
 
 struct EnvironmentConfig{
