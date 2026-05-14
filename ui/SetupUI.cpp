@@ -48,7 +48,6 @@ static bool LoadConfig(TestConfig& cfg, const char* path) {
     std::ifstream f(path);
     if (!f.is_open()) return false;
     json j;
-
     j=json::parse(f);
     cfg = j.get<TestConfig>();
     printf("%s\n\n", cfg.Default_Plant_Config.name.data());
@@ -61,9 +60,6 @@ static bool LoadConfigAny(TestConfig& cfg) {
         "default_config.json",
         "../default_config.json",
         ".../config/default_config.jason",//修改完路径之后
-        "./config/default_config.json"
-        "config/default_config.json"
-        "../config/default_config.json"
     };
     for (auto p : paths) {
         if (LoadConfig(cfg, p)) return true;
@@ -93,32 +89,32 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
         if (s_GameConfig.The_Word.length < 10) s_GameConfig.The_Word.length = 10;
     };
 
-    auto renderDefaultsTab = [&]() {
-        if (ImGui::CollapsingHeader("Default Animal", ImGuiTreeNodeFlags_DefaultOpen)) {
-            AnimalConfig& a = s_GameConfig.Default_Animal_Config;
-            char nameBuf[128];
-            snprintf(nameBuf, sizeof(nameBuf), "%s", a.name.c_str());
-            if (ImGui::InputText("Name", nameBuf, sizeof(nameBuf)))
-                a.name = nameBuf;
-            ImGui::InputInt("Reproduce Rate",  &a.reproduce_original_rate);
-            ImGui::InputInt("Reproduce Energy",&a.reproduce_original_energy);
-            ImGui::InputFloat("Max Rate",      &a.max_rate);
-            ImGui::InputFloat("Step Energy",   &a.step_energy_cost);
-            ImGui::InputFloat("Energy Rate",   &a.energy_rate);
-        }
-        if (ImGui::CollapsingHeader("Default Plant", ImGuiTreeNodeFlags_DefaultOpen)) {
-            PlantConfig& p = s_GameConfig.Default_Plant_Config;
-            char plantNameBuf[128];
-            snprintf(plantNameBuf, sizeof(plantNameBuf), "%s", p.name.c_str());
-            if (ImGui::InputText("Name", plantNameBuf, sizeof(plantNameBuf)))
-                p.name = plantNameBuf;
-            ImGui::InputInt("Reproduce Energy", &p.reproduce_original_energy);
-            ImGui::InputFloat("Step Energy",    &p.step_energy_cost);
-        }
-    };
+    //auto renderDefaultsTab = [&]() {//不需要把？？
+    //    if (ImGui::CollapsingHeader("Default Animal", ImGuiTreeNodeFlags_DefaultOpen)) {
+    //        AnimalConfig& a = s_GameConfig.Default_Animal_Config;
+    //        char nameBuf[128];
+    //        snprintf(nameBuf, sizeof(nameBuf), "%s", a.name.c_str());
+    //        if (ImGui::InputText("Name", nameBuf, sizeof(nameBuf)))
+    //            a.name = nameBuf;
+    //        ImGui::InputInt("Reproduce Rate",  &a.reproduce_original_rate);
+    //        ImGui::InputInt("Reproduce Energy",&a.reproduce_original_energy);
+    //        ImGui::InputFloat("Max Rate",      &a.max_rate);
+    //        ImGui::InputFloat("Step Energy",   &a.step_energy_cost);
+    //        ImGui::InputFloat("Energy Rate",   &a.energy_rate);
+    //    }
+    //    if (ImGui::CollapsingHeader("Default Plant", ImGuiTreeNodeFlags_DefaultOpen)) {
+    //        PlantConfig& p = s_GameConfig.Default_Plant_Config;
+    //        char plantNameBuf[128];
+    //        snprintf(plantNameBuf, sizeof(plantNameBuf), "%s", p.name.c_str());
+    //        if (ImGui::InputText("Name", plantNameBuf, sizeof(plantNameBuf)))
+    //            p.name = plantNameBuf;
+    //        ImGui::InputInt("Reproduce Energy", &p.reproduce_original_energy);
+    //        ImGui::InputFloat("Step Energy",    &p.step_energy_cost);
+    //    }
+    //};
 
     auto renderEnvironmentsTab = [&]() {
-        for (int i = 0; i < (int)s_GameConfig.The_Environments.size(); ++i) {
+        for (int i = 0; i < (int)s_GameConfig.The_Environments.size(); ++i) {//可以更改环境中能存活的东西
             auto& env = s_GameConfig.The_Environments[i];
             ImGui::PushID(i);
             ImGui::Separator();
@@ -132,9 +128,10 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
                 StrToVec(buf, env.CanLive);
             ImGui::PopID();
         }
-        if (ImGui::Button("Add Environment")) {
-            s_GameConfig.The_Environments.push_back({"NewEnv", {}});
-        }
+        //不能添加新的环境（因为Update要有天气)！！！
+        //if (ImGui::Button("Add Environment")) {
+        //    s_GameConfig.The_Environments.push_back({"NewEnv", {}});
+        //}
     };
 
     auto renderAnimalsTab = [&]() {
@@ -158,7 +155,7 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
             ImGui::PopID();
         }
         if (ImGui::Button("Add Animal Species")) {
-            s_GameConfig.The_Animals.push_back({"NewSpecies", {}, -1, -1, 100, 0.01f, -1});
+            s_GameConfig.User_AddNew_Animal(*(new AnimalConfig));//统一调用提供的接口！！
         }
     };
 
@@ -176,7 +173,7 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
             ImGui::PopID();
         }
         if (ImGui::Button("Add Plant Species")) {
-            s_GameConfig.The_Plants.push_back({"NewPlant", 10, 0.01f});
+            s_GameConfig.User_AddNew_Plant(*(new PlantConfig));
         }
     };
 
@@ -209,20 +206,20 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
 
         if (ImGui::BeginTabBar("Tabs")) {
             if (ImGui::BeginTabItem("World"))      { activeTab = 0; ImGui::EndTabItem(); }
-            if (ImGui::BeginTabItem("Defaults"))   { activeTab = 1; ImGui::EndTabItem(); }
-            if (ImGui::BeginTabItem("Environments")){ activeTab = 2; ImGui::EndTabItem(); }
-            if (ImGui::BeginTabItem("Animals"))    { activeTab = 3; ImGui::EndTabItem(); }
-            if (ImGui::BeginTabItem("Plants"))     { activeTab = 4; ImGui::EndTabItem(); }
+            //if (ImGui::BeginTabItem("Defaults"))   { activeTab = 1; ImGui::EndTabItem(); }//应该隐藏啊
+            if (ImGui::BeginTabItem("Environments")){ activeTab = 1; ImGui::EndTabItem(); }
+            if (ImGui::BeginTabItem("Animals"))    { activeTab = 2; ImGui::EndTabItem(); }
+            if (ImGui::BeginTabItem("Plants"))     { activeTab = 3; ImGui::EndTabItem(); }
             ImGui::EndTabBar();
         }
 
         ImGui::BeginChild("TabContent", ImVec2(0, -50), true);
         switch (activeTab) {
             case 0: renderWorldTab();        break;
-            case 1: renderDefaultsTab();     break;
-            case 2: renderEnvironmentsTab(); break;
-            case 3: renderAnimalsTab();      break;
-            case 4: renderPlantsTab();       break;
+            //case 1: renderDefaultsTab();     break;
+            case 1: renderEnvironmentsTab(); break;
+            case 2: renderAnimalsTab();      break;
+            case 3: renderPlantsTab();       break;
         }
         ImGui::EndChild();
 
