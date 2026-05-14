@@ -36,7 +36,7 @@ static ImU32 EnvColor(const std::string& name, float energy, float maxE) {
     return IM_COL32((int)(r*i), (int)(g*i), (int)(b*i), 255);
 }
 
-static const char* EnvName(const std::string& name) {//ªπ√ª”–ƒÿ µ´ «∫√œÒø…“‘º”
+static const char* EnvName(const std::string& name) {//ËøòÊ≤°ÊúâÂë¢ ‰ΩÜÊòØÂ•ΩÂÉèÂèØ‰ª•Âä†
     if (name == "GressLand") return "Grassland";
     if (name == "Water")     return "Water";
     if (name == "Forest")    return "Forest";
@@ -48,14 +48,15 @@ static const char* OrganismDisplayName(const std::string& name) {
     return name.c_str();
 }
 
-static ImU32 OrganismColor(const std::string& name, float energy, float maxE) {//–Ë“™¿©’π
+static ImU32 OrganismColor(const std::string& name, float energy, float maxE) {//ÈúÄË¶ÅÊâ©Â±ï
     float i = (maxE > 0.001f) ? energy / maxE : 0.5f;
     i = std::clamp(i, 0.25f, 1.0f);
+    if (name == "Gress")       return IM_COL32(0,            (int)(220*i), (int)(80*i),  210);
     if (name == "Gress")       return IM_COL32(0,            (int)(220*i), (int)(80*i),  210);
     if (name == "Wolf")        return IM_COL32((int)(220*i), (int)(60*i),  (int)(50*i),  210);
     if (name == "Sheep")       return IM_COL32((int)(255*i), (int)(245*i), (int)(200*i), 240);
     if (name == "Animal")      return IM_COL32((int)(255*i), (int)(90*i),  (int)(70*i),  210);
-    return IM_COL32((int)(128*i), (int)(128*i), (int)(128*i), 210);//ƒ¨»œµƒ
+    return IM_COL32((int)(128*i), (int)(128*i), (int)(128*i), 210);//ÈªòËÆ§ÁöÑ
 }
 
 // ============================================================
@@ -67,8 +68,8 @@ static void DrawWorldGrid(const World& world, bool flat, bool showReq) {
     int w = world.GetWidth(), h = world.GetHeight();
 
     ImVec2 avail = ImGui::GetContentRegionAvail();
-    float cellSize = min(avail.x / w, avail.y / h);
-    cellSize = max(cellSize, 3.0f);
+    float cellSize = std::min(avail.x / w, avail.y / h);
+    cellSize = std::max(cellSize, 3.0f);
 
     float maxE = 0.001f;
     for (auto* e : envs) if (e->energy > maxE) maxE = e->energy;
@@ -76,7 +77,7 @@ static void DrawWorldGrid(const World& world, bool flat, bool showReq) {
     ImDrawList* dl = ImGui::GetWindowDrawList();
     ImVec2 base = ImGui::GetCursorScreenPos();
 
-    for (int y = 0; y < h; ++y) {//ª≠ª∑æ≥µƒ∏Ò◊”
+    for (int y = 0; y < h; ++y) {//ÁîªÁéØÂ¢ÉÁöÑÊ†ºÂ≠ê
         for (int x = 0; x < w; ++x) {
             int idx = y * w + x;
             ImVec2 p0(base.x + x*cellSize, base.y + y*cellSize);
@@ -376,10 +377,11 @@ void RenderUI(World& world, int* pFrame, int total,
     ImGui::End();
 
     // ---- reproduce requests grid ----
-    if (showRequests) {      //–Ë“™  ≈‰
+    if (showRequests) {      //ÈúÄË¶ÅÈÄÇÈÖç
         static bool reqGress = true, reqSheep = true, reqWolf = true;
         ImGui::SetNextWindowSize(ImVec2(320, 380), ImGuiCond_FirstUseEver);
         ImGui::Begin("Repro Requests", &showRequests);
+        ImGui::Checkbox("Gress", &reqGress); ImGui::SameLine();
         ImGui::Checkbox("Gress", &reqGress); ImGui::SameLine();
         ImGui::Checkbox("Sheep", &reqSheep); ImGui::SameLine();
         ImGui::Checkbox("Wolf",  &reqWolf);
@@ -387,8 +389,8 @@ void RenderUI(World& world, int* pFrame, int total,
         const auto& reqs = world.GetReproduceRequests();
         int w = world.GetWidth(), h = world.GetHeight();
         ImVec2 avail = ImGui::GetContentRegionAvail();
-        float cs = min(avail.x / w, avail.y / h);
-        cs = max(cs, 4.0f);
+        float cs = std::min(avail.x / w, avail.y / h);
+        cs = std::max(cs, 4.0f);
 
         ImDrawList* dl = ImGui::GetWindowDrawList();
         ImVec2 base = ImGui::GetCursorScreenPos();
@@ -401,8 +403,9 @@ void RenderUI(World& world, int* pFrame, int total,
                 dl->AddRect(p0, ImVec2(p0.x+cs, p0.y+cs), IM_COL32(50,50,54,255));
             }
 
-        // draw request markers –Ë“™¿©’π
+        // draw request markers ÈúÄË¶ÅÊâ©Â±ï
         for (auto& r : reqs) {
+            if (r.name == "Gress" && !reqGress) continue;
             if (r.name == "Gress" && !reqGress) continue;
             if (r.name == "Sheep" && !reqSheep) continue;
             if (r.name == "Wolf"  && !reqWolf)  continue;
@@ -411,6 +414,7 @@ void RenderUI(World& world, int* pFrame, int total,
             ImVec2 c(base.x + rx*cs + cs*0.5f, base.y + ry*cs + cs*0.5f);
             float rad = cs * 0.4f;
             ImU32 col;
+            if (r.name == "Gress")      col = IM_COL32(0, 220, 80, 230);
             if (r.name == "Gress")      col = IM_COL32(0, 220, 80, 230);
             else if (r.name == "Sheep") col = IM_COL32(255, 245, 200, 230);
             else if (r.name == "Wolf")  col = IM_COL32(220, 60, 50, 230);

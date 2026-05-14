@@ -1,4 +1,5 @@
 #include "Organism.h"
+#include"boids/GA.h"
 #include <cassert>
 #include "MyOperator.h"
 #include <cmath>
@@ -27,7 +28,12 @@ Reproducable *ReprodueNewOrganism(ReproduceRequest request)
     {
         return new UserPlant(Plant_id++, request.pos.first, request.pos.second, request.radius, World::GetWorld().conf.Organism_reproduce_energy_threshold, World::GetWorld().conf.Organism_reproduce_energy_cost, UserPlant::FindPlantConfig(request.name));
     }
-    return new UserAnimal(Animal_id++, request.pos.first, request.pos.second, request.radius, World::GetWorld().conf.Organism_reproduce_energy_threshold, World::GetWorld().conf.Organism_reproduce_energy_cost, UserAnimal::FindAnimalConfig(request.name));
+    if(request.new_genes.has_value()){
+        // return new UserAnimal(Animal_id++, request.pos.first, request.pos.second, request.radius, World::GetWorld().conf.Organism_reproduce_energy_threshold, World::GetWorld().conf.Organism_reproduce_energy_cost, UserAnimal::FindAnimalConfig(request.name));
+        return MyOperator::GetOp()(request,Animal_id++);
+    }else{
+        throw new std::runtime_error("no new genes");
+    }
 }
 
 // 以下为被注释掉的 ReproduceManager 单例实现，暂未使用
@@ -140,7 +146,7 @@ Plant::Plant(int iD, int x, int y, int radius, float reproduce_energy_threshold,
  * @brief 植物的繁殖行为：在半径范围内随机生成一个新位置，并向世界请求添加新植物
  */
 
-void Plant::Reproduce()
+void Plant::Reproduce(std::optional<Reproducable*> other)
 {
     if (!active || !reproduce_able)
     { // 死了就不能活着
@@ -153,7 +159,7 @@ void Plant::Reproduce()
     }
     int x = Pos.first;
     int y = Pos.second;
-    //printf("156");
+    // printf("156");
     // 在 [-reproduce_radius, +reproduce_radius] 范围内随机偏移
     int x_new = x + std::rand() % (2 * reproduce_radius + 1) - reproduce_radius;
     int y_new = y + std::rand() % (2 * reproduce_radius + 1) - reproduce_radius;
@@ -205,7 +211,7 @@ Animal::Animal(int id, int x, int y, int radius, float reproduce_energy_threshol
     reproduce_able = true;
 }
 
-Animal::Animal(int iD, int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost, AnimalConfig& org)
+Animal::Animal(int iD, int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost,     std::optional<boids::Genes> genes,AnimalConfig& org)
     : id(iD), Reproducable(reproduce_energy_threshold, reproduce_energy_cost, radius, org.step_energy_cost, ANIMAL)
 {
     energy = org.reproduce_original_energy;
@@ -218,11 +224,12 @@ Animal::Animal(int iD, int x, int y, int radius, float reproduce_energy_threshol
     Pos = std::make_pair(x, y);
     explicit_pos = std::make_pair(x, y);
     reproduce_able = true;
+    genes = genes.value_or(boids::Genes());
 }
 
-void Animal::Reproduce()
+void Animal::Reproduce(std::optional<Reproducable*> other)
 {
-    
+   if(!other.has_value()) throw std::runtime_error("Animal::Reproduce: no other animal");  
     if (!active || !reproduce_able)
     { // 死了就不能活着
         return;
@@ -245,8 +252,12 @@ void Animal::Reproduce()
         // 子代植动物物的半径在父半径的[0.25,2.0]倍之间随机，并取整
         float r = reproduce_radius * std::min(2.0, std::max(0.25, (double)std::rand() / RAND_MAX));
         int r_int = std::max(1, (int)r);
+        if(!(type==ANIMAL&&other.has_value()&&other.value()->type==type)){
+            throw std::runtime_error("Animal::Reproduce: other animal is not animal");
+        }
+        boids::Genes g=GA::Fusion(genes,static_cast<Animal*>(other.value())->genes);
        // printf("%d\n",r_int);
-        if (!(World::GetWorld().AddReproduceRequest({ANIMAL, name, std::make_pair(x_new, y_new), r_int})))
+        if (!(World::GetWorld().AddReproduceRequest({ANIMAL, name, std::make_pair(x_new, y_new), r_int,g})))
         {
             energy -= reproduce_energy_cost;
             // printf("Animal Generating");
@@ -323,13 +334,13 @@ void PredationOrFuck(Reproducable *a, Reproducable *b)
         
         if (a->reproduce_able && !b->reproduce_able)
         {
-            a->Reproduce();
+            a->Reproduce(b);
         }
         if (b->reproduce_able && !a->reproduce_able)
         {
-            b->Reproduce();
+            b->Reproduce(a);
         }else{
-            rand01()<0.5?b->Reproduce():a->Reproduce();
+            rand01()<0.5?b->Reproduce(a):a->Reproduce(b);
         }
         return;
     }

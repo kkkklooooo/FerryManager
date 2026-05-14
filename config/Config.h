@@ -1,5 +1,5 @@
 #pragma once
-
+#include<boids/Genes.h>
 #include"json.hpp"
 #include<string>
 #include<vector>

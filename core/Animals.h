@@ -6,8 +6,8 @@
 
 class UserAnimal :public Animal {
 public:
-	UserAnimal(int iD,int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost, AnimalConfig org)
-		:Animal(iD, x, y, radius, reproduce_energy_threshold, reproduce_energy_cost, org)
+	UserAnimal(int iD,int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost,     std::optional<boids::Genes> genes,AnimalConfig org)
+		:Animal(iD, x, y, radius, reproduce_energy_threshold, reproduce_energy_cost, genes,org)
 	{}
 	static AnimalConfig FindAnimalConfig(const std::string& name) {
 		auto& animals = TestConfig::GetTestConfig().The_Animals;
