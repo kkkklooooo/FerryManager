@@ -1,6 +1,7 @@
 #ifndef FERRY_MANAGER_MAIN_H
 #define FERRY_MANAGER_MAIN_H
 
+#include"boids/Genes.h"
 #include <utility>
 #include <vector>
 #include<string>
@@ -33,6 +34,7 @@ struct ReproduceRequest
     std::string name;           //生成生物的具体名称
     std::pair<int, int> pos;     // 生成位置 (x, y)
     int radius;                  // 子代生物的初始半径
+    std::optional<boids::Genes> new_genes;
 };
 
 /**
@@ -75,7 +77,7 @@ public:
     bool reproduce_able;
 
     // 纯虚函数（实际有默认实现），派生类应重写具体的繁殖行为
-    virtual void Reproduce()=0;
+    virtual void Reproduce(std::optional<Reproducable*> other=std::nullopt)=0;
 };
 
 /**
@@ -90,7 +92,7 @@ public:
 
     int id;   // 植物唯一标识符
     // 重写繁殖方法：随机生成子代位置并向世界提交繁殖请求
-    void Reproduce() override;
+    void Reproduce(std::optional<Reproducable*> other=std::nullopt) override;
     void Step() override;
     float calculate_overlay_cost();
 };
@@ -99,7 +101,7 @@ class Animal :public Reproducable
 {
 public:
     Animal(int id,int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost, float step_energy_cost);
-    Animal(int id,int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost, AnimalConfig& need);
+    Animal(int id,int x, int y, int radius, float reproduce_energy_threshold, float reproduce_energy_cost,     std::optional<boids::Genes> genes,AnimalConfig& need);
 
     float rate;
     int eat_intrval=0;
@@ -113,7 +115,7 @@ public:
 
     virtual  float SetRate();//由世界返回动物的速度区间
     virtual  void  SetRate(Animal* a);//由能量改变速度大小
-    void Reproduce() override;
+    void Reproduce(std::optional<Reproducable*> other=std::nullopt) override;
     void Step() override;
     float calculate_overlay_cost();
     void OnEatInterval(){
