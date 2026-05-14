@@ -67,8 +67,8 @@ static void DrawWorldGrid(const World& world, bool flat, bool showReq) {
     int w = world.GetWidth(), h = world.GetHeight();
 
     ImVec2 avail = ImGui::GetContentRegionAvail();
-    float cellSize = min(avail.x / w, avail.y / h);
-    cellSize = max(cellSize, 3.0f);
+    float cellSize = std::min(avail.x / w, avail.y / h);
+    cellSize = std::max(cellSize, 3.0f);
 
     float maxE = 0.001f;
     for (auto* e : envs) if (e->energy > maxE) maxE = e->energy;
@@ -387,8 +387,8 @@ void RenderUI(World& world, int* pFrame, int total,
         const auto& reqs = world.GetReproduceRequests();
         int w = world.GetWidth(), h = world.GetHeight();
         ImVec2 avail = ImGui::GetContentRegionAvail();
-        float cs = min(avail.x / w, avail.y / h);
-        cs = max(cs, 4.0f);
+        float cs = std::min(avail.x / w, avail.y / h);
+        cs = std::max(cs, 4.0f);
 
         ImDrawList* dl = ImGui::GetWindowDrawList();
         ImVec2 base = ImGui::GetCursorScreenPos();

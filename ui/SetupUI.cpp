@@ -61,6 +61,9 @@ static bool LoadConfigAny(TestConfig& cfg) {
         "default_config.json",
         "../default_config.json",
         ".../config/default_config.jason",//修改完路径之后
+        "./config/default_config.json"
+        "config/default_config.json"
+        "../config/default_config.json"
     };
     for (auto p : paths) {
         if (LoadConfig(cfg, p)) return true;
