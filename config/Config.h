@@ -17,7 +17,8 @@ struct AnimalConfig {
     float step_energy_cost = -1.0f;
     float energy_rate = -1.0f;
     int   eat_intrval_max = -1;
-
+    float reproduce_energy_threshold = -1; // 繁殖所需能量阈值，-1=使用全局默认
+    float reproduce_energy_cost = -1;      // 繁殖消耗能量，-1=使用全局默认
 };
 
 struct EnvironmentConfig{
@@ -31,6 +32,8 @@ struct PlantConfig{
     std::string name="Plant";
     int   reproduce_original_energy = -1;
     float step_energy_cost = - 1.0f;
+    float reproduce_energy_threshold = -1; // 繁殖所需能量阈值，-1=使用全局默认
+    float reproduce_energy_cost = -1;      // 繁殖消耗能量，-1=使用全局默认
 };
 
 
@@ -70,7 +73,9 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AnimalConfig,
     max_rate,
     step_energy_cost,
     energy_rate,
-    eat_intrval_max)
+    eat_intrval_max,
+    reproduce_energy_threshold,
+    reproduce_energy_cost)
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(EnvironmentConfig,
     name,
@@ -79,7 +84,9 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(EnvironmentConfig,
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(PlantConfig,
     name,
     reproduce_original_energy,
-    step_energy_cost)
+    step_energy_cost,
+    reproduce_energy_threshold,
+    reproduce_energy_cost)
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TestConfig,
     The_Word,

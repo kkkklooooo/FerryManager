@@ -717,10 +717,16 @@ int main() {
     ImGui::CreateContext();
     ImGui::GetIO().IniFilename = nullptr;
     ImGui::StyleColorsDark();
+
     ImPlot::CreateContext();
 
     ImGui_ImplWin32_Init(g_hWnd);
     ImGui_ImplOpenGL3_Init();
+
+    // load CJK font for Chinese text (after backend init, Build() auto-called)
+    ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\msyh.ttc", 16.0f,
+        nullptr, io.Fonts->GetGlyphRangesChineseFull());
 
     if (!RunSetupPhase(g_hWnd, g_done)) {
         ImGui_ImplOpenGL3_Shutdown();

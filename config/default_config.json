@@ -11,12 +11,16 @@
     "max_rate": 3,
     "step_energy_cost": 0.3,
     "energy_rate": 0.2,
-    "eat_intrval_max": 10
+    "eat_intrval_max": 10,
+    "reproduce_energy_threshold": -1,
+    "reproduce_energy_cost": -1
   },
   "Default_Plant_Config": {
     "name": "Gress",
     "reproduce_original_energy": 8,
-    "step_energy_cost": 0.2
+    "step_energy_cost": 0.2,
+    "reproduce_energy_threshold": -1,
+    "reproduce_energy_cost": -1
   },
   "The_Environments": [
     {
@@ -37,7 +41,9 @@
       "max_rate": 3,
       "step_energy_cost": 0.35,
       "energy_rate": 0.5,
-      "eat_intrval_max": 8
+      "eat_intrval_max": 8,
+      "reproduce_energy_threshold": -1,
+      "reproduce_energy_cost": -1
     },
     {
       "name": "Sheep",
@@ -47,14 +53,18 @@
       "max_rate": 2,
       "step_energy_cost": 0.08,
       "energy_rate": 0.2,
-      "eat_intrval_max": 4
+      "eat_intrval_max": 4,
+      "reproduce_energy_threshold": -1,
+      "reproduce_energy_cost": -1
     }
   ],
   "The_Plants": [
     {
       "name": "Gress",
       "reproduce_original_energy": 8,
-      "step_energy_cost": 0.2
+      "step_energy_cost": 0.2,
+      "reproduce_energy_threshold": -1,
+      "reproduce_energy_cost": -1
     }
   ]
 }
