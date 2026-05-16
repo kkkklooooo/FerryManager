@@ -26,9 +26,9 @@ set(HEADERS
 
 add_executable(ecosim ${SOURCES} ${HEADERS}
     "operator/MyOperator.h" "operator/MyOperatorDefine.cpp"
-    "core/Animals.h" "core/Plants.h"
+    "core/Animals.h" "core/Plants.h" 
     "config/ConflgDefine.cpp" "config/Config.h" "test_main.cpp"
-    "implot/implot.cpp" "implot/implot_items.cpp" "implot/implot.h")
+    "implot/implot.cpp" "implot/implot_items.cpp" "implot/implot.h" "data/game_struct.h")
 
 target_include_directories(ecosim PRIVATE
     ${CMAKE_SOURCE_DIR}
@@ -46,7 +46,7 @@ add_executable(ecosim2 ${SOURCES} ${HEADERS}
     "operator/MyOperator.h" "operator/MyOperatorDefine.cpp"
     "core/Animals.h" "core/Plants.h"
     "config/ConflgDefine.cpp" "config/Config.h" "imguMe/myui.cpp"
-     "implot/implot.cpp" "implot/implot_items.cpp" "implot/implot.h")
+     "implot/implot.cpp" "implot/implot_items.cpp" "implot/implot.h" "data/game_struct.h")
 
 target_include_directories(ecosim2 PRIVATE
     ${CMAKE_SOURCE_DIR}
@@ -70,7 +70,7 @@ add_executable(debug_sim debug_main.cpp
     "operator/MyOperator.h" "operator/MyOperatorDefine.cpp"
     "core/Animals.h" "core/Plants.h"
     core/OrganismDefine.cpp core/EnvironmentDefine.cpp core/WorldDefine.cpp
-    config/ConflgDefine.cpp config/Config.h boids/boids.cpp )
+    config/ConflgDefine.cpp config/Config.h boids/boids.cpp  "data/game_struct.h")
 
 target_include_directories(debug_sim PRIVATE
     ${CMAKE_SOURCE_DIR}
@@ -86,7 +86,7 @@ add_executable(boids_test
     boids/boids.cpp
     ${IMGUI_SOURCES}
     imgui/backends/imgui_impl_win32.cpp
-    imgui/backends/imgui_impl_opengl3.cpp)
+    imgui/backends/imgui_impl_opengl3.cpp "data/game_struct.h")
 
 target_include_directories(boids_test PRIVATE
     ${CMAKE_SOURCE_DIR}
@@ -113,6 +113,12 @@ add_custom_command(TARGET ecosim POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${CMAKE_SOURCE_DIR}/config/default_config.json"
         "$<TARGET_FILE_DIR:ecosim>/default_config.json"
+)
+
+add_custom_command(TARGET ecosim2 POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/config/default_config.json"
+        "$<TARGET_FILE_DIR:ecosim2>/default_config.json"
 )
 
 add_custom_command(TARGET debug_sim POST_BUILD

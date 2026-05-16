@@ -1,18 +1,21 @@
 #include "SetupUI.h"
 #include "Config.h"
 #include "World.h"
+#include"data/game_struct.h"
 #include "imgui/imgui.h"
 #include "imgui/backends/imgui_impl_win32.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
 #include <GL/gl.h>
 #include <fstream>
 #include <sstream>
+#include <filesystem>
 #include <cstdio>
 
+namespace fs = std::filesystem;
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
+std::unordered_map<std::string, ImVec4>OrganismColor;
 static TestConfig s_GameConfig;
-
+static gameData   s_WorldData;
 // ---- helpers for editing string vectors as comma-separated text ----
 static void VecToStr(const std::vector<std::string>& v, char* buf, size_t bufSize) {
     std::string s;
@@ -43,6 +46,23 @@ static void StrToVec(const char* buf, std::vector<std::string>& v) {
 }
 
 // ----
+static std::string remove_json_suffix(const std::string& filename) {
+    const std::string suffix = ".json";
+    if (filename.size() >= suffix.size() &&
+        filename.rfind(suffix) == filename.size() - suffix.size()) {
+        return filename.substr(0, filename.size() - suffix.size());
+    }
+    return filename;  // 没有后缀，原样返回
+}
+
+static std::string add_json_suffix(const std::string& filename) {
+    const std::string suffix = ".json";
+    if (filename.size() >= suffix.size() &&
+        filename.rfind(suffix) == filename.size() - suffix.size()) {
+        return filename;// 有后缀，原样返回
+    }
+    return filename+suffix;
+}
 
 static bool LoadConfig(TestConfig& cfg, const char* path) {
     std::ifstream f(path);
@@ -50,7 +70,7 @@ static bool LoadConfig(TestConfig& cfg, const char* path) {
     json j;
     j=json::parse(f);
     cfg = j.get<TestConfig>();
-    printf("%s\n\n", cfg.Default_Plant_Config.name.data());
+    //printf("%s\n\n", cfg.Default_Plant_Config.name.data());
     return true;
 }
 
@@ -59,13 +79,34 @@ static bool LoadConfigAny(TestConfig& cfg) {
     const char* paths[] = {
         "default_config.json",
         "../default_config.json",
-        ".../config/default_config.jason",//�޸���·��֮��
-        "./config/default_config.json",
         "../config/default_config.json",
-        "config/default_config.json"
+        "../../config/default_config.json",
+        "../../default_config.json"
     };
     for (auto p : paths) {
         if (LoadConfig(cfg, p)) return true;
+    }
+    return false;
+}
+
+static bool LoadWorld(gameData& gad, const char* path) {
+    std::ifstream f(path);
+    if (!f.is_open()) return false;
+    json j;
+    j = json::parse(f);
+    gad = j.get<gameData>();
+    return true;
+}
+
+static bool LoadWorldAny(gameData& gad) {
+    const char* paths[] = {
+          "../../../data/game_data.json",
+          "../../data/game_data.json",
+          "../data/game_data.json",            
+          "data/game_data.json"
+    };
+    for (auto p : paths) {
+        if (LoadWorld(gad, p)) return true;
     }
     return false;
 }
@@ -83,6 +124,8 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
             "Loaded default_config.json");
     }
 
+    
+
     static int activeTab = 0;
 
     auto renderWorldTab = [&]() {
@@ -94,29 +137,7 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
         if (s_GameConfig.The_Word.length < 10) s_GameConfig.The_Word.length = 10;
     };
 
-    //auto renderDefaultsTab = [&]() {//����Ҫ�ѣ���
-    //    if (ImGui::CollapsingHeader("Default Animal", ImGuiTreeNodeFlags_DefaultOpen)) {
-    //        AnimalConfig& a = s_GameConfig.Default_Animal_Config;
-    //        char nameBuf[128];
-    //        snprintf(nameBuf, sizeof(nameBuf), "%s", a.name.c_str());
-    //        if (ImGui::InputText("Name", nameBuf, sizeof(nameBuf)))
-    //            a.name = nameBuf;
-    //        ImGui::InputInt("Reproduce Rate",  &a.reproduce_original_rate);
-    //        ImGui::InputInt("Reproduce Energy",&a.reproduce_original_energy);
-    //        ImGui::InputFloat("Max Rate",      &a.max_rate);
-    //        ImGui::InputFloat("Step Energy",   &a.step_energy_cost);
-    //        ImGui::InputFloat("Energy Rate",   &a.energy_rate);
-    //    }
-    //    if (ImGui::CollapsingHeader("Default Plant", ImGuiTreeNodeFlags_DefaultOpen)) {
-    //        PlantConfig& p = s_GameConfig.Default_Plant_Config;
-    //        char plantNameBuf[128];
-    //        snprintf(plantNameBuf, sizeof(plantNameBuf), "%s", p.name.c_str());
-    //        if (ImGui::InputText("Name", plantNameBuf, sizeof(plantNameBuf)))
-    //            p.name = plantNameBuf;
-    //        ImGui::InputInt("Reproduce Energy", &p.reproduce_original_energy);
-    //        ImGui::InputFloat("Step Energy",    &p.step_energy_cost);
-    //    }
-    //};
+
 
     auto renderEnvironmentsTab = [&]() {
         ImGui::TextDisabled("环境决定哪些物种可以在该地形上生存和繁殖");
@@ -170,6 +191,13 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
             if (ImGui::IsItemHovered()) ImGui::SetTooltip("能量达到此值才能繁殖,-1=使用全局引擎默认值");
             ImGui::InputFloat("繁殖消耗 (Repro Cost)", &a.reproduce_energy_cost);
             if (ImGui::IsItemHovered()) ImGui::SetTooltip("每次繁殖消耗的能量,-1=使用全局引擎默认值");
+
+            float col[4] = {1,1,1,1};
+            auto it = OrganismColor.find(a.name);
+            if (it != OrganismColor.end()) { col[0]=it->second.x; col[1]=it->second.y; col[2]=it->second.z; col[3]=it->second.w; }
+            if (ImGui::ColorEdit4("颜色", col, ImGuiColorEditFlags_NoInputs))
+                OrganismColor[a.name] = ImVec4(col[0], col[1], col[2], col[3]);
+
             ImGui::PopID();
         }
         if (ImGui::Button("添加物种 (Add Animal)")) {
@@ -197,6 +225,13 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
             if (ImGui::IsItemHovered()) ImGui::SetTooltip("能量达到此值才能繁殖.-1=使用全局引擎默认值");
             ImGui::InputFloat("繁殖消耗 (Repro Cost)", &p.reproduce_energy_cost);
             if (ImGui::IsItemHovered()) ImGui::SetTooltip("每次繁殖消耗的能量.-1=使用全局引擎默认值");
+
+            float col[4] = {1,1,1,1};
+            auto it = OrganismColor.find(p.name);
+            if (it != OrganismColor.end()) { col[0]=it->second.x; col[1]=it->second.y; col[2]=it->second.z; col[3]=it->second.w; }
+            if (ImGui::ColorEdit4("颜色", col, ImGuiColorEditFlags_NoInputs))
+                OrganismColor[p.name] = ImVec4(col[0], col[1], col[2], col[3]);
+
             ImGui::PopID();
         }
         if (ImGui::Button("添加物种 (Add Plant)")) {
@@ -205,6 +240,90 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
     };
 
     bool startRequested = false;
+
+    auto renderCreateWorldTab = [&]() {
+        static bool g_Create = false;
+        bool finded = LoadWorldAny(s_WorldData);
+        if (!finded) {
+            s_WorldData = gameData();
+            snprintf(g_StatusMsg, sizeof(g_StatusMsg), "WARNING: game_data.json not find - using empty defaults");
+        }
+        else
+        {
+            snprintf(g_StatusMsg, sizeof(g_StatusMsg),
+                "Loaded game_data.json");
+        }
+        const char* paths[] = {
+                "../../../data/game_data.json",
+                "../../data/game_data.json",
+                "../data/game_data.json",
+                "data/game_data.json"
+        };
+        ImGui::TextDisabled("当前世界");
+        ImGui::Spacing();
+        for (auto i : s_WorldData.names) {
+            ImGui::PushID(i.data());
+            ImGui::Separator();
+            std::string lable = remove_json_suffix(i);
+            std::vector<std::string> path = {
+                "../../../data/" + i,
+                "../../data" + i,
+                "data/" + i,
+                i,
+                "../" + i,
+                "../data/" + i
+            };
+            if (ImGui::Button(lable.c_str())) {
+                for (auto p : path) {
+                    if (LoadConfig(s_GameConfig, p.c_str())) {
+                        ImGui::PopID(); 
+                        InitGameConfig(s_GameConfig);
+                        World::GetWorld(s_GameConfig);
+                        startRequested = true;
+                        return;
+                    }
+                }
+            }
+            ImGui::PopID();
+        }
+        if (ImGui::Button(g_Create ? "不创造新世界（Don't Add New World)" : "创造新世界（Add New World)")) {
+            g_Create = !g_Create;
+        }
+        if (g_Create) {//
+            static char theName[32]="";
+            ImGui::InputText("名称 (Name):", theName, sizeof(theName));
+            if (ImGui::Button("Yes I will create this world")) {
+                std::string fullName = add_json_suffix(theName);
+                //printf("%s", theName);
+                s_WorldData.names.push_back(fullName);
+                json gameconfig = s_GameConfig;
+                json AllGame = s_WorldData;//自动序列化
+                fs::path P = "../../../data/game_data.json";
+                std::ifstream f(P);
+                if (f.is_open()) {
+                    f.close();
+                    std::ofstream F(P);
+                    F << AllGame;
+                    F.close();
+                    fs::path dir = P.parent_path();
+                    fs::path cur = dir / fullName;
+                    std::ofstream FF(cur);
+                    if (FF.is_open()) {
+                        FF << gameconfig;
+                        FF.close();
+                    }
+                    else
+                    {
+                        throw("can't Open!!");
+                    }
+                    InitGameConfig(s_GameConfig);
+                    World::GetWorld(s_GameConfig);
+                    startRequested = true;
+                    }
+
+            }
+        }
+    };
 
     while (!quitRequested && !startRequested) {
         MSG msg;
@@ -236,6 +355,7 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
             if (ImGui::BeginTabItem("Environments")) { activeTab = 1; ImGui::EndTabItem(); }
             if (ImGui::BeginTabItem("Animals"))    { activeTab = 2; ImGui::EndTabItem(); }
             if (ImGui::BeginTabItem("Plants"))     { activeTab = 3; ImGui::EndTabItem(); }
+            if (ImGui::BeginTabItem("CreatWorlds")) { activeTab = 4; ImGui::EndTabItem(); }
             ImGui::EndTabBar();
         }
 
@@ -246,6 +366,7 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
             case 1: renderEnvironmentsTab(); break;
             case 2: renderAnimalsTab();      break;
             case 3: renderPlantsTab();       break;
+            case 4:renderCreateWorldTab();   break;
         }
         ImGui::EndChild();
 
