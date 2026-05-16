@@ -12,15 +12,15 @@
     "step_energy_cost": 0.3,
     "energy_rate": 0.2,
     "eat_intrval_max": 10,
-    "reproduce_energy_threshold": 1,
-    "reproduce_energy_cost": 1
+    "reproduce_energy_threshold": -1,
+    "reproduce_energy_cost": -1
   },
   "Default_Plant_Config": {
     "name": "Gress",
     "reproduce_original_energy": 8,
     "step_energy_cost": 0.2,
-    "reproduce_energy_threshold": 1,
-    "reproduce_energy_cost": 1
+    "reproduce_energy_threshold": -1,
+    "reproduce_energy_cost": -1
   },
   "The_Environments": [
     {
