@@ -235,8 +235,7 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
 
         if (ImGui::BeginTabBar("Tabs")) {
             if (ImGui::BeginTabItem("World"))      { activeTab = 0; ImGui::EndTabItem(); }
-            //if (ImGui::BeginTabItem("Defaults"))   { activeTab = 1; ImGui::EndTabItem(); }//Ӧ�����ذ�
-            if (ImGui::BeginTabItem("Environments")){ activeTab = 1; ImGui::EndTabItem(); }
+            if (ImGui::BeginTabItem("Environments")) { activeTab = 1; ImGui::EndTabItem(); }
             if (ImGui::BeginTabItem("Animals"))    { activeTab = 2; ImGui::EndTabItem(); }
             if (ImGui::BeginTabItem("Plants"))     { activeTab = 3; ImGui::EndTabItem(); }
             ImGui::EndTabBar();

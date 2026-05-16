@@ -20,8 +20,8 @@
     "name": "Gress",
     "reproduce_original_energy": 8,
     "step_energy_cost": 0.2,
-    "reproduce_energy_threshold": -1,
-    "reproduce_energy_cost": -1
+    "reproduce_energy_threshold": 18,
+    "reproduce_energy_cost": 10
   },
   "The_Environments": [
     {
