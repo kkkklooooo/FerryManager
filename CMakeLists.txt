@@ -70,7 +70,7 @@ add_executable(debug_sim debug_main.cpp
     "operator/MyOperator.h" "operator/MyOperatorDefine.cpp"
     "core/Animals.h" "core/Plants.h"
     core/OrganismDefine.cpp core/EnvironmentDefine.cpp core/WorldDefine.cpp
-    config/ConflgDefine.cpp config/Config.h boids/boids.cpp "imguMe/myui.cpp")
+    config/ConflgDefine.cpp config/Config.h boids/boids.cpp )
 
 target_include_directories(debug_sim PRIVATE
     ${CMAKE_SOURCE_DIR}
@@ -86,8 +86,7 @@ add_executable(boids_test
     boids/boids.cpp
     ${IMGUI_SOURCES}
     imgui/backends/imgui_impl_win32.cpp
-    imgui/backends/imgui_impl_opengl3.cpp
- "imguMe/myui.cpp")
+    imgui/backends/imgui_impl_opengl3.cpp)
 
 target_include_directories(boids_test PRIVATE
     ${CMAKE_SOURCE_DIR}
