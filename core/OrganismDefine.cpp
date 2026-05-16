@@ -26,7 +26,8 @@ Reproducable *ReprodueNewOrganism(ReproduceRequest request)
 {
     if (request.type == PLANT)
     {
-        return new UserPlant(Plant_id++, request.pos.first, request.pos.second, request.radius, World::GetWorld().conf.Organism_reproduce_energy_threshold, World::GetWorld().conf.Organism_reproduce_energy_cost, UserPlant::FindPlantConfig(request.name));
+        PlantConfig pc = UserPlant::FindPlantConfig(request.name);
+        return new UserPlant(Plant_id++, request.pos.first, request.pos.second, request.radius, pc.reproduce_energy_threshold, pc.reproduce_energy_cost, pc);
     }
     // return new UserAnimal(Animal_id++, request.pos.first, request.pos.second, request.radius, World::GetWorld().conf.Organism_reproduce_energy_threshold, World::GetWorld().conf.Organism_reproduce_energy_cost, UserAnimal::FindAnimalConfig(request.name));
     return MyOperator::GetOp()(request,Animal_id++);

@@ -10,7 +10,7 @@ public:
 	using Creator = std::function<UserAnimal *(int id, int x, int y, int radius,std::optional<boids::Genes> g)>;
 	using PlantCreator = std::function<UserPlant *(int id, int x, int y, int radius ,    std::optional<boids::Genes> g)>; // 注册官方植物的
 
-	// ע�ắ��
+	// 注册函数
 	static void register_Animal_Create(std::string name, Creator creator);
 	static void register_Plant_Create(std::string name, PlantCreator creator);
 	void operator()(Reproducable *a, Reproducable *b);
@@ -19,7 +19,6 @@ public:
 	static MyOperator &GetOp();
 
 private:
-	// ȫ��Ψһע���
 	static std::unordered_map<std::string, Creator> &registry();
 	static std::unordered_map<std::string, PlantCreator> &Plantregistry();
 };
@@ -33,8 +32,10 @@ struct PlantRegistrator
 	PlantRegistrator() = default;
 };
 
-static PlantRegistrator Gress("Gress", [](int id, int x, int y, int radius,    std::optional<boids::Genes> genes=std::nullopt)
-							  { return new UserPlant(id, x, y, radius, Config::GetConfig().Organism_reproduce_energy_threshold, Config::GetConfig().Organism_reproduce_energy_cost, UserPlant::FindPlantConfig("Gress")); });
+static PlantRegistrator Gress("Gress", [](int id, int x, int y, int radius, std::optional<boids::Genes> genes=std::nullopt) {
+	auto cfg = UserPlant::FindPlantConfig("Gress");
+	return new UserPlant(id, x, y, radius, cfg.reproduce_energy_threshold, cfg.reproduce_energy_cost, cfg);
+});
 
 struct AnimalRegistrator
 {
@@ -45,8 +46,12 @@ struct AnimalRegistrator
 	AnimalRegistrator() = default;
 };
 
-static AnimalRegistrator wolf("Wolf", [](int id, int x, int y, int radius, std::optional<boids::Genes> g) -> UserAnimal *
-							  { return new UserAnimal(id, x, y, radius, Config::GetConfig().Organism_reproduce_energy_threshold, Config::GetConfig().Organism_reproduce_energy_cost, g, UserAnimal::FindAnimalConfig("Wolf")); });
+static AnimalRegistrator wolf("Wolf", [](int id, int x, int y, int radius, std::optional<boids::Genes> g) -> UserAnimal * {
+	auto cfg = UserAnimal::FindAnimalConfig("Wolf");
+	return new UserAnimal(id, x, y, radius, cfg.reproduce_energy_threshold, cfg.reproduce_energy_cost, g, cfg);
+});
 
-static AnimalRegistrator sheep("Sheep", [](int id, int x, int y, int radius, std::optional<boids::Genes> g) -> UserAnimal *
-							   { return new UserAnimal(id, x, y, radius, Config::GetConfig().Organism_reproduce_energy_threshold, Config::GetConfig().Organism_reproduce_energy_cost, g, UserAnimal::FindAnimalConfig("Sheep")); });
+static AnimalRegistrator sheep("Sheep", [](int id, int x, int y, int radius, std::optional<boids::Genes> g) -> UserAnimal * {
+	auto cfg = UserAnimal::FindAnimalConfig("Sheep");
+	return new UserAnimal(id, x, y, radius, cfg.reproduce_energy_threshold, cfg.reproduce_energy_cost, g, cfg);
+});
