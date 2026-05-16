@@ -157,21 +157,32 @@ static void DrawWorldGrid(const World& world, bool flat, bool showReq) {
 // ============================================================
 static std::unordered_map<std::string,std::vector<float>>Organism_hestory;
 
+static void ResetPopulationHistory() {
+    Organism_hestory.clear();
+}
+
+
 static void DrawPopulationHistory() {
-    ImGui::BeginChild("Plot", ImVec2(0, 0));
-    int count = (int)Organism_hestory.size();
+    ImGui::SetNextWindowSize(ImVec2(900, 300), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Plot");
+    long long int count = Organism_hestory["&&ALLORGANISM&&"].size();
+    //printf("%d ", count);
     if (count < 3) {
         ImGui::TextDisabled("Waiting for data...");
         ImGui::End();
         return;
     }
-
-    float yMax = Organism_hestory["&&ALLORGANISM&&"][0];
+    if (count > 5000) {
+        ResetPopulationHistory();
+        ImGui::End();
+        return;
+    }
+    float yMax = Organism_hestory["&&ALLORGANISM&&"][count-1];
     yMax = max(yMax * 1.15f, 10.0f);
 
     if (ImPlot::BeginPlot("##PopPlot", ImVec2(-1, -1))) {
         ImPlot::SetupAxes("Frame", "Count");
-        ImPlot::SetupAxisLimits(ImAxis_X1, 0, (double)(count + 10), ImGuiCond_Once);
+        ImPlot::SetupAxisLimits(ImAxis_X1, 0, (double)(count + 10), ImGuiCond_Always);
         ImPlot::SetupAxisLimits(ImAxis_Y1, 0, (double)yMax, ImGuiCond_Always);
         for (auto i : Organism_hestory) {
             if (i.first == "&&ALLORGANISM&&")continue;
@@ -182,12 +193,9 @@ static void DrawPopulationHistory() {
         }
         ImPlot::EndPlot();
     }
-    ImGui::EndChild();
+    ImGui::End();
 }
 
-static void ResetPopulationHistory() {
-    Organism_hestory.clear();
-}
 
 // ============================================================
 //  Plant table
@@ -289,10 +297,8 @@ static void DrawStats(const World& world, int frame, int total) {
         }
         size[o->name]++;
     }
-
     Organisms = plants + animals;
-    Organism_hestory["&&ALLORGANISM&&"]={0};
-    Organism_hestory["&&ALLORGANISM&&"][0] = Organisms;
+    Organism_hestory["&&ALLORGANISM&&"].push_back( Organisms);
     for (auto* e : envs) envE += e->energy;
 
     ImGui::Text("|Frame %d/%d", frame, total); ImGui::SameLine(130);
