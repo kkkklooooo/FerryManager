@@ -17,6 +17,8 @@ struct AnimalConfig {
     float step_energy_cost = -1.0f;
     float energy_rate = -1.0f;
     int   eat_intrval_max = -1;
+    float reproduce_energy_threshold = -1; // 繁殖所需能量阈值，-1=使用全局默认
+    float reproduce_energy_cost = -1;      // 繁殖消耗能量，-1=使用全局默认
 };
 
 struct EnvironmentConfig{

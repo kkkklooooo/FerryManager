@@ -152,9 +152,17 @@ static void DrawWorldGrid(const World& world, bool flat, bool showReq) {
 }
 
 // ============================================================
-//  Energy heat-map
+// Organism statistics
 // ============================================================
-//TODO
+static std::unordered_map<std::string,std::vector<float>>Organism_hestory;
+
+static void DrawPopulationHistory() {
+
+}
+
+static void ResetPopulationHistory() {
+    Organism_hestory.clear();
+}
 
 // ============================================================
 //  Plant table
@@ -167,7 +175,7 @@ static void DrawPlantList(const World& world) {//±£¡Ù
         ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingFixedFit,
         ImVec2(0, avail.y)))
         return;
-
+    
     ImGui::TableSetupColumn("ID", ImGuiTableColumnFlags_WidthFixed, 40);
     ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, 40);
     ImGui::TableSetupColumn("X", ImGuiTableColumnFlags_WidthFixed, 40);
@@ -239,7 +247,7 @@ static void DrawStats(const World& world, int frame, int total) {
     const auto& orgs = world.GetReproducas();
     const auto& envs = world.GetEnvironments();
     static std::unordered_map<std::string, int>size;
-    int plants = 0, animals = 0, wolves = 0, sheep = 0;
+    int plants=0 ,animals=0,Organisms=0;
     float pE = 0, aE = 0, envE = 0;
     size.clear();
     for (auto* o : orgs) {
@@ -256,6 +264,9 @@ static void DrawStats(const World& world, int frame, int total) {
         }
         size[o->name]++;
     }
+
+    Organisms = plants + animals;
+
     for (auto* e : envs) envE += e->energy;
 
     ImGui::Text("|Frame %d/%d", frame, total); ImGui::SameLine(130);
@@ -266,7 +277,10 @@ static void DrawStats(const World& world, int frame, int total) {
     ImGui::Text("Env-E: %.0f|", envE);
     for (auto O : size) {
         ImGui::Text("%s: %d", O.first.data(), O.second);
+        Organism_hestory[O.first].push_back(O.second);
+        Organism_hestory["&&ALLORGANISM&&"][0]= Organisms;
     }
+    DrawPopulationHistory();
     ImGui::SameLine(830);
     ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 }

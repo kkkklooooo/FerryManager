@@ -25,8 +25,6 @@ AnimalConfig TestConfig::Check_Animal(AnimalConfig &fu) {
 	if (fu.step_energy_cost < 0)fu.step_energy_cost = Default_Animal_Config.step_energy_cost;
 	if (fu.energy_rate < 0)fu.energy_rate = Default_Animal_Config.energy_rate;
 	if (fu.eat_intrval_max < 0)fu.eat_intrval_max = Default_Animal_Config.eat_intrval_max;
-	if (fu.reproduce_energy_threshold < 0)fu.reproduce_energy_threshold = Config::GetConfig().Organism_reproduce_energy_threshold;
-	if (fu.reproduce_energy_cost < 0)fu.reproduce_energy_cost = Config::GetConfig().Organism_reproduce_energy_cost;
 	return fu;
 }
 
