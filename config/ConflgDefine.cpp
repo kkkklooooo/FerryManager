@@ -27,7 +27,7 @@ AnimalConfig TestConfig::Check_Animal(AnimalConfig &fu) {
 	if (fu.eat_intrval_max < 0)fu.eat_intrval_max = Default_Animal_Config.eat_intrval_max;
 	if (fu.max_energy <= 0)fu.max_energy = Default_Animal_Config.max_energy;
 	if (fu.reproduce_energy_threshold < 0)fu.reproduce_energy_threshold = Default_Animal_Config.reproduce_energy_threshold;
-	if(fu.reproduce_energy_cost<0)fu.reproduce_energy_cost= Default_Animal_Config.reproduce_energy_threshold;
+	if(fu.reproduce_energy_cost<0)fu.reproduce_energy_cost= Default_Animal_Config.reproduce_energy_cost;
 	return fu;
 }
 
@@ -39,7 +39,7 @@ PlantConfig TestConfig::Check_Plant(PlantConfig& fu) {
 	if (fu.reproduce_original_energy < 0)fu.reproduce_original_energy = Default_Plant_Config.reproduce_original_energy;
 	if (fu.step_energy_cost < 0)fu.step_energy_cost = Default_Plant_Config.step_energy_cost;
 	if (fu.reproduce_energy_threshold < 0)fu.reproduce_energy_threshold = Default_Plant_Config.reproduce_energy_threshold;
-	if (fu.reproduce_energy_cost < 0)fu.reproduce_energy_cost = Default_Plant_Config.reproduce_energy_threshold;
+	if (fu.reproduce_energy_cost < 0)fu.reproduce_energy_cost = Default_Plant_Config.reproduce_energy_cost;
 	return fu;
 }
 

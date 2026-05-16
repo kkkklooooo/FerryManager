@@ -35,6 +35,12 @@ void MyOperator::operator()(Reproducable *a, Reproducable *b)
         a->energy += bite * loss;
         if (a->energy > aAnimal->max_energy) a->energy = (float)aAnimal->max_energy;
         b->energy -= bite;
+        {
+            float killChance = b->type == PLANT
+                ? 0.03f
+                : 0.05f + 0.30f * (a->energy / (a->energy + b->energy + 0.001f));
+            if (rand01() < killChance) b->active = false;
+        }
         aAnimal->OnEatInterval();
         return;
     }
@@ -52,6 +58,12 @@ void MyOperator::operator()(Reproducable *a, Reproducable *b)
         b->energy += bite * loss;
         if (b->energy > bAnimal->max_energy) b->energy = (float)bAnimal->max_energy;
         a->energy -= bite;
+        {
+            float killChance = a->type == PLANT
+                ? 0.03f
+                : 0.05f + 0.30f * (b->energy / (b->energy + a->energy + 0.001f));
+            if (rand01() < killChance) a->active = false;
+        }
         bAnimal->OnEatInterval();
         return;
     }
