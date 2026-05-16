@@ -358,11 +358,13 @@ static std::vector<float> s_geneCoh;   // avg cohesion
 static std::vector<float> s_geneAli;   // avg alignment
 static std::vector<float> s_geneSep;   // avg separation
 static std::vector<float> s_geneVis;   // avg vision
+static std::vector<float> s_geneEsc;   // avg escape
+static std::vector<float> s_geneFood;  // avg food_addict
 static bool showGeneChart = false;
 
 static void RecordGeneStats(const World& world) {
     const auto& orgs = world.GetReproducas();
-    float coh = 0, ali = 0, sep = 0, vis = 0;
+    float coh = 0, ali = 0, sep = 0, vis = 0, esc = 0, food = 0;
     int sheep = 0;
     for (auto* o : orgs) {
         if (!o || !o->active || o->type == PLANT) continue;
@@ -372,14 +374,18 @@ static void RecordGeneStats(const World& world) {
         ali += a->genes.alignment;
         sep += a->genes.separation;
         vis += a->genes.vision;
+        esc += a->genes.escape;
+        food += a->genes.food_addict;
         sheep++;
     }
-    if (sheep > 0) { coh /= sheep; ali /= sheep; sep /= sheep; vis /= sheep; }
-    else { coh = ali = sep = vis = 0; }
+    if (sheep > 0) { coh /= sheep; ali /= sheep; sep /= sheep; vis /= sheep; esc /= sheep; food /= sheep; }
+    else { coh = ali = sep = vis = esc = food = 0; }
     s_geneCoh.push_back(coh);
     s_geneAli.push_back(ali);
     s_geneSep.push_back(sep);
     s_geneVis.push_back(vis);
+    s_geneEsc.push_back(esc);
+    s_geneFood.push_back(food);
 }
 
 static void ResetGeneHistory() {
@@ -387,6 +393,8 @@ static void ResetGeneHistory() {
     s_geneAli.clear();
     s_geneSep.clear();
     s_geneVis.clear();
+    s_geneEsc.clear();
+    s_geneFood.clear();
 }
 
 static void DrawGeneChart() {
@@ -412,6 +420,8 @@ static void DrawGeneChart() {
         ImPlot::PlotLine("Alignment", s_geneAli.data(), count);
         ImPlot::PlotLine("Separation", s_geneSep.data(), count);
         ImPlot::PlotLine("Vision",    s_geneVis.data(), count);
+        ImPlot::PlotLine("Escape",    s_geneEsc.data(), count);
+        ImPlot::PlotLine("FoodAddict", s_geneFood.data(), count);
 
         ImPlot::EndPlot();
     }
