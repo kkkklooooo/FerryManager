@@ -61,8 +61,8 @@ static void DrawWorldGrid(const World& world, bool flat, bool showReq) {
     int w = world.GetWidth(), h = world.GetHeight();
 
     ImVec2 avail = ImGui::GetContentRegionAvail();
-    float cellSize = std::min(avail.x / w, avail.y / h);
-    cellSize =std::max(cellSize, 3.0f);
+    float cellSize = min(avail.x / w, avail.y / h);
+    cellSize =max(cellSize, 3.0f);
 
     float maxE = 0.001f;
     for (auto* e : envs) if (e->energy > maxE) maxE = e->energy;
@@ -276,7 +276,7 @@ static void DrawAnimalList(const World& world) {
 // ============================================================
 //  Stats bar
 // ============================================================
-static void DrawStats(const World& world, int frame, int total) {
+static void DrawStats(const World& world, int frame, int total,bool persue,bool stepReq) {
     const auto& orgs = world.GetReproducas();
     const auto& envs = world.GetEnvironments();
     static std::unordered_map<std::string, int>size;
@@ -298,7 +298,10 @@ static void DrawStats(const World& world, int frame, int total) {
         size[o->name]++;
     }
     Organisms = plants + animals;
-    Organism_hestory["&&ALLORGANISM&&"].push_back( Organisms);
+    if (!persue || stepReq) { 
+        //printf("111");
+        Organism_hestory["&&ALLORGANISM&&"].push_back(Organisms); 
+    }
     for (auto* e : envs) envE += e->energy;
 
     ImGui::Text("|Frame %d/%d", frame, total); ImGui::SameLine(130);
@@ -309,7 +312,7 @@ static void DrawStats(const World& world, int frame, int total) {
     ImGui::Text("Env-E: %.0f|", envE);
     for (auto O : size) {
         ImGui::Text("%s: %d", O.first.data(), O.second);
-        Organism_hestory[O.first].push_back(O.second);
+        if(!persue || stepReq)Organism_hestory[O.first].push_back(O.second);
     }
     DrawPopulationHistory();
     ImGui::SameLine(830);
@@ -424,7 +427,7 @@ void RenderUI(World& world, int* pFrame, int total,
     ImGui::Spacing();
     ImGui::Checkbox("Flat Colors", &flatColors);
     ImGui::Separator();
-    DrawStats(world, *pFrame, total);
+    DrawStats(world, *pFrame, total, *pPaused,*pStep);
     ImGui::End();
 
     // ---- world grid ----
