@@ -61,8 +61,8 @@ static void DrawWorldGrid(const World& world, bool flat, bool showReq) {
     int w = world.GetWidth(), h = world.GetHeight();
 
     ImVec2 avail = ImGui::GetContentRegionAvail();
-    float cellSize = min(avail.x / w, avail.y / h);
-    cellSize = max(cellSize, 3.0f);
+    float cellSize = std::min(avail.x / w, avail.y / h);
+    cellSize =std::max(cellSize, 3.0f);
 
     float maxE = 0.001f;
     for (auto* e : envs) if (e->energy > maxE) maxE = e->energy;
@@ -167,7 +167,7 @@ static void DrawPopulationHistory() {
     }
 
     float yMax = Organism_hestory["&&ALLORGANISM&&"][0];
-    yMax = max(yMax * 1.15f, 10.0f);
+    yMax = std::max(yMax * 1.15f, 10.0f);
 
     if (ImPlot::BeginPlot("##PopPlot", ImVec2(-1, -1))) {
         ImPlot::SetupAxes("Frame", "Count");
