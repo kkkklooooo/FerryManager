@@ -106,6 +106,7 @@ public:
     float rate;
     int eat_intrval=0;
     int eat_intrval_max=20;
+    int max_energy=100;
     
     int id; //动物唯一标符
     std::vector<boids::Particle> neighbors;

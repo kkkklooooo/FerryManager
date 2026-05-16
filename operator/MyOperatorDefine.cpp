@@ -3,9 +3,10 @@
 #include <cassert>
 #include <cstdio>
 #include <algorithm>
+#include<random>
 using Creator = std::function<UserAnimal *(int id, int x, int y, int radius,std::optional<boids::Genes> g)>;
 using PlantCreator = std::function<UserPlant *(int id, int x, int y, int radius ,    std::optional<boids::Genes> g)>; // 注册官方植物的
-
+extern double rand01(); 
 
 void MyOperator::operator()(Reproducable *a, Reproducable *b)
 {
@@ -24,13 +25,17 @@ void MyOperator::operator()(Reproducable *a, Reproducable *b)
     {
         Animal *aAnimal = dynamic_cast<Animal *>(a);
         if (aAnimal->eat_intrval > 0)
-            return; // ����eat,��������һ��eat
-        a->energy += b->energy * World::GetWorld().conf.Organism_animal_absorb_rate * World::GetWorld().conf.Organism_loss_rate;
-        b->energy -= b->energy * World::GetWorld().conf.Organism_animal_absorb_rate;
-        b->active = false;
+            return;
+        float hunger = aAnimal->max_energy - a->energy;
+        if (hunger <= 0) return;
+        float absorb = World::GetWorld().conf.Organism_animal_absorb_rate;
+        float loss  = World::GetWorld().conf.Organism_loss_rate;
+        float bite  = std::min({hunger / loss, b->energy * absorb, b->energy});
+        if (bite <= 0) return;
+        a->energy += bite * loss;
+        if (a->energy > aAnimal->max_energy) a->energy = (float)aAnimal->max_energy;
+        b->energy -= bite;
         aAnimal->OnEatInterval();
-        // assert(a->energy >= -100&& b->energy >= -100);
-        // printf("\033[31m%s eat %s\033[0m\n", a->name, b->name);
         return;
     }
     if (bEa && !aEb)
@@ -38,28 +43,50 @@ void MyOperator::operator()(Reproducable *a, Reproducable *b)
         Animal *bAnimal = dynamic_cast<Animal *>(b);
         if (bAnimal->eat_intrval > 0)
             return;
-        b->energy += a->energy * World::GetWorld().conf.Organism_animal_absorb_rate * World::GetWorld().conf.Organism_loss_rate;
-        a->energy -= a->energy * World::GetWorld().conf.Organism_animal_absorb_rate;
-        a->active = false;
+        float hunger = bAnimal->max_energy - b->energy;
+        if (hunger <= 0) return;
+        float absorb = World::GetWorld().conf.Organism_animal_absorb_rate;
+        float loss  = World::GetWorld().conf.Organism_loss_rate;
+        float bite  = std::min({hunger / loss, a->energy * absorb, a->energy});
+        if (bite <= 0) return;
+        b->energy += bite * loss;
+        if (b->energy > bAnimal->max_energy) b->energy = (float)bAnimal->max_energy;
+        a->energy -= bite;
         bAnimal->OnEatInterval();
-        // assert(a->energy >= -100&& b->energy >= -100);
-        // printf("\033[31m%s eat %s\033[0m\n", b->name, a->name);
         return;
     }
     if (aEb && bEa)
     {
-        if (a->energy >= b->energy)
-        {
-            b->active = false;
-            printf("\033[31m%s eat %s\033[0m\n", a->name, b->name);
-            return;
+        Animal *aAnimal = dynamic_cast<Animal *>(a);
+        Animal *bAnimal = dynamic_cast<Animal *>(b);
+        if (aAnimal && bAnimal) {
+            float totalE = a->energy + b->energy;
+            if (totalE <= 0) return;
+            float aRatio = a->energy / totalE;
+            float absorb = World::GetWorld().conf.Organism_animal_absorb_rate;
+            float aDmg = b->energy * absorb * (1.0f - aRatio);
+            float bDmg = a->energy * absorb * aRatio;
+            if (aAnimal->eat_intrval <= 0 && aAnimal->energy < aAnimal->max_energy) {
+                float hunger = aAnimal->max_energy - a->energy;
+                float gain = std::min(bDmg * World::GetWorld().conf.Organism_loss_rate, hunger);
+                a->energy += gain;
+                if (a->energy > aAnimal->max_energy) a->energy = (float)aAnimal->max_energy;
+                aAnimal->OnEatInterval();
+            }
+            b->energy -= bDmg;
+            if (bAnimal->eat_intrval <= 0 && bAnimal->energy < bAnimal->max_energy) {
+                float hunger = bAnimal->max_energy - b->energy;
+                float gain = std::min(aDmg * World::GetWorld().conf.Organism_loss_rate, hunger);
+                b->energy += gain;
+                if (b->energy > bAnimal->max_energy) b->energy = (float)bAnimal->max_energy;
+                bAnimal->OnEatInterval();
+            }
+            a->energy -= aDmg;
+        } else {
+            if (a->energy >= b->energy) b->active = false;
+            else                       a->active = false;
         }
-        else
-        {
-            a->active = false;
-            printf("\033[31m%s eat %s\033[0m\n", b->name, a->name);
-            return;
-        }
+        return;
     }
 }
 

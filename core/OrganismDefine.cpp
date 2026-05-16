@@ -212,6 +212,7 @@ Animal::Animal(int iD, int x, int y, int radius, float reproduce_energy_threshol
     diet = org.diet;
     _energy_rate = org.energy_rate;
     max_rate = org.max_rate;
+    max_energy = org.max_energy;
     eat_intrval_max = org.eat_intrval_max;
     Pos = std::make_pair(x, y);
     explicit_pos = std::make_pair(x, y);

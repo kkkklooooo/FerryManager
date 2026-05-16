@@ -164,6 +164,8 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
             if (ImGui::IsItemHovered()) ImGui::SetTooltip("速度上限,由能量*能量率计算的速度不会超过此值,-1=使用默认值");
             ImGui::InputFloat("每步消耗 (Step Cost)",  &a.step_energy_cost);
             if (ImGui::IsItemHovered()) ImGui::SetTooltip("每帧消耗的能量,-1=使用默认值(0.3)");
+            ImGui::InputInt("最大能量 (Max Energy)",    &a.max_energy);
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("能量上限，吃饱后不再捕食,-1=使用默认值(50)");
             ImGui::InputFloat("能量转化率 (Energy Rate)",  &a.energy_rate);
             if (ImGui::IsItemHovered()) ImGui::SetTooltip("能量到速度的转化系数: 速度=能量*此值,-1=使用默认值(0.2)");
             ImGui::InputFloat("繁殖阈值 (Repro Threshold)", &a.reproduce_energy_threshold);

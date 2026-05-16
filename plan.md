@@ -215,285 +215,150 @@ Phase 1 的第一步（1.1）具体操作：
 
 ---
 
-## 八、Boids 遗传算法 + 空间网格繁殖 实施计划
+ ---
+  🧬 GA（遗传算法）—— 为什么"没啥用"，以及怎么做
 
-### 概述
+  当前问题
 
-**目标：**
-1. 用 boids 算法替代动物随机移动，让同种羊/狼自然聚拢，解决低密度时繁殖靠运气的问题
-2. boids 的三个权重 + 感知半径作为可突变基因，产生自然选择压力
-3. 空间网格同时服务于 boids 邻居查询和繁殖/捕食交互，O(n) 复杂度
+  GA::Fusion 只是把父母基因取平均 + 高斯噪声，没有选择压力。四个基因（cohesion/alignment/separation/vision）虽然会被追踪
+  统计，但它们对个体的生存概率影响微乎其微——动物死不死几乎完全取决于能量流（吃没吃到东西），基因差异体现不出来。
 
-**当前问题：** 动物随机走位，同种相遇纯靠运气，低密度时几乎无法繁殖。
+  改进方向
 
-**解决思路：** Boids 的 cohesion 规则倾向聚群 → 同种必然靠近 → 繁殖自然发生。三个权重可遗传 → 进化选择。
+  1. 让基因真正影响生存——基因 → 行为 → 能量效率
 
----
+  ┌────────────┬────────────────┬────────────────────────────────────────────────────┐
+  │    基因    │    当前影响    │                      应该影响                      │
+  ├────────────┼────────────────┼────────────────────────────────────────────────────┤
+  │ vision     │ 探测邻居半径   │ 探测食物/捕食者半径，大视野 = 消耗更多 step_energy │
+  ├────────────┼────────────────┼────────────────────────────────────────────────────┤
+  │ cohesion   │ 向群体中心靠拢 │ 高 cohesion = 更安全（群体防御），但食物竞争更激烈 │
+  ├────────────┼────────────────┼────────────────────────────────────────────────────┤
+  │ separation │ 远离邻居       │ 高 separation = 避免拥挤惩罚，但失去群体保护       │
+  ├────────────┼────────────────┼────────────────────────────────────────────────────┤
+  │ speed      │ 移动速度       │ 快 = 追猎物/逃跑强，但能耗大                       │
+  └────────────┴────────────────┴────────────────────────────────────────────────────┘
 
-### 文件改动清单
+  核心思路：每步能耗 = base_cost × (1 + speed_factor + vision_factor)，让高能力个体有真实的能量代价。
 
-| 文件 | 改什么 |
-|------|--------|
-| `Organism.h` | 加 `BoidGenes` 结构体, `Animal` 加 `vx/vy`/`genes`/`BoidsMove()`; `ReproduceRequest` 加 `genes` |
-| `OrganismDefine.cpp` | 实现 `BoidsMove()`, `Animal::Step()` 调用 boids, `Animal::Reproduce()` 加突变 |
-| `Animals.h` | Wolf/Sheep 构造函数设初始基因默认值 |
-| `MyOperatorDefine.cpp` | 工厂创建后注入基因 (`a->genes = x.genes`) |
-| `WordDefine.cpp` | `Update()` 调整步骤顺序（植物solo繁殖拆分、动物交互循环） |
-| `test_main.cpp` | Animal tooltip 显示基因值（可选） |
+  2. 加入捕食成功率基因
 
----
+  AnimalConfig 里加 hunt_efficiency 和 escape_chance，捕食时不再是 100% 成功，而是：
+  P(捕食成功) = 捕食者.hunt / (捕食者.hunt + 猎物.escape)
+  这直接创造选择压力——捕食能力差的狼会饿死。
 
-### Step 1: 数据结构 (`Organism.h`)
+  3. 环境承载力的季节波动
 
-```cpp
-// 新增基因结构体
-struct BoidGenes {
-    float cohesion   = 1.0f;   // 范围 0.2 ~ 3.0
-    float alignment  = 0.5f;   // 范围 0.2 ~ 3.0
-    float separation = 1.0f;   // 范围 0.2 ~ 3.0
-    int   vision     = 3;      // 感知半径(格子), 范围 2 ~ 8
-};
+  在 Environment::Update 里加一个简单的季节循环：
+  season = (frame / 1000) % 4   // 春/夏/秋/冬
+  冬季 solar_gain 减半，植物吸收效率下降 → 食物链从底部收缩 → 种群周期性波动 → 更真实的 Lotka-Volterra 振荡。
 
-// Animal 类新增成员
-class Animal : public Reproducable {
-    // ... 现有成员保持 ...
-    float vx = 0, vy = 0;   // 速度向量
-    BoidGenes genes;         // 遗传性状
+  4. 疾病/衰老
 
-    void BoidsMove();        // 新增方法
-};
+  - 每个生物有 age，超过寿命上限后每帧死亡概率递增
+  - 或者：超过一定密度时触发"疾病"，随机杀死区域内生物（密度依赖死亡）
 
-// ReproduceRequest 加基因字段
-struct ReproduceRequest {
-    OrganismType type;
-    std::string  name;
-    std::pair<int,int> pos;
-    int radius;
-    BoidGenes genes;  // 新增
-};
-```
+  ---
+  🦅 Boids —— 还能做什么
 
----
+  当前状态
 
-### Step 2: Boids 移动逻辑 (`OrganismDefine.cpp`)
+  Reynolds 三力模型，基因控制权重，效果已经很标准了。
 
-`BoidsMove()` 复用 `Environment::Organisms` 空间网格查邻居：
+  改进方向
 
-```cpp
-void Animal::BoidsMove() {
-    World& w = World::GetWorld();
-    int ww = w.GetWidth(), hh = w.GetHeight();
-    int vr = genes.vision;
+  1. 捕食-逃逸行为
 
-    float cx = 0, cy = 0;   // cohesion
-    float ax = 0, ay = 0;   // alignment
-    float sx = 0, sy = 0;   // separation
-    int count = 0;
+  当前 boids 只对同类做 flocking。实际上应该分层：
+  - 同类邻居：cohesion + alignment + separation（当前行为）
+  - 捕食者邻居：只有 escape 力——反向远离
+  - 猎物邻居：只有 pursuit 力——追踪最近猎物
 
-    int gx0 = std::max(0, Pos.first  - vr);
-    int gy0 = std::max(0, Pos.second - vr);
-    int gx1 = std::min(ww-1, Pos.first  + vr);
-    int gy1 = std::min(hh-1, Pos.second + vr);
+  这样 Wolf 会追 Sheep，Sheep 会逃离 Wolf，比现在纯靠 PredationOrFuck 碰运气自然得多。
 
-    for (int gy = gy0; gy <= gy1; gy++) {
-        for (int gx = gx0; gx <= gx1; gx++) {
-            auto* env = w.GetEnvironments()[gy * ww + gx];
-            for (auto* other : env->Organisms) {
-                if (other == this || other->name != name) continue;
-                float dx = (float)(other->Pos.first  - Pos.first);
-                float dy = (float)(other->Pos.second - Pos.second);
-                float dist = std::sqrt(dx*dx + dy*dy);
-                if (dist < 0.01f || dist > vr) continue;
+  2. 障碍物/地形回避
 
-                count++;
-                cx += dx; cy += dy;                          // cohesion
-                auto* a = static_cast<Animal*>(other);
-                ax += a->vx; ay += a->vy;                    // alignment
-                sx -= dx / (dist*dist); sy -= dy / (dist*dist); // separation
-            }
-        }
-    }
+  环境格本来就有类型（Water/GressLand），可以让 Water 格对陆地动物产生排斥力，或者动物在 Water
+  上减速。这样地形就有实际意义了——现在地形几乎不影响动物行为。
 
-    if (count > 0) {
-        cx = (cx / count) * genes.cohesion;
-        cy = (cy / count) * genes.cohesion;
-        ax = (ax / count) * genes.alignment;
-        ay = (ay / count) * genes.alignment;
-        sx *= genes.separation;
-        sy *= genes.separation;
-    }
+  3. 群体分裂（fission-fusion dynamics）
 
-    // 噪声防止死锁
-    float nx = ((float)rand()/RAND_MAX - 0.5f) * 0.4f;
-    float ny = ((float)rand()/RAND_MAX - 0.5f) * 0.4f;
+  当群体过大时，适当减少 cohesion 或增加 separation，让大群自动分裂成小群——真实动物行为。
 
-    vx = vx * 0.7f + cx + ax + sx + nx;  // 惯性衰减
-    vy = vy * 0.7f + cy + ay + sy + ny;
+  4. 视觉遮挡
 
-    float len = std::sqrt(vx*vx + vy*vy);
-    if (len > 0.001f) { vx = vx / len * rate; vy = vy / len * rate; }
-    else              { vx = rate; vy = 0; }
+  vision 基因当前只是半径。可以改成视线锥（cone），动物只能看到前方一定角度内的东西，不能 360° 全向感知。
 
-    Pos.first  = std::clamp(Pos.first  + (int)std::round(vx), 0, ww-1);
-    Pos.second = std::clamp(Pos.second + (int)std::round(vy), 0, hh-1);
-}
-```
+  ---
+  🌍 生态系统 —— 更多拟真维度
 
-`Animal::Step()` 改为：
+  1. 分解者（Decomposer）
 
-```cpp
-void Animal::Step() {
-    float ori = step_energy_cost;
-    step_energy_cost *= calculate_overlay_cost();
-    Organism::Step();
-    step_energy_cost = ori;
+  生物死后尸体留在格子上作为 deadOrganismEnergy，但当前只有植物能吸收环境能量。加入分解者（真菌/细菌）把尸体能量回收到环
+  境，形成完整的物质循环闭环。
 
-    if (eat_intrval-- <= 0)
-        BoidsMove();  // 替代原来的随机移动
-}
-```
+  2. 营养级金字塔可视化
 
----
+  在 UI 里加一个实时能量金字塔图——各营养级的总能量：太阳 → 植物 → 食草 → 食肉。能看到 10% 能量传递效率的直观表现。
 
-### Step 3: 初始基因值 (`Animals.h`)
+  3. 物种入侵模拟
 
-```cpp
-// Wolf: 独猎型 — 低 cohesion, 中 alignment, 中 separation, 大 vision
-Wolf::Wolf(...) : Animal(...) {
-    genes.cohesion   = 0.3f;
-    genes.alignment  = 0.6f;
-    genes.separation = 0.8f;
-    genes.vision     = 5;
-}
+  SetupUI 里加一个"投放入侵物种"按钮，在运行时向稳定生态中丢入 5 个新物种个体，观察是会灭绝还是会颠覆整个系统。
 
-// Sheep: 聚群型 — 高 cohesion, 中 alignment, 高 separation, 中 vision
-Sheep::Sheep(...) : Animal(...) {
-    genes.cohesion   = 1.5f;
-    genes.alignment  = 0.5f;
-    genes.separation = 1.5f;
-    genes.vision     = 3;
-}
-```
+  4. 微进化可视化
 
----
+  当前已经有基因统计曲线，但可以做得更直观——比如在种群面板里显示每个物种当前的平均基因值（小条形图），一眼就能看到狼群是
+  在变得更激进还是更保守。
 
-### Step 4: 基因突变 (`OrganismDefine.cpp`)
+  ---
+  🎯 推荐优先级
 
-`Animal::Reproduce()` 中拷贝父基因并随机扰动：
+  ┌────────┬────────────────────────────┬────────────────┬────────┐
+  ---
+  🌍 生态系统 —— 更多拟真维度
 
-```cpp
-void Animal::Reproduce() {
-    // ... 现有检查不变 ...
+  1. 分解者（Decomposer）
 
-    BoidGenes childGenes = genes;
-    childGenes.cohesion   = std::clamp(genes.cohesion   + rnd(-0.15f, 0.15f), 0.2f, 3.0f);
-    childGenes.alignment  = std::clamp(genes.alignment  + rnd(-0.15f, 0.15f), 0.2f, 3.0f);
-    childGenes.separation = std::clamp(genes.separation + rnd(-0.15f, 0.15f), 0.2f, 3.0f);
-    childGenes.vision     = (int)std::clamp((float)genes.vision + rnd(-1.0f, 1.0f), 2.0f, 8.0f);
+  生物死后尸体留在格子上作为 deadOrganismEnergy，但当前只有植物能吸收环境能量。加入分解者（真菌/细菌）把尸体能量回收到环境，形成完整的物质循环闭环。
 
-    ReproduceRequest req = {ANIMAL, name, {x_new, y_new}, r_int, childGenes};
-    if (!World::GetWorld().AddReproduceRequest(req))
-        energy -= reproduce_energy_cost;
-}
-```
+  2. 营养级金字塔可视化
 
----
+  在 UI 里加一个实时能量金字塔图——各营养级的总能量：太阳 → 植物 → 食草 → 食肉。能看到 10% 能量传递效率的直观表现。
 
-### Step 5: 工厂注入基因 (`MyOperatorDefine.cpp`)
+  3. 物种入侵模拟
 
-```cpp
-Reproducable* MyOperator::operator()(ReproduceRequest& x, int id) {
-    auto it = registry().find(x.name);
-    if (it != registry().end()) {
-        auto* a = it->second(id, x.pos.first, x.pos.second, x.radius);
-        a->genes = x.genes;  // 注入突变后的基因
-        return a;
-    }
-    return nullptr;
-}
-```
+  SetupUI 里加一个"投放入侵物种"按钮，在运行时向稳定生态中丢入 5 个新物种个体，观察是会灭绝还是会颠覆整个系统。
 
----
+  4. 微进化可视化
 
-### Step 6: Update 调序 (`WordDefine.cpp`)
+  当前已经有基因统计曲线，但可以做得更直观——比如在种群面板里显示每个物种当前的平均基因值（小条形图），一眼就能看到狼群是在变得更激进还是更保守。
 
-```cpp
-void World::Update() {
-    // 1. 清网格 + 清死生物
-    for (auto& env : Environments) env->Organisms.clear();
-    RemoveDeadOrganisms();
+  ---
+  🎯 推荐优先级
 
-    // 2. 环境更新、能量交换、生物 Step(含 boids 移动)、填网格
-    for (auto& org : Reproducas) {
-        auto* env = Environments[org->Pos.second * GetWidth() + org->Pos.first];
-        env->Organisms.push_back(org);
-        env->EnergyExchange(org);
-        org->Step();  // boids 移动在这里面
-    }
-    for (auto& env : Environments) env->Update(CurrentWeather);
+  ┌────────┬────────────────────────────┬────────────────┬────────┐
+  │ 优先级 │            改动            │      效果      │ 工作量 │
+  ---
+  🎯 推荐优先级
 
-    // 3. 繁殖 + 捕食
-    for (int y = 0; y < GetHeight(); y++)
-    for (int x = 0; x < GetWidth(); x++) {
-        auto* env = Environments[y * GetWidth() + x];
-        for (auto* a : env->Organisms) {
-            // 植物自繁殖
-            if (a->type == PLANT && a->reproduce_able)
-                a->Reproduce();
-            // 动物: 查 9 邻格
-            for (int dy = -1; dy <= 1; dy++)
-            for (int dx = -1; dx <= 1; dx++) {
-                int ny = y + dy, nx = x + dx;
-                if (ny < 0 || ny >= GetHeight() || nx < 0 || nx >= GetWidth()) continue;
-                for (auto* b : Environments[ny * GetWidth() + nx]->Organisms) {
-                    if (a < b) PredationOrFuck(a, b);
-                }
-            }
-        }
-    }
+  ┌────────┬────────────────────────────┬────────────────┬────────┐
+  │ 优先级 │            改动            │      效果      │ 工作量 │
+  ├────────┼────────────────────────────┼────────────────┼────────┤
+  │ 高     │ 捕食成功率基因             │ GA 立刻有意义  │ 小     │
+  ├────────┼────────────────────────────┼────────────────┼────────┤
+  │ 高     │ 基因影响能耗               │ 自然选择有抓手 │ 小     │
+  ├────────┼────────────────────────────┼────────────────┼────────┤
+  │ 高     │ 猎物/捕食者分层的 boids 力 │ 行为明显更真实 │ 中     │
+  ├────────┼────────────────────────────┼────────────────┼────────┤
+  │ 中     │ 季节循环                   │ 种群动态更丰富 │ 小     │
+  ├────────┼────────────────────────────┼────────────────┼────────┤
+  │ 中     │ 地形影响移动               │ 地形有意义     │ 小     │
+  ├────────┼────────────────────────────┼────────────────┼────────┤
+  │ 低     │ 分解者/物质循环            │ 生态完整       │ 中     │
+  ├────────┼────────────────────────────┼────────────────┼────────┤
+  │ 低     │ 衰老/密度死亡              │ 更多死亡原因   │ 小     │
+  ├────────┼────────────────────────────┼────────────────┼────────┤
+  │ 低     │ 视线锥                     │ 行为更精确     │ 中     │
+  └────────┴────────────────────────────┴────────────────┴────────┘
 
-    // 4. 执行繁殖请求
-    Reproduce();
-}
-```
-
----
-
-### Step 7: UI 展示基因 (`test_main.cpp`)
-
-Animal 列表的 tooltip 里显示基因值：
-
-```cpp
-if (ImGui::IsItemHovered()) {
-    ImGui::BeginTooltip();
-    auto* a = static_cast<const Animal*>(org);
-    ImGui::Text("%s #%d", OrganismDisplayName(org->name), a->id);
-    ImGui::Text("Cohesion:   %.2f", a->genes.cohesion);
-    ImGui::Text("Alignment:  %.2f", a->genes.alignment);
-    ImGui::Text("Separation: %.2f", a->genes.separation);
-    ImGui::Text("Vision:     %d",   a->genes.vision);
-    ImGui::EndTooltip();
-}
-```
-
----
-
-### 选择压力（自然形成）
-
-| 性状 | 太低的问题 | 太高的问题 | 平衡点 |
-|------|-----------|-----------|--------|
-| cohesion | 找不到配偶, 灭绝 | 全挤一块吃光资源 | 中偏高 |
-| alignment | 群体散开各自为战 | 全群冲进贫瘠区 | 中 |
-| separation | 挤死(拥挤惩罚) | 繁殖邻居不够 | 中偏高 |
-| vision | 找不到同伴 | 成本高(可选: 加能耗) | 中 |
-
----
-
-### 实施顺序
-
-1. `Organism.h` - 加 `BoidGenes`, `vx`/`vy`, `BoidsMove()` 声明, `ReproduceRequest` 加 genes
-2. `OrganismDefine.cpp` - 实现 `BoidsMove()`, 改 `Step()`, `Reproduce()` 加突变
-3. `Animals.h` - Wolf/Sheep 设初始基因
-4. `MyOperatorDefine.cpp` - 工厂注入基因
-5. `WordDefine.cpp` - `Update()` 调整顺序
-6. `test_main.cpp` - 基因 UI
+  ---

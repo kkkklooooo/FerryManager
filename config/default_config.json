@@ -12,6 +12,7 @@
     "step_energy_cost": 0.3,
     "energy_rate": 0.2,
     "eat_intrval_max": 10,
+    "max_energy": 50,
     "reproduce_energy_threshold": -1,
     "reproduce_energy_cost": -1
   },
@@ -42,6 +43,7 @@
       "step_energy_cost": 0.35,
       "energy_rate": 0.5,
       "eat_intrval_max": 8,
+      "max_energy": 80,
       "reproduce_energy_threshold": -1,
       "reproduce_energy_cost": -1
     },
@@ -54,6 +56,7 @@
       "step_energy_cost": 0.08,
       "energy_rate": 0.2,
       "eat_intrval_max": 4,
+      "max_energy": 40,
       "reproduce_energy_threshold": -1,
       "reproduce_energy_cost": -1
     }
