@@ -6,18 +6,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 file(GLOB IMGUI_SOURCES imgui/*.cpp)
 
-set(SOURCES1
-    core/OrganismDefine.cpp
-    core/EnvironmentDefine.cpp
-    core/WorldDefine.cpp
-    ui/SetupUI.cpp
-    imguMe/myui.cpp
-    boids/boids.cpp
-    ${IMGUI_SOURCES}
-    imgui/backends/imgui_impl_win32.cpp
-    imgui/backends/imgui_impl_opengl3.cpp
-)
-
 set(SOURCES
     core/OrganismDefine.cpp
     core/EnvironmentDefine.cpp
@@ -40,13 +28,7 @@ set(HEADERS
 add_executable(ecosim ${SOURCES} ${HEADERS}
     "operator/MyOperator.h" "operator/MyOperatorDefine.cpp"
     "core/Animals.h" "core/Plants.h"
-    "config/ConflgDefine.cpp" "config/Config.h"
-    "implot/implot.cpp" "implot/implot_items.cpp" "implot/implot.h")
-
-add_executable(ecosim2 ${SOURCES1} ${HEADERS}
-    "operator/MyOperator.h" "operator/MyOperatorDefine.cpp"
-    "core/Animals.h" "core/Plants.h"
-    "config/ConflgDefine.cpp" "config/Config.h" "imgui/imgui.h"
+    "config/ConflgDefine.cpp" "config/Config.h" "imguMe/myui.cpp"
     "implot/implot.cpp" "implot/implot_items.cpp" "implot/implot.h")
 
 target_include_directories(ecosim PRIVATE
@@ -61,20 +43,7 @@ target_include_directories(ecosim PRIVATE
     ${CMAKE_SOURCE_DIR}/implot
 )
 
-target_include_directories(ecosim2 PRIVATE
-    ${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/core
-    ${CMAKE_SOURCE_DIR}/config
-    ${CMAKE_SOURCE_DIR}/ui
-    ${CMAKE_SOURCE_DIR}/operator
-    ${CMAKE_SOURCE_DIR}/vendor
-    ${CMAKE_SOURCE_DIR}/imgui
-    ${CMAKE_SOURCE_DIR}/imgui/backends
-    ${CMAKE_SOURCE_DIR}/implot
-)
-
 target_link_libraries(ecosim PRIVATE opengl32 gdi32 dwmapi)
-target_link_libraries(ecosim2 PRIVATE opengl32 gdi32 dwmapi)
 
 # ---- headless debug sim ----
 add_executable(debug_sim debug_main.cpp
@@ -115,7 +84,6 @@ target_link_libraries(boids_test PRIVATE opengl32 gdi32 dwmapi)
 
 if(MSVC)
     target_compile_options(ecosim PRIVATE /EHsc /utf-8)
-    target_compile_options(ecosim2 PRIVATE /EHsc /utf-8)
     target_compile_options(debug_sim PRIVATE /EHsc /utf-8)
     target_compile_options(boids_test PRIVATE /EHsc /utf-8)
 endif()
