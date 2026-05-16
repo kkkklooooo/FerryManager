@@ -42,12 +42,12 @@
       "reproduce_original_rate": 10,
       "reproduce_original_energy": 30,
       "max_rate": 3,
-      "step_energy_cost": 0.35,
+      "step_energy_cost": 0.15,
       "energy_rate": 0.5,
-      "eat_intrval_max": 8,
+      "eat_intrval_max": 6,
       "max_energy": 80,
-      "reproduce_energy_threshold": 50,
-      "reproduce_energy_cost": 25
+      "reproduce_energy_threshold": 45,
+      "reproduce_energy_cost": 22
     },
     {
       "name": "Sheep",
@@ -56,12 +56,12 @@
       "reproduce_original_rate": 3,
       "reproduce_original_energy": 18,
       "max_rate": 2,
-      "step_energy_cost": 0.08,
+      "step_energy_cost": 0.05,
       "energy_rate": 0.2,
-      "eat_intrval_max": 4,
+      "eat_intrval_max": 3,
       "max_energy": 40,
-      "reproduce_energy_threshold": 35,
-      "reproduce_energy_cost": 15
+      "reproduce_energy_threshold": 22,
+      "reproduce_energy_cost": 12
     }
   ],
   "The_Plants": [

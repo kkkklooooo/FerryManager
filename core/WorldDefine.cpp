@@ -42,10 +42,10 @@ World::World(Config& Conf, TestConfig& Game_conf)
     auto addSheep = [&](int x, int y) {
         Reproducas.push_back(MyOperator::GetOp()(x, y, 5, "Sheep", Animal_id++));
     };
-    for (int s = 0; s < 4; ++s) {
+    for (int s = 0; s < 6; ++s) {
         int sx = std::rand() % w;
         int sy = std::rand() % h;
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < 5; ++i) {
             int px = sx + std::rand() % 7 - 3;
             int py = sy + std::rand() % 7 - 3;
             if (px >= 0 && px < w && py >= 0 && py < h)
@@ -57,7 +57,7 @@ World::World(Config& Conf, TestConfig& Game_conf)
     auto addWolf = [&](int x, int y) {
         Reproducas.push_back(MyOperator::GetOp()(x, y, 5, "Wolf", Animal_id++));
     };
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < 4; ++i) {
         int wx = cx + std::rand() % 11 - 5;
         int wy = cy + std::rand() % 11 - 5;
         if (wx >= 0 && wx < w && wy >= 0 && wy < h)
@@ -232,10 +232,10 @@ void World::Reset()
     auto addSheep = [&](int x, int y) {
         Reproducas.push_back(MyOperator::GetOp()(x, y, 5, "Sheep", Animal_id++));
     };
-    for (int s = 0; s < 4; ++s) {
+    for (int s = 0; s < 6; ++s) {
         int sx = std::rand() % w;
         int sy = std::rand() % h;
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < 5; ++i) {
             int px = sx + std::rand() % 7 - 3;
             int py = sy + std::rand() % 7 - 3;
             if (px >= 0 && px < w && py >= 0 && py < h)
@@ -247,7 +247,7 @@ void World::Reset()
     auto addWolf = [&](int x, int y) {
         Reproducas.push_back(MyOperator::GetOp()(x, y, 5, "Wolf", Animal_id++));
     };
-    for (int i = 0; i < 17; ++i) {
+    for (int i = 0; i < 4; ++i) {
         int wx = cx + std::rand() % 11 - 5;
         int wy = cy + std::rand() % 11 - 5;
         if (wx >= 0 && wx < w && wy >= 0 && wy < h)

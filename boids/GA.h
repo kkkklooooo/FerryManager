@@ -17,7 +17,9 @@ namespace GA{
         return boids::Genes{blend(a.alignment,b.alignment),
                             blend(a.cohesion,b.cohesion),
                             blend(a.separation,b.separation),
-                            blend(a.vision,b.vision)};
+                            blend(a.vision,b.vision),
+                            blend(a.escape,b.escape), 
+                            blend(a.food_addict,b.food_addict)};
     } 
     // void Mutation(boids::Genes& new_gene)
     // {
