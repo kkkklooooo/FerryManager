@@ -6,6 +6,7 @@
   "Default_Animal_Config": {
     "name": "Animal",
     "diet": [],
+    "predator": [],
     "reproduce_original_rate": 2,
     "reproduce_original_energy": 18,
     "max_rate": 3,
@@ -37,6 +38,7 @@
     {
       "name": "Wolf",
       "diet": [ "Sheep" ],
+      "predator": [],
       "reproduce_original_rate": 10,
       "reproduce_original_energy": 30,
       "max_rate": 3,
@@ -50,6 +52,7 @@
     {
       "name": "Sheep",
       "diet": [ "Gress" ],
+      "predator": [ "Wolf" ],
       "reproduce_original_rate": 3,
       "reproduce_original_energy": 18,
       "max_rate": 2,

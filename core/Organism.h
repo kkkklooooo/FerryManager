@@ -71,6 +71,7 @@ public:
     virtual ~Reproducable() = default;
     std::vector<EnvironmentType> live_environment;
     std::vector<std::string>diet;
+    std::vector<std::string>predator;
     float reproduce_energy_threshold;
     float reproduce_energy_cost;
     int reproduce_radius;

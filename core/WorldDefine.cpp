@@ -247,7 +247,7 @@ void World::Reset()
     auto addWolf = [&](int x, int y) {
         Reproducas.push_back(MyOperator::GetOp()(x, y, 5, "Wolf", Animal_id++));
     };
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < 17; ++i) {
         int wx = cx + std::rand() % 11 - 5;
         int wy = cy + std::rand() % 11 - 5;
         if (wx >= 0 && wx < w && wy >= 0 && wy < h)

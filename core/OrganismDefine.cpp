@@ -210,6 +210,7 @@ Animal::Animal(int iD, int x, int y, int radius, float reproduce_energy_threshol
     rate = org.reproduce_original_rate;
     name = org.name;
     diet = org.diet;
+    predator=org.predator;
     _energy_rate = org.energy_rate;
     max_rate = org.max_rate;
     max_energy = org.max_energy;

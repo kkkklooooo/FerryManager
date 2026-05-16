@@ -11,6 +11,8 @@ using json = nlohmann::json;
 struct AnimalConfig {
     std::string name="Animal";
     std::vector<std::string> diet = {};
+
+    std::vector<std::string> predator = {};
     int   reproduce_original_rate = -1;
     int   reproduce_original_energy = -1;
     float max_rate=-1;
@@ -69,6 +71,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(WordConfig, length, width)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AnimalConfig,
     name,
     diet,
+    predator,
     reproduce_original_rate,
     reproduce_original_energy,
     max_rate,
