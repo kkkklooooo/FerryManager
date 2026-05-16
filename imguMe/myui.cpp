@@ -18,6 +18,7 @@
 #include <chrono>
 #include<iostream>
 #include<fstream>
+#include <implot/implot.h>
 
 using json = nlohmann::json;
 
@@ -157,7 +158,31 @@ static void DrawWorldGrid(const World& world, bool flat, bool showReq) {
 static std::unordered_map<std::string,std::vector<float>>Organism_hestory;
 
 static void DrawPopulationHistory() {
+    ImGui::BeginChild("Plot", ImVec2(0, 0));
+    int count = (int)Organism_hestory.size();
+    if (count < 3) {
+        ImGui::TextDisabled("Waiting for data...");
+        ImGui::End();
+        return;
+    }
 
+    float yMax = Organism_hestory["&&ALLORGANISM&&"][0];
+    yMax = max(yMax * 1.15f, 10.0f);
+
+    if (ImPlot::BeginPlot("##PopPlot", ImVec2(-1, -1))) {
+        ImPlot::SetupAxes("Frame", "Count");
+        ImPlot::SetupAxisLimits(ImAxis_X1, 0, (double)(count + 10), ImGuiCond_Once);
+        ImPlot::SetupAxisLimits(ImAxis_Y1, 0, (double)yMax, ImGuiCond_Always);
+        for (auto i : Organism_hestory) {
+            if (i.first == "&&ALLORGANISM&&")continue;
+            std::string na = i.first;
+            ImGui::PushID(na.data());
+            ImPlot::PlotLine(na.data(), Organism_hestory[na].data(),count);
+            ImGui::PopID();
+        }
+        ImPlot::EndPlot();
+    }
+    ImGui::EndChild();
 }
 
 static void ResetPopulationHistory() {
@@ -266,7 +291,8 @@ static void DrawStats(const World& world, int frame, int total) {
     }
 
     Organisms = plants + animals;
-
+    Organism_hestory["&&ALLORGANISM&&"]={0};
+    Organism_hestory["&&ALLORGANISM&&"][0] = Organisms;
     for (auto* e : envs) envE += e->energy;
 
     ImGui::Text("|Frame %d/%d", frame, total); ImGui::SameLine(130);
@@ -278,7 +304,6 @@ static void DrawStats(const World& world, int frame, int total) {
     for (auto O : size) {
         ImGui::Text("%s: %d", O.first.data(), O.second);
         Organism_hestory[O.first].push_back(O.second);
-        Organism_hestory["&&ALLORGANISM&&"][0]= Organisms;
     }
     DrawPopulationHistory();
     ImGui::SameLine(830);
@@ -604,16 +629,22 @@ int main() {
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImPlot::CreateContext();
     ImGui::GetIO().IniFilename = nullptr;
     ImGui::StyleColorsDark();
 
     ImGui_ImplWin32_Init(g_hWnd);
     ImGui_ImplOpenGL3_Init();
 
+    ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\msyh.ttc", 16.0f,
+        nullptr, io.Fonts->GetGlyphRangesChineseFull());
+
     if (!RunSetupPhase(g_hWnd, g_done)) {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplWin32_Shutdown();
         ImGui::DestroyContext();
+        ImPlot::DestroyContext();
         CleanupWindow();
         return 0;
     }
@@ -685,6 +716,7 @@ int main() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
+    ImPlot::DestroyContext();
     CleanupWindow();
     return 0;
 }
