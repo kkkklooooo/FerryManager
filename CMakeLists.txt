@@ -114,10 +114,10 @@ target_include_directories(boids_test PRIVATE
 target_link_libraries(boids_test PRIVATE opengl32 gdi32 dwmapi)
 
 if(MSVC)
-    target_compile_options(ecosim PRIVATE /EHsc)
-    target_compile_options(ecosim2 PRIVATE /EHsc)
-    target_compile_options(debug_sim PRIVATE /EHsc)
-    target_compile_options(boids_test PRIVATE /EHsc)
+    target_compile_options(ecosim PRIVATE /EHsc /utf-8)
+    target_compile_options(ecosim2 PRIVATE /EHsc /utf-8)
+    target_compile_options(debug_sim PRIVATE /EHsc /utf-8)
+    target_compile_options(boids_test PRIVATE /EHsc /utf-8)
 endif()
 
 # Copy default_config.json to build directory so the exe can find it

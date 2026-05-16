@@ -150,26 +150,26 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
             snprintf(animalNameBuf, sizeof(animalNameBuf), "%s", a.name.c_str());
             if (ImGui::InputText("名称 (Name)", animalNameBuf, sizeof(animalNameBuf)))
                 a.name = animalNameBuf;
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("动物物种名，需与环境 CanLive 中的名称一致");
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("动物物种名,需与环境 CanLive 中的名称一致");
             char buf[256];
             VecToStr(a.diet, buf, sizeof(buf));
             if (ImGui::InputText("食谱 (Diet)", buf, sizeof(buf)))
                 StrToVec(buf, a.diet);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("逗号分隔的食物列表，如 Gress,Sheep。只有在此列表中的物种才会被捕食");
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("逗号分隔的食物列表,如 Gress,Sheep.只有在此列表中的物种才会被捕食");
             ImGui::InputInt("初始速度 (Init Speed)",    &a.reproduce_original_rate);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("动物出生时的移动速度，-1=使用默认动物配置");
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("动物出生时的移动速度,-1=使用默认动物配置");
             ImGui::InputInt("初始能量 (Init Energy)",  &a.reproduce_original_energy);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("动物出生时的能量值，-1=使用默认动物配置(18)");
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("动物出生时的能量值,-1=使用默认动物配置(18)");
             ImGui::InputFloat("最大速度 (Max Speed)",     &a.max_rate);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("速度上限，由能量*能量率计算的速度不会超过此值，-1=使用默认值");
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("速度上限,由能量*能量率计算的速度不会超过此值,-1=使用默认值");
             ImGui::InputFloat("每步消耗 (Step Cost)",  &a.step_energy_cost);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("每帧消耗的能量，-1=使用默认值(0.3)");
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("每帧消耗的能量,-1=使用默认值(0.3)");
             ImGui::InputFloat("能量转化率 (Energy Rate)",  &a.energy_rate);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("能量到速度的转化系数: 速度=能量*此值，-1=使用默认值(0.2)");
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("能量到速度的转化系数: 速度=能量*此值,-1=使用默认值(0.2)");
             ImGui::InputFloat("繁殖阈值 (Repro Threshold)", &a.reproduce_energy_threshold);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("能量达到此值才能繁殖，-1=使用全局引擎默认值");
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("能量达到此值才能繁殖,-1=使用全局引擎默认值");
             ImGui::InputFloat("繁殖消耗 (Repro Cost)", &a.reproduce_energy_cost);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("每次繁殖消耗的能量，-1=使用全局引擎默认值");
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("每次繁殖消耗的能量,-1=使用全局引擎默认值");
             ImGui::PopID();
         }
         if (ImGui::Button("添加物种 (Add Animal)")) {
@@ -178,7 +178,7 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
     };
 
     auto renderPlantsTab = [&]() {
-        ImGui::TextDisabled("配置每种植物的参数，-1 表示使用默认值");
+        ImGui::TextDisabled("配置每种植物的参数,-1 表示使用默认值");
         ImGui::Spacing();
         for (int i = 0; i < (int)s_GameConfig.The_Plants.size(); ++i) {
             auto& p = s_GameConfig.The_Plants[i];
@@ -188,15 +188,15 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
             snprintf(plantSpNameBuf, sizeof(plantSpNameBuf), "%s", p.name.c_str());
             if (ImGui::InputText("名称 (Name)", plantSpNameBuf, sizeof(plantSpNameBuf)))
                 p.name = plantSpNameBuf;
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("植物物种名，需与环境 CanLive 中的名称一致");
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("植物物种名,需与环境 CanLive 中的名称一致");
             ImGui::InputInt("初始能量 (Init Energy)", &p.reproduce_original_energy);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("植物出生时的能量值，-1=使用默认植物配置(5)");
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("植物出生时的能量值,-1=使用默认植物配置(5)");
             ImGui::InputFloat("每步消耗 (Step Cost)", &p.step_energy_cost);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("每帧消耗的能量，会被拥挤因子放大，-1=使用默认值(0.2)");
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("每帧消耗的能量,会被拥挤因子放大.-1=使用默认值(0.2)");
             ImGui::InputFloat("繁殖阈值 (Repro Threshold)", &p.reproduce_energy_threshold);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("能量达到此值才能繁殖，-1=使用全局引擎默认值");
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("能量达到此值才能繁殖.-1=使用全局引擎默认值");
             ImGui::InputFloat("繁殖消耗 (Repro Cost)", &p.reproduce_energy_cost);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("每次繁殖消耗的能量，-1=使用全局引擎默认值");
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("每次繁殖消耗的能量.-1=使用全局引擎默认值");
             ImGui::PopID();
         }
         if (ImGui::Button("添加物种 (Add Plant)")) {
