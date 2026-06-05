@@ -6,7 +6,8 @@
       "Bash(git format-patch *)",
       "Bash(git ls-tree *)",
       "Bash(\"C:/Program Files/CMake/bin/cmake.EXE\" --build build --config Debug --target ecosim -j 24)",
-      "Bash(cmake --build build)"
+      "Bash(cmake --build build)",
+      "Bash(./debug_sim.exe)"
     ]
   }
 }

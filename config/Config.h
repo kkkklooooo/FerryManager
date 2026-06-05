@@ -112,8 +112,8 @@ class Config{
     float Environment_energy_absorb_rate=0.01f;
     float Environment_plant_absorb_rate=0.2f;
     float Environment_step_max_absorb=1.5f;
-    float Environment_single_chunk_max_energy=25;
-    float Organism_animal_absorb_rate=0.4f;
+    float Environment_single_chunk_max_energy=40;
+    float Organism_animal_absorb_rate=0.30f;
     float Organism_loss_rate=0.85f;
     float Organism_reproduce_energy_threshold=22;
     float Organism_reproduce_energy_cost=10;
