@@ -53,13 +53,13 @@ World::World(Config& Conf, TestConfig& Game_conf)
         }
     }
 
-    // wolves: scattered near center
+    // wolves: tight cluster near center (for mate-finding)
     auto addWolf = [&](int x, int y) {
         Reproducas.push_back(MyOperator::GetOp()(x, y, 5, "Wolf", Animal_id++));
     };
-    for (int i = 0; i < 4; ++i) {
-        int wx = cx + std::rand() % 11 - 5;
-        int wy = cy + std::rand() % 11 - 5;
+    for (int i = 0; i < 8; ++i) {
+        int wx = cx + std::rand() % 5 - 2;
+        int wy = cy + std::rand() % 5 - 2;
         if (wx >= 0 && wx < w && wy >= 0 && wy < h)
             addWolf(wx, wy);
     }
@@ -243,13 +243,13 @@ void World::Reset()
         }
     }
 
-    // wolves: scattered near center
+    // wolves: tight cluster near center (for mate-finding)
     auto addWolf = [&](int x, int y) {
         Reproducas.push_back(MyOperator::GetOp()(x, y, 5, "Wolf", Animal_id++));
     };
-    for (int i = 0; i < 4; ++i) {
-        int wx = cx + std::rand() % 11 - 5;
-        int wy = cy + std::rand() % 11 - 5;
+    for (int i = 0; i < 8; ++i) {
+        int wx = cx + std::rand() % 5 - 2;
+        int wy = cy + std::rand() % 5 - 2;
         if (wx >= 0 && wx < w && wy >= 0 && wy < h)
             addWolf(wx, wy);
     }
