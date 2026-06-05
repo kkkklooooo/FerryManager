@@ -27,50 +27,147 @@
   "The_Environments": [
     {
       "name": "GressLand",
-      "CanLive": [ "Gress", "Sheep", "Wolf" ]
+      "CanLive": [
+        "Gress",
+        "Sheep",
+        "Wolf",
+        "Rabbit",
+        "Fox",
+        "Deer",
+        "Mouse",
+        "Bear",
+        "Berry",
+        "Seed",
+        "Leaves",
+        "Tree"
+      ]
     },
     {
       "name": "Water",
       "CanLive": []
     }
   ],
-  "The_Animals": [
+  "The_Animals":[
     {
-      "name": "Wolf",
-      "diet": [ "Sheep" ],
-      "predator": [],
-      "reproduce_original_rate": 10,
-      "reproduce_original_energy": 30,
+      "name": "Rabbit",
+      "diet": [ "Grass" ],
+      "predator": [ "Wolf", "Fox" ],
+      "reproduce_original_rate": 4,
+      "reproduce_original_energy": 12,
       "max_rate": 3,
-      "step_energy_cost": 0.15,
-      "energy_rate": 0.5,
-      "eat_intrval_max": 6,
-      "max_energy": 80,
-      "reproduce_energy_threshold": 45,
-      "reproduce_energy_cost": 22
+      "step_energy_cost": 0.03,
+      "energy_rate": 0.25,
+      "eat_intrval_max": 2,
+      "max_energy": 20,
+      "reproduce_energy_threshold": 10,
+      "reproduce_energy_cost": 5
     },
     {
-      "name": "Sheep",
-      "diet": [ "Gress" ],
+      "name": "Wolf",
+      "diet": [ "Deer", "Rabbit", "Mouse" ],
+      "predator": [],
+      "reproduce_original_rate": 1,
+      "reproduce_original_energy": 35,
+      "max_rate": 1,
+      "step_energy_cost": 0.12,
+      "energy_rate": 0.45,
+      "eat_intrval_max": 5,
+      "max_energy": 80,
+      "reproduce_energy_threshold": 50,
+      "reproduce_energy_cost": 30
+    },
+    {
+      "name": "Fox",
+      "diet": [ "Rabbit", "Mouse", "Berry" ],
       "predator": [ "Wolf" ],
-      "reproduce_original_rate": 3,
-      "reproduce_original_energy": 18,
+      "reproduce_original_rate": 2,
+      "reproduce_original_energy": 22,
       "max_rate": 2,
-      "step_energy_cost": 0.05,
-      "energy_rate": 0.2,
+      "step_energy_cost": 0.08,
+      "energy_rate": 0.35,
       "eat_intrval_max": 3,
       "max_energy": 40,
-      "reproduce_energy_threshold": 22,
-      "reproduce_energy_cost": 12
+      "reproduce_energy_threshold": 25,
+      "reproduce_energy_cost": 15
+    },
+    {
+      "name": "Deer",
+      "diet": [ "Grass", "Leaves" ],
+      "predator": [ "Wolf" ],
+      "reproduce_original_rate": 2,
+      "reproduce_original_energy": 25,
+      "max_rate": 1,
+      "step_energy_cost": 0.09,
+      "energy_rate": 0.20,
+      "eat_intrval_max": 3,
+      "max_energy": 70,
+      "reproduce_energy_threshold": 40,
+      "reproduce_energy_cost": 20
+    },
+    {
+      "name": "Mouse",
+      "diet": [ "Grass", "Seed" ],
+      "predator": [ "Wolf", "Fox" ],
+      "reproduce_original_rate": 5,
+      "reproduce_original_energy": 10,
+      "max_rate": 4,
+      "step_energy_cost": 0.02,
+      "energy_rate": 0.20,
+      "eat_intrval_max": 2,
+      "max_energy": 15,
+      "reproduce_energy_threshold": 8,
+      "reproduce_energy_cost": 4
+    },
+    {
+      "name": "Bear",
+      "diet": [ "Berry", "Rabbit", "Mouse" ],
+      "predator": [],
+      "reproduce_original_rate": 1,
+      "reproduce_original_energy": 40,
+      "max_rate": 1,
+      "step_energy_cost": 0.11,
+      "energy_rate": 0.30,
+      "eat_intrval_max": 4,
+      "max_energy": 100,
+      "reproduce_energy_threshold": 60,
+      "reproduce_energy_cost": 35
     }
   ],
   "The_Plants": [
     {
-      "name": "Gress",
+      "name": "Grass",
       "reproduce_original_energy": 8,
       "step_energy_cost": 0.2,
       "reproduce_energy_threshold": 20,
       "reproduce_energy_cost": 12
+    },
+    {
+      "name": "Berry",
+      "reproduce_original_energy": 12,
+      "step_energy_cost": 0.15,
+      "reproduce_energy_threshold": 25,
+      "reproduce_energy_cost": 15
+    },
+    {
+      "name": "Seed",
+      "reproduce_original_energy": 6,
+      "step_energy_cost": 0.1,
+      "reproduce_energy_threshold": 15,
+      "reproduce_energy_cost": 8
+    },
+    {
+      "name": "Leaves",
+      "reproduce_original_energy": 10,
+      "step_energy_cost": 0.18,
+      "reproduce_energy_threshold": 22,
+      "reproduce_energy_cost": 14
+    },
+    {
+      "name": "Tree",
+      "reproduce_original_energy": 20,
+      "step_energy_cost": 0.3,
+      "reproduce_energy_threshold": 40,
+      "reproduce_energy_cost": 25
     }
   ]
 }
