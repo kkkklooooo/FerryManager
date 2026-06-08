@@ -33,7 +33,6 @@
         "Wolf",
         "Rabbit",
         "Fox",
-        "Deer",
         "Mouse",
         "Bear",
         "Berry",
@@ -64,7 +63,7 @@
     },
     {
       "name": "Wolf",
-      "diet": [ "Deer", "Rabbit", "Mouse" ],
+      "diet": [ "Sheep", "Rabbit", "Mouse" ],
       "predator": [],
       "reproduce_original_rate": 1,
       "reproduce_original_energy": 35,
@@ -91,7 +90,7 @@
       "reproduce_energy_cost": 15
     },
     {
-      "name": "Deer",
+      "name": "Sheep",
       "diet": [ "Grass", "Leaves" ],
       "predator": [ "Wolf" ],
       "reproduce_original_rate": 2,

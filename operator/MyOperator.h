@@ -32,8 +32,8 @@ struct PlantRegistrator
 	PlantRegistrator() = default;
 };
 
-static PlantRegistrator Gress("Gress", [](int id, int x, int y, int radius, std::optional<boids::Genes> genes=std::nullopt) {
-	auto cfg = UserPlant::FindPlantConfig("Gress");
+static PlantRegistrator Gress("Grass", [](int id, int x, int y, int radius, std::optional<boids::Genes> genes=std::nullopt) {
+	auto cfg = UserPlant::FindPlantConfig("Grass");
 	return new UserPlant(id, x, y, radius, cfg.reproduce_energy_threshold, cfg.reproduce_energy_cost, cfg);
 });
 
@@ -46,12 +46,3 @@ struct AnimalRegistrator
 	AnimalRegistrator() = default;
 };
 
-static AnimalRegistrator wolf("Wolf", [](int id, int x, int y, int radius, std::optional<boids::Genes> g) -> UserAnimal * {
-	auto cfg = UserAnimal::FindAnimalConfig("Wolf");
-	return new UserAnimal(id, x, y, radius, cfg.reproduce_energy_threshold, cfg.reproduce_energy_cost, g, cfg);
-});
-
-static AnimalRegistrator sheep("Sheep", [](int id, int x, int y, int radius, std::optional<boids::Genes> g) -> UserAnimal * {
-	auto cfg = UserAnimal::FindAnimalConfig("Sheep");
-	return new UserAnimal(id, x, y, radius, cfg.reproduce_energy_threshold, cfg.reproduce_energy_cost, g, cfg);
-});

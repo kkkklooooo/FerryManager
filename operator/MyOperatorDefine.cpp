@@ -138,9 +138,8 @@ Reproducable *MyOperator::operator()(ReproduceRequest &x, int id)
     auto it_2 = Plantregistry().find(x.name);
     if (it_2 != Plantregistry().end())
     { // ����ע��Ĵ�������
-        return it_2->second(id, x.pos.first, x.pos.second, x.radius,std::nullopt);
+        return it_2->second(id, x.pos.first, x.pos.second, x.radius, std::nullopt);
     }
-    return nullptr;
     return nullptr;
 }
 

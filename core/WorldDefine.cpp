@@ -13,6 +13,19 @@ static World* TheOnlyWord;//世界指针单例
 World::World(Config& Conf, TestConfig& Game_conf)
     :conf(Conf),game_conf(Game_conf)
 {
+    for (auto _animals : game_conf.The_Animals) {
+        MyOperator::register_Animal_Create(_animals.name,[_animals](int id, int x, int y, int radius, std::optional<boids::Genes> g) -> UserAnimal* {
+            return new UserAnimal(id, x, y, radius, _animals.reproduce_energy_threshold, _animals.reproduce_energy_cost, g, _animals);
+            });
+    }
+
+    for (auto _plants : game_conf.The_Plants) {
+        MyOperator::register_Plant_Create(_plants.name, [_plants](int id, int x, int y, int radius, std::optional<boids::Genes> genes = std::nullopt) {
+            return new UserPlant(id, x, y, radius, _plants.reproduce_energy_threshold, _plants.reproduce_energy_cost, _plants);
+            });
+    }
+
+
     TheOnlyWord = this;
     int w = game_conf.The_Word.width;
     int h = game_conf.The_Word.length;
@@ -24,7 +37,7 @@ World::World(Config& Conf, TestConfig& Game_conf)
     int scatterRadius = 6;
 
     auto addPlant = [&](int x, int y) {
-        Reproducas.push_back(MyOperator::GetOp()(x, y, conf.Plant_init_radius, "Gress", Plant_id++));
+        Reproducas.push_back(MyOperator::GetOp()(x, y, conf.Plant_init_radius, "Grass", Plant_id++));
     };
 
     for (int s = 0; s < numSeeds; ++s) {

@@ -161,6 +161,9 @@ static void DrawWorldGrid(const World& world, bool flat, bool showReq) {
                 ImGui::Text("Energy:  %.1f", envs[idx]->energy);
             }
             for (auto* org : orgs) {
+                if (!org) {
+                    std::cout << "";
+                }
                 if (org->Pos.first == gx && org->Pos.second == gy)
                     ImGui::Text("%s  E=%.1f",
                         OrganismDisplayName(org->name), org->energy);
