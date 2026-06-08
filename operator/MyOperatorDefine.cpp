@@ -33,7 +33,7 @@ void MyOperator::operator()(Reproducable *a, Reproducable *b)
         float bite  = std::min({hunger / loss, b->energy * absorb, b->energy});
         if (bite <= 0) return;
         a->energy += bite * loss;
-        if (a->energy > aAnimal->max_energy) a->energy = (float)aAnimal->max_energy;
+        if (a->energy > aAnimal->max_energy) a->energy = static_cast<float>(aAnimal->max_energy);
         b->energy -= bite;
         {
             float killChance = b->type == PLANT
@@ -56,7 +56,7 @@ void MyOperator::operator()(Reproducable *a, Reproducable *b)
         float bite  = std::min({hunger / loss, a->energy * absorb, a->energy});
         if (bite <= 0) return;
         b->energy += bite * loss;
-        if (b->energy > bAnimal->max_energy) b->energy = (float)bAnimal->max_energy;
+        if (b->energy > bAnimal->max_energy) b->energy = static_cast<float>(bAnimal->max_energy);
         a->energy -= bite;
         {
             float killChance = a->type == PLANT
@@ -82,7 +82,7 @@ void MyOperator::operator()(Reproducable *a, Reproducable *b)
                 float hunger = aAnimal->max_energy - a->energy;
                 float gain = std::min(bDmg * World::GetWorld().conf.Organism_loss_rate, hunger);
                 a->energy += gain;
-                if (a->energy > aAnimal->max_energy) a->energy = (float)aAnimal->max_energy;
+                if (a->energy > aAnimal->max_energy) a->energy = static_cast<float>(aAnimal->max_energy);
                 aAnimal->OnEatInterval();
             }
             b->energy -= bDmg;
@@ -90,7 +90,7 @@ void MyOperator::operator()(Reproducable *a, Reproducable *b)
                 float hunger = bAnimal->max_energy - b->energy;
                 float gain = std::min(aDmg * World::GetWorld().conf.Organism_loss_rate, hunger);
                 b->energy += gain;
-                if (b->energy > bAnimal->max_energy) b->energy = (float)bAnimal->max_energy;
+                if (b->energy > bAnimal->max_energy) b->energy = static_cast<float>(bAnimal->max_energy);
                 bAnimal->OnEatInterval();
             }
             a->energy -= aDmg;
