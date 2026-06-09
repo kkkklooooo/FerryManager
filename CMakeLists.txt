@@ -40,6 +40,7 @@ target_include_directories(ecosim PRIVATE
     ${CMAKE_SOURCE_DIR}/imgui
     ${CMAKE_SOURCE_DIR}/imgui/backends
     ${CMAKE_SOURCE_DIR}/implot
+    ${CMAKE_SOURCE_DIR}/stb_image
 )
 
 add_executable(ecosim2 ${SOURCES} ${HEADERS}
