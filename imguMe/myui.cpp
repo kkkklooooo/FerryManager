@@ -1,4 +1,4 @@
-#define WIN32_LEAN_AND_MEAN
+﻿#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include "../ui/SetupUI.h"
 #include "../core/World.h"
@@ -27,7 +27,7 @@ using json = nlohmann::json;
 // ============================================================
 //  helper: environment -> colour
 // ============================================================
-static ImU32 EnvColor(const std::string& name, float energy, float maxE) { //����
+static ImU32 EnvColor(const std::string& name, float energy, float maxE) { // 环境颜色计算
     float i = (maxE > 0.001f) ? energy / maxE : 0.5f;
     i = std::clamp(i, 0.25f, 1.0f);
     int r, g, b;
@@ -39,8 +39,8 @@ static ImU32 EnvColor(const std::string& name, float energy, float maxE) { //�
     return IM_COL32((int)(r * i), (int)(g * i), (int)(b * i), 255);
 }
 
-//�о�ֱ�ӵ���string�ľͿ����� ��
-static const char* EnvName(const std::string& name) {//��û���� ���Ǻ�����Լ�
+// 直接使用string即可
+static const char* EnvName(const std::string& name) {// 环境名称转换
     if (name == "GressLand") return "Grassland";
     if (name == "Water")     return "Water";
     if (name == "Forest")    return "Forest";
@@ -63,8 +63,8 @@ static void DrawWorldGrid(const World& world, bool flat, bool showReq) {
     int w = world.GetWidth(), h = world.GetHeight();
 
     ImVec2 avail = ImGui::GetContentRegionAvail();
-    float cellSize = min(avail.x / w, avail.y / h);
-    cellSize =max(cellSize, 3.0f);
+    float cellSize = std::min(avail.x / w, avail.y / h);
+    cellSize =std::max(cellSize, 3.0f);
 
     float maxE = 0.001f;
     for (auto* e : envs) if (e->energy > maxE) maxE = e->energy;
@@ -72,7 +72,7 @@ static void DrawWorldGrid(const World& world, bool flat, bool showReq) {
     ImDrawList* dl = ImGui::GetWindowDrawList();
     ImVec2 base = ImGui::GetCursorScreenPos();
 
-    for (int y = 0; y < h; ++y) {//�������ĸ���
+    for (int y = 0; y < h; ++y) {// 绘制世界网格
         for (int x = 0; x < w; ++x) {
             int idx = y * w + x;
             ImVec2 p0(base.x + x * cellSize, base.y + y * cellSize);
@@ -148,7 +148,7 @@ static void DrawWorldGrid(const World& world, bool flat, bool showReq) {
 
     ImGui::Dummy(ImVec2(w * cellSize, h * cellSize));
 
-    if (ImGui::IsItemHovered()) {//չʾ������
+    if (ImGui::IsItemHovered()) {// 显示悬浮提示
         ImVec2 m = ImGui::GetMousePos();
         int gx = (int)((m.x - base.x) / cellSize);
         int gy = (int)((m.y - base.y) / cellSize);
@@ -161,9 +161,6 @@ static void DrawWorldGrid(const World& world, bool flat, bool showReq) {
                 ImGui::Text("Energy:  %.1f", envs[idx]->energy);
             }
             for (auto* org : orgs) {
-                if (!org) {
-                    std::cout << "";
-                }
                 if (org->Pos.first == gx && org->Pos.second == gy)
                     ImGui::Text("%s  E=%.1f",
                         OrganismDisplayName(org->name), org->energy);
@@ -199,7 +196,7 @@ static void DrawPopulationHistory() {
         return;
     }
     float yMax = Organism_hestory["&&ALLORGANISM&&"][count-1];
-    yMax = max(yMax * 1.15f, 10.0f);
+    yMax = std::max(yMax * 1.15f, 10.0f);
 
     if (ImPlot::BeginPlot("##PopPlot", ImVec2(-1, -1))) {
         ImPlot::SetupAxes("Frame", "Count");
@@ -221,7 +218,7 @@ static void DrawPopulationHistory() {
 // ============================================================
 //  Plant table
 // ============================================================
-static void DrawPlantList(const World& world) {//����
+static void DrawPlantList(const World& world) {// 植物列表
     const auto& orgs = world.GetReproducas();
     ImVec2 avail = ImGui::GetContentRegionAvail();
     if (!ImGui::BeginTable("##plants", 5,
@@ -414,7 +411,7 @@ void RenderUI(World& world, int* pFrame, int total,
             ImGui::MenuItem("Plants", nullptr, &showPlants);
             ImGui::MenuItem("Animals", nullptr, &showAnimals);
             //ImGui::MenuItem("Heatmap", nullptr, &showHeatmap);
-            ImGui::MenuItem("Query Panel", nullptr, &showQuery);//�������
+            ImGui::MenuItem("Query Panel", nullptr, &showQuery);// 查询面板
             ImGui::MenuItem("ColorSet", nullptr, &showColorSet);
             ImGui::Separator();
             ImGui::MenuItem("Flat Colors", nullptr, &flatColors);
@@ -528,7 +525,7 @@ void RenderUI(World& world, int* pFrame, int total,
     }
 
     if (showColorSet) {
-        //����ÿ����ֲ�����ɫ������
+        // 设置每种动植物的颜色
         const auto& AllAnaimals = world.game_conf.The_Animals;
         const auto& AllPlants = world.game_conf.The_Plants;
 

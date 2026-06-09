@@ -52,14 +52,14 @@ static std::string remove_json_suffix(const std::string& filename) {
         filename.rfind(suffix) == filename.size() - suffix.size()) {
         return filename.substr(0, filename.size() - suffix.size());
     }
-    return filename;  // 娌℃湁鍚庣紑锛屽師鏍疯繑鍥?
+    return filename;  // 无后缀名，原样返回
 }
 
 static std::string add_json_suffix(const std::string& filename) {
     const std::string suffix = ".json";
     if (filename.size() >= suffix.size() &&
         filename.rfind(suffix) == filename.size() - suffix.size()) {
-        return filename;// 鏈夊悗缂€锛屽師鏍疯繑鍥?
+        return filename;// 有后缀名，原样返回
     }
     return filename + suffix;
 }
@@ -82,7 +82,7 @@ static bool LoadConfigAny(TestConfig& cfg) {
         "../config/default_config.json",
         "../../config/default_config.json",
         "../../default_config.json",
-        ".../config/default_config.jason",//?????·?????
+        ".../config/default_config.jason",// 备选路径
         "./config/default_config.json"
     };
     for (auto p : paths) {
@@ -132,10 +132,10 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
     static int activeTab = 0;
 
     auto renderWorldTab = [&]() {
-        ImGui::InputInt("瀹藉害 (Width)", &s_GameConfig.The_Word.width);
-        if (ImGui::IsItemHovered()) ImGui::SetTooltip("涓栫晫妯?鍚戞牸瀛愭暟锛屾渶灏?10");
-        ImGui::InputInt("闀垮害 (Length)", &s_GameConfig.The_Word.length);
-        if (ImGui::IsItemHovered()) ImGui::SetTooltip("涓栫晫绾靛悜鏍煎瓙鏁帮紝鏈€灏?10");
+        ImGui::InputInt("宽度 (Width)", &s_GameConfig.The_Word.width);
+        if (ImGui::IsItemHovered()) ImGui::SetTooltip("世界横向格子数，最小 10");
+        ImGui::InputInt("长度 (Length)", &s_GameConfig.The_Word.length);
+        if (ImGui::IsItemHovered()) ImGui::SetTooltip("世界纵向格子数，最小 10");
         if (s_GameConfig.The_Word.width < 10) s_GameConfig.The_Word.width = 10;
         if (s_GameConfig.The_Word.length < 10) s_GameConfig.The_Word.length = 10;
         };
@@ -143,7 +143,7 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
 
 
     auto renderEnvironmentsTab = [&]() {
-        ImGui::TextDisabled("鐜?澧冨喅瀹氬摢浜涚墿绉嶅彲浠ュ湪璇ュ湴褰?涓婄敓瀛樺拰绻佹畺");
+        ImGui::TextDisabled("环境决定哪些物种可以在此地形上生存和繁殖");
         ImGui::Spacing();
         for (int i = 0; i < (int)s_GameConfig.The_Environments.size(); ++i) {
             auto& env = s_GameConfig.The_Environments[i];
@@ -151,20 +151,20 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
             ImGui::Separator();
             char envNameBuf[128];
             snprintf(envNameBuf, sizeof(envNameBuf), "%s", env.name.c_str());
-            if (ImGui::InputText("鍚嶇О (Name)", envNameBuf, sizeof(envNameBuf)))
+            if (ImGui::InputText("名称 (Name)", envNameBuf, sizeof(envNameBuf)))
                 env.name = envNameBuf;
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("鐜?澧冪被鍨嬪悕绉帮紝濡? GressLand銆乄ater");
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("环境类型名称，如 GressLand、Water");
             char buf[256];
             VecToStr(env.CanLive, buf, sizeof(buf));
-            if (ImGui::InputText("鍙?鐢熷瓨鐗╃?? (CanLive)", buf, sizeof(buf)))
+            if (ImGui::InputText("可生存物种 (CanLive)", buf, sizeof(buf)))
                 StrToVec(buf, env.CanLive);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("閫楀彿鍒嗛殧鐨勭墿绉嶅悕鍒楄〃锛屽彧鏈夊湪姝ゅ垪琛ㄤ腑鐨勭墿绉嶆墠鑳藉湪姝ょ幆澧冪箒娈?");
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("逗号分隔的物种名称列表，只有在此列表中的物种才能在此环境繁殖");
             ImGui::PopID();
         }
         };
 
     auto renderAnimalsTab = [&]() {
-        ImGui::TextDisabled("閰嶇疆姣忕?嶅姩鐗╃殑鍙傛暟锛?-1 琛ㄧず浣跨敤榛樿?ゅ€?");
+        ImGui::TextDisabled("配置每种动物的参数，-1 表示使用默认值");
         ImGui::Spacing();
         for (int i = 0; i < (int)s_GameConfig.The_Animals.size(); ++i) {
             auto& a = s_GameConfig.The_Animals[i];
@@ -172,46 +172,46 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
             ImGui::Separator();
             char animalNameBuf[128];
             snprintf(animalNameBuf, sizeof(animalNameBuf), "%s", a.name.c_str());
-            if (ImGui::InputText("鍚嶇О (Name)", animalNameBuf, sizeof(animalNameBuf)))
+            if (ImGui::InputText("名称 (Name)", animalNameBuf, sizeof(animalNameBuf)))
                 a.name = animalNameBuf;
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("鍔ㄧ墿鐗╃?嶅悕,闇€涓庣幆澧? CanLive 涓?鐨勫悕绉颁竴鑷?");
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("动物物种名，需与环境中 CanLive 的名称一致");
             char buf[256];
             VecToStr(a.diet, buf, sizeof(buf));
-            if (ImGui::InputText("椋熻氨 (Diet)", buf, sizeof(buf)))
+            if (ImGui::InputText("食谱 (Diet)", buf, sizeof(buf)))
                 StrToVec(buf, a.diet);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("閫楀彿鍒嗛殧鐨勯?熺墿鍒楄〃,濡? Gress,Sheep.鍙?鏈夊湪姝ゅ垪琛ㄤ腑鐨勭墿绉嶆墠浼氳??鎹曢??");
-            ImGui::InputInt("鍒濆?嬮€熷害 (Init Speed)", &a.reproduce_original_rate);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("鍔ㄧ墿鍑虹敓鏃剁殑绉诲姩閫熷害,-1=浣跨敤榛樿?ゅ姩鐗╅厤缃?");
-            ImGui::InputInt("鍒濆?嬭兘閲? (Init Energy)", &a.reproduce_original_energy);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("鍔ㄧ墿鍑虹敓鏃剁殑鑳介噺鍊?,-1=浣跨敤榛樿?ゅ姩鐗╅厤缃?(18)");
-            ImGui::InputFloat("鏈€澶ч€熷害 (Max Speed)", &a.max_rate);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("閫熷害涓婇檺,鐢辫兘閲?*鑳介噺鐜囪?＄畻鐨勯€熷害涓嶄細瓒呰繃姝ゅ€?,-1=浣跨敤榛樿?ゅ€?");
-            ImGui::InputFloat("姣忔?ユ秷鑰? (Step Cost)", &a.step_energy_cost);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("姣忓抚娑堣€楃殑鑳介噺,-1=浣跨敤榛樿?ゅ€?(0.3)");
-            ImGui::InputInt("鏈€澶ц兘閲? (Max Energy)", &a.max_energy);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("鑳介噺涓婇檺锛屽悆楗卞悗涓嶅啀鎹曢??,-1=浣跨敤榛樿?ゅ€?(50)");
-            ImGui::InputFloat("鑳介噺杞?鍖栫巼 (Energy Rate)", &a.energy_rate);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("鑳介噺鍒伴€熷害鐨勮浆鍖栫郴鏁?: 閫熷害=鑳介噺*姝ゅ€?,-1=浣跨敤榛樿?ゅ€?(0.2)");
-            ImGui::InputFloat("绻佹畺闃堝€? (Repro Threshold)", &a.reproduce_energy_threshold);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("鑳介噺杈惧埌姝ゅ€兼墠鑳界箒娈?,-1=浣跨敤鍏ㄥ眬寮曟搸榛樿?ゅ€?");
-            ImGui::InputFloat("绻佹畺娑堣€? (Repro Cost)", &a.reproduce_energy_cost);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("姣忔?＄箒娈栨秷鑰楃殑鑳介噺,-1=浣跨敤鍏ㄥ眬寮曟搸榛樿?ゅ€?");
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("逗号分隔的食物列表，如 Gress,Sheep。只有在此列表中的物种才会被捕捉");
+            ImGui::InputInt("初始速度 (Init Speed)", &a.reproduce_original_rate);
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("动物出生时的移动速度，-1=使用默认动物配置");
+            ImGui::InputInt("初始能量 (Init Energy)", &a.reproduce_original_energy);
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("动物出生时的能量值，-1=使用默认动物配置(18)");
+            ImGui::InputFloat("最大速度 (Max Speed)", &a.max_rate);
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("速度上限，由能量*能量率计算的速度不会超过此值，-1=使用默认值");
+            ImGui::InputFloat("每步消耗 (Step Cost)", &a.step_energy_cost);
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("每帧消耗的能量，-1=使用默认值(0.3)");
+            ImGui::InputInt("最大能量 (Max Energy)", &a.max_energy);
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("能量上限，吃饱后不再捕捉，-1=使用默认值(50)");
+            ImGui::InputFloat("能量转化率 (Energy Rate)", &a.energy_rate);
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("能量到速度的转化系数: 速度=能量*此值，-1=使用默认值(0.2)");
+            ImGui::InputFloat("繁殖阈值 (Repro Threshold)", &a.reproduce_energy_threshold);
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("能量达到此值才能繁殖，-1=使用全局引擎默认值");
+            ImGui::InputFloat("繁殖消耗 (Repro Cost)", &a.reproduce_energy_cost);
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("每次繁殖消耗的能量，-1=使用全局引擎默认值");
 
             float col[4] = { 1,1,1,1 };
             auto it = OrganismColor.find(a.name);
             if (it != OrganismColor.end()) { col[0] = it->second.x; col[1] = it->second.y; col[2] = it->second.z; col[3] = it->second.w; }
-            if (ImGui::ColorEdit4("棰滆壊", col, ImGuiColorEditFlags_NoInputs))
+            if (ImGui::ColorEdit4("颜色", col, ImGuiColorEditFlags_NoInputs))
                 OrganismColor[a.name] = ImVec4(col[0], col[1], col[2], col[3]);
 
             ImGui::PopID();
         }
-        if (ImGui::Button("娣诲姞鐗╃?? (Add Animal)")) {
+        if (ImGui::Button("添加物种 (Add Animal)"))
             s_GameConfig.User_AddNew_Animal(*(new AnimalConfig));
-        }
         };
+        
 
     auto renderPlantsTab = [&]() {
-        ImGui::TextDisabled("閰嶇疆姣忕?嶆?嶇墿鐨勫弬鏁?,-1 琛ㄧず浣跨敤榛樿?ゅ€?");
+        ImGui::TextDisabled("配置每种植物的参数，-1 表示使用默认值");
         ImGui::Spacing();
         for (int i = 0; i < (int)s_GameConfig.The_Plants.size(); ++i) {
             auto& p = s_GameConfig.The_Plants[i];
@@ -219,30 +219,30 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
             ImGui::Separator();
             char plantSpNameBuf[128];
             snprintf(plantSpNameBuf, sizeof(plantSpNameBuf), "%s", p.name.c_str());
-            if (ImGui::InputText("鍚嶇О (Name)", plantSpNameBuf, sizeof(plantSpNameBuf)))
+            if (ImGui::InputText("名称 (Name)", plantSpNameBuf, sizeof(plantSpNameBuf)))
                 p.name = plantSpNameBuf;
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("妞嶇墿鐗╃?嶅悕,闇€涓庣幆澧? CanLive 涓?鐨勫悕绉颁竴鑷?");
-            ImGui::InputInt("鍒濆?嬭兘閲? (Init Energy)", &p.reproduce_original_energy);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("妞嶇墿鍑虹敓鏃剁殑鑳介噺鍊?,-1=浣跨敤榛樿?ゆ?嶇墿閰嶇疆(5)");
-            ImGui::InputFloat("姣忔?ユ秷鑰? (Step Cost)", &p.step_energy_cost);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("姣忓抚娑堣€楃殑鑳介噺,浼氳??鎷ユ尋鍥犲瓙鏀惧ぇ.-1=浣跨敤榛樿?ゅ€?(0.2)");
-            ImGui::InputFloat("绻佹畺闃堝€? (Repro Threshold)", &p.reproduce_energy_threshold);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("鑳介噺杈惧埌姝ゅ€兼墠鑳界箒娈?.-1=浣跨敤鍏ㄥ眬寮曟搸榛樿?ゅ€?");
-            ImGui::InputFloat("绻佹畺娑堣€? (Repro Cost)", &p.reproduce_energy_cost);
-            if (ImGui::IsItemHovered()) ImGui::SetTooltip("姣忔?＄箒娈栨秷鑰楃殑鑳介噺.-1=浣跨敤鍏ㄥ眬寮曟搸榛樿?ゅ€?");
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("植物物种名，需与环境中 CanLive 的名称一致");
+            ImGui::InputInt("初始能量 (Init Energy)", &p.reproduce_original_energy);
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("植物出生时的能量值，-1=使用默认植物配置(5)");
+            ImGui::InputFloat("每步消耗 (Step Cost)", &p.step_energy_cost);
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("每帧消耗的能量，会被拥挤因子放大。-1=使用默认值(0.2)");
+            ImGui::InputFloat("繁殖阈值 (Repro Threshold)", &p.reproduce_energy_threshold);
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("能量达到此值才能繁殖。-1=使用全局引擎默认值");
+            ImGui::InputFloat("繁殖消耗 (Repro Cost)", &p.reproduce_energy_cost);
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("每次繁殖消耗的能量。-1=使用全局引擎默认值");
 
             float col[4] = { 1,1,1,1 };
             auto it = OrganismColor.find(p.name);
             if (it != OrganismColor.end()) { col[0] = it->second.x; col[1] = it->second.y; col[2] = it->second.z; col[3] = it->second.w; }
-            if (ImGui::ColorEdit4("棰滆壊", col, ImGuiColorEditFlags_NoInputs))
+            if (ImGui::ColorEdit4("颜色", col, ImGuiColorEditFlags_NoInputs))
                 OrganismColor[p.name] = ImVec4(col[0], col[1], col[2], col[3]);
 
             ImGui::PopID();
         }
-        if (ImGui::Button("娣诲姞鐗╃?? (Add Plant)")) {
+        if (ImGui::Button("添加物种 (Add Plant)"))
             s_GameConfig.User_AddNew_Plant(*(new PlantConfig));
-        }
         };
+        
 
     bool startRequested = false;
 
@@ -264,7 +264,7 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
                 "../data/game_data.json",
                 "data/game_data.json"
         };
-        ImGui::TextDisabled("褰撳墠涓栫晫");
+        ImGui::TextDisabled("当前世界");
         ImGui::Spacing();
         for (auto i : s_WorldData.names) {
             ImGui::PushID(i.data());
@@ -291,18 +291,17 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
             }
             ImGui::PopID();
         }
-        if (ImGui::Button(g_Create ? "涓嶅垱閫犳柊涓栫晫锛圖on't Add New World)" : "鍒涢€犳柊涓栫晫锛圓dd New World)")) {
+        if (ImGui::Button(g_Create ? "不创建新世界（Don't Add New World)" : "创建新世界（Add New World)"))
             g_Create = !g_Create;
-        }
         if (g_Create) {//
             static char theName[32] = "";
-            ImGui::InputText("鍚嶇О (Name):", theName, sizeof(theName));
+            ImGui::InputText("名称 (Name):", theName, sizeof(theName));
             if (ImGui::Button("Yes I will create this world")) {
                 std::string fullName = add_json_suffix(theName);
                 //printf("%s", theName);
                 s_WorldData.names.push_back(fullName);
                 json gameconfig = s_GameConfig;
-                json AllGame = s_WorldData;//鑷?鍔ㄥ簭鍒楀寲
+                json AllGame = s_WorldData;// 自动序列化
                 fs::path P = "../../../data/game_data.json";
                 std::ifstream f(P);
                 if (f.is_open()) {

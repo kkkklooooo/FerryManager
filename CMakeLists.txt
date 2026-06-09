@@ -157,3 +157,100 @@ add_custom_command(TARGET debug_sim POST_BUILD
         "$<TARGET_FILE_DIR:debug_sim>/default_config.json"
 )
 
+# ---- shared library for distribution ----
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
+set(LIB_HEADERS
+    core/Registry.h
+    core/Organism.h
+    core/Environment.h
+    core/World.h
+    core/Animals.h
+    core/Plants.h
+    config/Config.h
+    data/game_struct.h
+    operator/MyOperator.h
+    boids/boids.h
+    boids/Genes.h
+    boids/GA.h
+)
+
+add_library(ecosim_lib SHARED
+    core/OrganismDefine.cpp
+    core/EnvironmentDefine.cpp
+    core/WorldDefine.cpp
+    config/ConflgDefine.cpp
+    operator/MyOperatorDefine.cpp
+    boids/boids.cpp
+    ${LIB_HEADERS}
+)
+
+target_include_directories(ecosim_lib
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/core>
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/config>
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/operator>
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/vendor>
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/boids>
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/data>
+    PRIVATE
+        ${CMAKE_SOURCE_DIR}
+        ${CMAKE_SOURCE_DIR}/core
+        ${CMAKE_SOURCE_DIR}/config
+        ${CMAKE_SOURCE_DIR}/operator
+        ${CMAKE_SOURCE_DIR}/vendor
+        ${CMAKE_SOURCE_DIR}/boids
+)
+
+# Copy all project headers to includes/ for distribution
+add_custom_command(TARGET ecosim_lib POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/includes/core"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/includes/config"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/includes/data"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/includes/operator"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/includes/boids"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/includes/vendor"
+    # core/
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/core/Registry.h"       "${CMAKE_BINARY_DIR}/includes/core/"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/core/Organism.h"       "${CMAKE_BINARY_DIR}/includes/core/"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/core/Environment.h"     "${CMAKE_BINARY_DIR}/includes/core/"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/core/World.h"           "${CMAKE_BINARY_DIR}/includes/core/"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/core/Animals.h"         "${CMAKE_BINARY_DIR}/includes/core/"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/core/Plants.h"          "${CMAKE_BINARY_DIR}/includes/core/"
+    # config/
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/config/Config.h"        "${CMAKE_BINARY_DIR}/includes/config/"
+    # data/
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/data/game_struct.h"     "${CMAKE_BINARY_DIR}/includes/data/"
+    # operator/
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/operator/MyOperator.h"  "${CMAKE_BINARY_DIR}/includes/operator/"
+    # boids/
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/boids/boids.h"          "${CMAKE_BINARY_DIR}/includes/boids/"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/boids/Genes.h"          "${CMAKE_BINARY_DIR}/includes/boids/"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/boids/GA.h"             "${CMAKE_BINARY_DIR}/includes/boids/"
+    # vendor/ (needed by Config.h and game_struct.h)
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/vendor/json.hpp"        "${CMAKE_BINARY_DIR}/includes/vendor/"
+    # also copy default_config.json alongside the DLL
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/config/default_config.json"
+        "$<TARGET_FILE_DIR:ecosim_lib>/default_config.json"
+    COMMENT "Copied library headers to ${CMAKE_BINARY_DIR}/includes/"
+)
+
+# MSVC compile options for the lib
+if(MSVC)
+    target_compile_options(ecosim_lib PRIVATE /EHsc /utf-8)
+endif()
