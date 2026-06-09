@@ -65,6 +65,36 @@ target_link_libraries(ecosim PRIVATE opengl32 gdi32 dwmapi)
 
 target_link_libraries(ecosim2 PRIVATE opengl32 gdi32 dwmapi)
 
+add_library(Ecosystem_simulator STATIC
+    core/OrganismDefine.cpp
+    core/EnvironmentDefine.cpp
+    core/WorldDefine.cpp
+    boids/boids.cpp
+    boids/boids.h
+    core/Registry.h
+    core/Organism.h
+    core/Environment.h
+    core/World.h
+    "operator/MyOperator.h" "operator/MyOperatorDefine.cpp"
+    "core/Animals.h" "core/Plants.h"
+    "config/ConflgDefine.cpp" "config/Config.h"
+    "data/game_struct.h"
+)
+configure_file(
+    ${CMAKE_SOURCE_DIR}/config/default_config.json
+    ${CMAKE_CACHEFILE_DIR}/config/default_config.json
+    COPYONLY
+)
+target_link_directories(Ecosystem_simulator PUBLIC
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/core
+    ${CMAKE_SOURCE_DIR}/config
+    ${CMAKE_SOURCE_DIR}/operator
+    ${CMAKE_SOURCE_DIR}/vendor
+    ${CMAKE_SOURCE_DIR}/imgui
+)
+
+
 # ---- headless debug sim ----
 add_executable(debug_sim debug_main.cpp
     "operator/MyOperator.h" "operator/MyOperatorDefine.cpp"
@@ -126,3 +156,4 @@ add_custom_command(TARGET debug_sim POST_BUILD
         "${CMAKE_SOURCE_DIR}/config/default_config.json"
         "$<TARGET_FILE_DIR:debug_sim>/default_config.json"
 )
+
