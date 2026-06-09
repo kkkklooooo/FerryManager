@@ -1,4 +1,4 @@
-﻿#define WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include "../ui/SetupUI.h"
 #include "../core/World.h"
@@ -19,6 +19,7 @@
 #include<iostream>
 #include<fstream>
 #include <implot/implot.h>
+#include"utils/img_utils.h"
 
 extern std::unordered_map<std::string, ImVec4>OrganismColor;
 
@@ -27,7 +28,7 @@ using json = nlohmann::json;
 // ============================================================
 //  helper: environment -> colour
 // ============================================================
-static ImU32 EnvColor(const std::string& name, float energy, float maxE) { // 环境颜色计算
+static ImU32 EnvColor(const std::string& name, float energy, float maxE) { // �?境�?�色计算
     float i = (maxE > 0.001f) ? energy / maxE : 0.5f;
     i = std::clamp(i, 0.25f, 1.0f);
     int r, g, b;
@@ -40,7 +41,7 @@ static ImU32 EnvColor(const std::string& name, float energy, float maxE) { // �
 }
 
 // 直接使用string即可
-static const char* EnvName(const std::string& name) {// 环境名称转换
+static const char* EnvName(const std::string& name) {// �?境名称转�?
     if (name == "GressLand") return "Grassland";
     if (name == "Water")     return "Water";
     if (name == "Forest")    return "Forest";
@@ -53,6 +54,8 @@ static const char* OrganismDisplayName(const std::string& name) {
 }
 
 
+
+static GLuint g_grassTex = 0;
 
 // ============================================================
 //  World grid
@@ -79,16 +82,20 @@ static void DrawWorldGrid(const World& world, bool flat, bool showReq) {
             ImVec2 p1(p0.x + cellSize, p0.y + cellSize);
 
             ImU32 col;
-            if (flat) {
+            bool isGrass = (idx < (int)envs.size() && envs[idx]->name == "GressLand");
+            if (isGrass && g_grassTex) {
+                dl->AddImage((ImTextureID)(intptr_t)g_grassTex, p0, p1);
+            }
+            else if (flat) {
                 col = IM_COL32(35, 35, 38, 255);
+                dl->AddRectFilled(p0, p1, col);
             }
             else {
                 col = IM_COL32(20, 20, 20, 255);
                 if (idx < (int)envs.size())
                     col = EnvColor(envs[idx]->name, envs[idx]->energy, maxE);
+                dl->AddRectFilled(p0, p1, col);
             }
-
-            dl->AddRectFilled(p0, p1, col);
             dl->AddRect(p0, p1, IM_COL32(55, 55, 58, 255), 0, 0, 1.0f);
         }
     }
@@ -148,7 +155,7 @@ static void DrawWorldGrid(const World& world, bool flat, bool showReq) {
 
     ImGui::Dummy(ImVec2(w * cellSize, h * cellSize));
 
-    if (ImGui::IsItemHovered()) {// 显示悬浮提示
+    if (ImGui::IsItemHovered()) {// 显示�?�?提示
         ImVec2 m = ImGui::GetMousePos();
         int gx = (int)((m.x - base.x) / cellSize);
         int gy = (int)((m.y - base.y) / cellSize);
@@ -411,7 +418,7 @@ void RenderUI(World& world, int* pFrame, int total,
             ImGui::MenuItem("Plants", nullptr, &showPlants);
             ImGui::MenuItem("Animals", nullptr, &showAnimals);
             //ImGui::MenuItem("Heatmap", nullptr, &showHeatmap);
-            ImGui::MenuItem("Query Panel", nullptr, &showQuery);// 查询面板
+            ImGui::MenuItem("Query Panel", nullptr, &showQuery);// 查�?�面�?
             ImGui::MenuItem("ColorSet", nullptr, &showColorSet);
             ImGui::Separator();
             ImGui::MenuItem("Flat Colors", nullptr, &flatColors);
@@ -525,7 +532,7 @@ void RenderUI(World& world, int* pFrame, int total,
     }
 
     if (showColorSet) {
-        // 设置每种动植物的颜色
+        // 设置每�?�动植物的�?�色
         const auto& AllAnaimals = world.game_conf.The_Animals;
         const auto& AllPlants = world.game_conf.The_Plants;
 
@@ -670,6 +677,8 @@ int main() {
 
     ImGui_ImplWin32_Init(g_hWnd);
     ImGui_ImplOpenGL3_Init();
+
+    g_grassTex = LoadTexture("assets/grass.png");
 
     ImGuiIO& io = ImGui::GetIO();
     io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\msyh.ttc", 16.0f,
