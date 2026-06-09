@@ -11,6 +11,7 @@
 #include <sstream>
 #include <filesystem>
 #include <cstdio>
+#include"utils/img_utils.h"
 
 namespace fs = std::filesystem;
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);

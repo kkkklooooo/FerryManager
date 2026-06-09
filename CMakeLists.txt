@@ -13,6 +13,7 @@ set(SOURCES
     MAKE_IMAGE/make_image.cpp
     ui/SetupUI.cpp
     boids/boids.cpp
+    utils/img_utils.cpp
     ${IMGUI_SOURCES}
     imgui/backends/imgui_impl_win32.cpp
     imgui/backends/imgui_impl_opengl3.cpp
@@ -51,7 +52,8 @@ add_executable(ecosim2 ${SOURCES} ${HEADERS}
     "operator/MyOperator.h" "operator/MyOperatorDefine.cpp"
     "core/Animals.h" "core/Plants.h"
     "config/ConflgDefine.cpp" "config/Config.h" "imguMe/myui.cpp"
-     "implot/implot.cpp" "implot/implot_items.cpp" "implot/implot.h" "data/game_struct.h")
+     "implot/implot.cpp" "implot/implot_items.cpp" "implot/implot.h" "data/game_struct.h"
+     utils/img_utils.h)
 
 target_include_directories(ecosim2 PRIVATE
     ${CMAKE_SOURCE_DIR}
