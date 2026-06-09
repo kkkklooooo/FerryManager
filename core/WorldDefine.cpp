@@ -12,7 +12,8 @@ static World* TheOnlyWord;//世界指针单例
 
 World::World(Config& Conf, TestConfig& Game_conf)
     :conf(Conf),game_conf(Game_conf)
-{
+{   
+    //按值捕获--animal销毁后不会变(放到堆里)
     for (auto _animals : game_conf.The_Animals) {
         MyOperator::register_Animal_Create(_animals.name,[_animals](int id, int x, int y, int radius, std::optional<boids::Genes> g) -> UserAnimal* {
             return new UserAnimal(id, x, y, radius, _animals.reproduce_energy_threshold, _animals.reproduce_energy_cost, g, _animals);
