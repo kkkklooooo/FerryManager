@@ -1,6 +1,7 @@
 ﻿#include "SetupUI.h"
 #include "Config.h"
 #include "World.h"
+#include"MAKE_IMAGE/make_image.h"
 #include"data/game_struct.h"
 #include "imgui/imgui.h"
 #include "imgui/backends/imgui_impl_win32.h"
@@ -140,7 +141,7 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
         if (s_GameConfig.The_Word.length < 10) s_GameConfig.The_Word.length = 10;
         };
 
-
+    
 
     auto renderEnvironmentsTab = [&]() {
         ImGui::TextDisabled("环境决定哪些物种可以在此地形上生存和繁殖");

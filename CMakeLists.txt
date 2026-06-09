@@ -10,6 +10,7 @@ set(SOURCES
     core/OrganismDefine.cpp
     core/EnvironmentDefine.cpp
     core/WorldDefine.cpp
+    MAKE_IMAGE/make_image.cpp
     ui/SetupUI.cpp
     boids/boids.cpp
     ${IMGUI_SOURCES}
@@ -22,6 +23,9 @@ set(HEADERS
     core/Organism.h
     core/Environment.h
     core/World.h
+    stb_image/stb_image.h
+    stb_image/std_image_write.h
+    MAKE_IMAGE/make_image.h
 )
 
 add_executable(ecosim ${SOURCES} ${HEADERS}
@@ -59,42 +63,13 @@ target_include_directories(ecosim2 PRIVATE
     ${CMAKE_SOURCE_DIR}/imgui
     ${CMAKE_SOURCE_DIR}/imgui/backends
     ${CMAKE_SOURCE_DIR}/implot
+    ${CMAKE_SOURCE_DIR}/stb_image
 )
 
 target_link_libraries(ecosim PRIVATE opengl32 gdi32 dwmapi)
 
 
 target_link_libraries(ecosim2 PRIVATE opengl32 gdi32 dwmapi)
-
-add_library(Ecosystem_simulator STATIC
-    core/OrganismDefine.cpp
-    core/EnvironmentDefine.cpp
-    core/WorldDefine.cpp
-    boids/boids.cpp
-    boids/boids.h
-    core/Registry.h
-    core/Organism.h
-    core/Environment.h
-    core/World.h
-    "operator/MyOperator.h" "operator/MyOperatorDefine.cpp"
-    "core/Animals.h" "core/Plants.h"
-    "config/ConflgDefine.cpp" "config/Config.h"
-    "data/game_struct.h"
-)
-configure_file(
-    ${CMAKE_SOURCE_DIR}/config/default_config.json
-    ${CMAKE_CACHEFILE_DIR}/config/default_config.json
-    COPYONLY
-)
-target_link_directories(Ecosystem_simulator PUBLIC
-    ${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/core
-    ${CMAKE_SOURCE_DIR}/config
-    ${CMAKE_SOURCE_DIR}/operator
-    ${CMAKE_SOURCE_DIR}/vendor
-    ${CMAKE_SOURCE_DIR}/imgui
-)
-
 
 # ---- headless debug sim ----
 add_executable(debug_sim debug_main.cpp
