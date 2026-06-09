@@ -15,7 +15,7 @@
 
 namespace fs = std::filesystem;
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-std::unordered_map<std::string, ImVec4>OrganismColor;
+//std::unordered_map<std::string, ImVec4>OrganismColor;
 static TestConfig s_GameConfig;
 static gameData   s_WorldData;
 // ---- helpers for editing string vectors as comma-separated text ----
@@ -66,6 +66,24 @@ static std::string add_json_suffix(const std::string& filename) {
     return filename + suffix;
 }
 
+static std::string add_png_suffix(const std::string& filename) {
+    const std::string suffix = ".png";
+    if (filename.size() >= suffix.size() &&
+        filename.rfind(suffix) == filename.size() - suffix.size()) {
+        return filename;// 有后缀名，原样返回
+    }
+    return filename + suffix;
+}
+
+static std::string remove_png_suffix(const std::string& filename) {
+    const std::string suffix = ".png";
+    if (filename.size() >= suffix.size() &&
+        filename.rfind(suffix) == filename.size() - suffix.size()) {
+        return filename.substr(0, filename.size() - suffix.size());
+    }
+    return filename;  // 无后缀名，原样返回
+}
+
 static bool LoadConfig(TestConfig& cfg, const char* path) {
     std::ifstream f(path);
     if (!f.is_open()) return false;
@@ -75,6 +93,7 @@ static bool LoadConfig(TestConfig& cfg, const char* path) {
     //printf("%s\n\n", cfg.Default_Plant_Config.name.data());
     return true;
 }
+
 
 static bool LoadConfigAny(TestConfig& cfg) {
     // Try build dir first, then parent (project root)
@@ -199,11 +218,11 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
             ImGui::InputFloat("繁殖消耗 (Repro Cost)", &a.reproduce_energy_cost);
             if (ImGui::IsItemHovered()) ImGui::SetTooltip("每次繁殖消耗的能量，-1=使用全局引擎默认值");
 
-            float col[4] = { 1,1,1,1 };
+           /* float col[4] = { 1,1,1,1 };
             auto it = OrganismColor.find(a.name);
             if (it != OrganismColor.end()) { col[0] = it->second.x; col[1] = it->second.y; col[2] = it->second.z; col[3] = it->second.w; }
             if (ImGui::ColorEdit4("颜色", col, ImGuiColorEditFlags_NoInputs))
-                OrganismColor[a.name] = ImVec4(col[0], col[1], col[2], col[3]);
+                OrganismColor[a.name] = ImVec4(col[0], col[1], col[2], col[3]);*/
 
             ImGui::PopID();
         }
@@ -233,11 +252,11 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
             ImGui::InputFloat("繁殖消耗 (Repro Cost)", &p.reproduce_energy_cost);
             if (ImGui::IsItemHovered()) ImGui::SetTooltip("每次繁殖消耗的能量。-1=使用全局引擎默认值");
 
-            float col[4] = { 1,1,1,1 };
+           /* float col[4] = { 1,1,1,1 };
             auto it = OrganismColor.find(p.name);
             if (it != OrganismColor.end()) { col[0] = it->second.x; col[1] = it->second.y; col[2] = it->second.z; col[3] = it->second.w; }
             if (ImGui::ColorEdit4("颜色", col, ImGuiColorEditFlags_NoInputs))
-                OrganismColor[p.name] = ImVec4(col[0], col[1], col[2], col[3]);
+                OrganismColor[p.name] = ImVec4(col[0], col[1], col[2], col[3]);*/
 
             ImGui::PopID();
         }
@@ -378,6 +397,22 @@ bool RunSetupPhase(HWND hWnd, bool& quitRequested) {
 
         if (ImGui::Button("Start Simulation", ImVec2(-1, 35))) {
             InitGameConfig(s_GameConfig);
+            //在这里把map整好
+            for (auto dasb : s_GameConfig.The_Plants) {
+                std::string name = add_png_suffix(dasb.name);
+                name = "assets/" + name;
+                ImageMaker::getMap()[dasb.name] = (ImTextureID)(intptr_t)LoadTexture(name.data());
+            }
+            for (auto dasb : s_GameConfig.The_Environments) {
+                std::string name = add_png_suffix(dasb.name);
+                name = "assets/" + name;
+                ImageMaker::getMap()[dasb.name] = (ImTextureID)(intptr_t)LoadTexture(name.data());
+            }
+            for (auto dasb : s_GameConfig.The_Animals) {
+                std::string name = add_png_suffix(dasb.name);
+                name = "assets/" + name;
+                ImageMaker::getMap()[dasb.name] = (ImTextureID)(intptr_t)LoadTexture(name.data());
+            }
             World::GetWorld(s_GameConfig);
             startRequested = true;
         }

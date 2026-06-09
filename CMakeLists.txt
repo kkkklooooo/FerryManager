@@ -10,7 +10,7 @@ set(SOURCES
     core/OrganismDefine.cpp
     core/EnvironmentDefine.cpp
     core/WorldDefine.cpp
-    MAKE_IMAGE/make_image.cpp
+    
     ui/SetupUI.cpp
     boids/boids.cpp
     utils/img_utils.cpp
@@ -25,7 +25,7 @@ set(HEADERS
     core/Environment.h
     core/World.h
     stb_image/stb_image.h
-    stb_image/std_image_write.h
+    stb_image/stb_image_write.h
     MAKE_IMAGE/make_image.h
 )
 
@@ -127,6 +127,9 @@ add_custom_command(TARGET ecosim2 POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${CMAKE_SOURCE_DIR}/config/default_config.json"
         "$<TARGET_FILE_DIR:ecosim2>/default_config.json"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/assets"
+        "$<TARGET_FILE_DIR:ecosim2>/assets"
 )
 
 add_custom_command(TARGET debug_sim POST_BUILD

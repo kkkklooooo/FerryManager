@@ -19,9 +19,10 @@
 #include<iostream>
 #include<fstream>
 #include <implot/implot.h>
+#include"MAKE_IMAGE/make_image.h"
 #include"utils/img_utils.h"
 
-extern std::unordered_map<std::string, ImVec4>OrganismColor;
+//extern std::unordered_map<std::string, ImVec4>OrganismColor;
 
 using json = nlohmann::json;
 
@@ -55,7 +56,6 @@ static const char* OrganismDisplayName(const std::string& name) {
 
 
 
-static GLuint g_grassTex = 0;
 
 // ============================================================
 //  World grid
@@ -66,8 +66,8 @@ static void DrawWorldGrid(const World& world, bool flat, bool showReq) {
     int w = world.GetWidth(), h = world.GetHeight();
 
     ImVec2 avail = ImGui::GetContentRegionAvail();
-    float cellSize = std::min(avail.x / w, avail.y / h);
-    cellSize =std::max(cellSize, 3.0f);
+    float cellSize = min(avail.x / w, avail.y / h);
+    cellSize =max(cellSize, 3.0f);
 
     float maxE = 0.001f;
     for (auto* e : envs) if (e->energy > maxE) maxE = e->energy;
@@ -82,9 +82,8 @@ static void DrawWorldGrid(const World& world, bool flat, bool showReq) {
             ImVec2 p1(p0.x + cellSize, p0.y + cellSize);
 
             ImU32 col;
-            bool isGrass = (idx < (int)envs.size() && envs[idx]->name == "GressLand");
-            if (isGrass && g_grassTex) {
-                dl->AddImage((ImTextureID)(intptr_t)g_grassTex, p0, p1);
+            if ( ImageMaker::getMap().find(envs[idx]->name)!= ImageMaker::getMap().end()){
+                dl->AddImage(ImageMaker::getMap()[envs[idx]->name], p0, p1);
             }
             else if (flat) {
                 col = IM_COL32(35, 35, 38, 255);
@@ -110,22 +109,13 @@ static void DrawWorldGrid(const World& world, bool flat, bool showReq) {
         }
     }
 
-    auto drawOrg = [&](Reproducable* org, bool flat) {
-        int x = org->Pos.first, y = org->Pos.second;
-        ImVec2 p0(base.x + x * cellSize, base.y + y * cellSize);
-        ImVec2 p1(p0.x + cellSize, p0.y + cellSize);
-        ImVec4 base = OrganismColor[org->name];
-        float alpha = base.w;
-        if (!flat) {
-            float maxE = (org->type == PLANT) ? maxPlantE : maxAnimalE;
-            float ratio = org->energy / maxE;
-            if (ratio < 0.2f) ratio = 0.2f;
-            if (ratio > 1.0f) ratio = 1.0f;
-            alpha = base.w * ratio;
+    auto drawOrg = [&](Reproducable* org, bool flat) {//画图
+        std::string name = org->name;
+        if (ImageMaker::getMap().find(name) != ImageMaker::getMap().end()) {
+            ImVec2 p0(base.x +org->Pos.first*cellSize,base.y+org->Pos.second*cellSize);
+            ImVec2 p1(p0.x + cellSize, p0.y + cellSize);
+            dl->AddImage(ImageMaker::getMap()[name],p0,p1);
         }
-        ImU32 col = ImGui::ColorConvertFloat4ToU32(ImVec4(base.x, base.y, base.z, alpha));
-        dl->AddRectFilled(p0, p1, col);
-        dl->AddRect(p0, p1, IM_COL32(55, 55, 58, 255), 0, 0, 1.0f);
     };
 
     for (auto* org : orgs) {
@@ -155,7 +145,7 @@ static void DrawWorldGrid(const World& world, bool flat, bool showReq) {
 
     ImGui::Dummy(ImVec2(w * cellSize, h * cellSize));
 
-    if (ImGui::IsItemHovered()) {// 显示�?�?提示
+    if (ImGui::IsItemHovered()) {// 显示提示
         ImVec2 m = ImGui::GetMousePos();
         int gx = (int)((m.x - base.x) / cellSize);
         int gy = (int)((m.y - base.y) / cellSize);
@@ -203,7 +193,7 @@ static void DrawPopulationHistory() {
         return;
     }
     float yMax = Organism_hestory["&&ALLORGANISM&&"][count-1];
-    yMax = std::max(yMax * 1.15f, 10.0f);
+    yMax = max(yMax * 1.15f, 10.0f);
 
     if (ImPlot::BeginPlot("##PopPlot", ImVec2(-1, -1))) {
         ImPlot::SetupAxes("Frame", "Count");
@@ -408,7 +398,7 @@ static bool showQuery = false;
 static bool flatColors = true;
 static bool showRequests = true;
 static bool showAddList = false;
-static bool showColorSet = true;
+//static bool showColorSet = true;
 void RenderUI(World& world, int* pFrame, int total,
     bool paused, bool* pPaused, bool* pStep, float* pSpeed, bool* pUnlimited,
     int* pMaxSteps)
@@ -419,7 +409,7 @@ void RenderUI(World& world, int* pFrame, int total,
             ImGui::MenuItem("Animals", nullptr, &showAnimals);
             //ImGui::MenuItem("Heatmap", nullptr, &showHeatmap);
             ImGui::MenuItem("Query Panel", nullptr, &showQuery);// 查�?�面�?
-            ImGui::MenuItem("ColorSet", nullptr, &showColorSet);
+            //ImGui::MenuItem("ColorSet", nullptr, &showColorSet);
             ImGui::Separator();
             ImGui::MenuItem("Flat Colors", nullptr, &flatColors);
             ImGui::MenuItem("Repro Requests", nullptr, &showRequests);
@@ -531,62 +521,61 @@ void RenderUI(World& world, int* pFrame, int total,
         ImGui::End();
     }
 
-    if (showColorSet) {
-        // 设置每�?�动植物的�?�色
-        const auto& AllAnaimals = world.game_conf.The_Animals;
-        const auto& AllPlants = world.game_conf.The_Plants;
+    //if (showColorSet) {
+    //    const auto& AllAnaimals = world.game_conf.The_Animals;
+    //    const auto& AllPlants = world.game_conf.The_Plants;
 
-        static float rab_color[4] = { 1.0f,1.0f,1.0f,1.0f };
-        ImGui::Begin("OrganismColor");
-        if (ImGui::BeginTable("##Color", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg |
-            ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingFixedFit, ImVec2(0, 0))) {
-            ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, 40);
-            ImGui::TableSetupColumn("Color", ImGuiTableColumnFlags_WidthFixed, 40);
-            ImGui::TableSetupColumn("Current", ImGuiTableColumnFlags_WidthFixed, 250);
-            for (auto TheAnimal : AllAnaimals) {
-                ImGui::PushID(TheAnimal.name.c_str());
-                ImGui::TableNextRow();
-                ImGui::TableSetColumnIndex(0); ImGui::Text("%s", TheAnimal.name.data());
-                ImGui::TableSetColumnIndex(1);
-                auto it = OrganismColor.find(TheAnimal.name);
-                if (it != OrganismColor.end()) {
-                    rab_color[0] = it->second.x; rab_color[1] = it->second.y;
-                    rab_color[2] = it->second.z; rab_color[3] = it->second.w;
-                }
-                if (ImGui::ColorEdit4("##color", rab_color,
-                    ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel))
-                {
-                    OrganismColor[TheAnimal.name] = ImVec4(rab_color[0], rab_color[1],
-                        rab_color[2], rab_color[3]);
-                }
-                ImGui::TableSetColumnIndex(2); ImGui::Text("%f %f %f %f", OrganismColor[TheAnimal.name].x, OrganismColor[TheAnimal.name].y,
-                    OrganismColor[TheAnimal.name].z, OrganismColor[TheAnimal.name].w);
-                ImGui::PopID();
-            }
-            for (auto ThePlant : AllPlants) {
-                ImGui::PushID(ThePlant.name.c_str());
-                ImGui::TableNextRow();
-                ImGui::TableSetColumnIndex(0); ImGui::Text("%s", ThePlant.name.data());
-                ImGui::TableSetColumnIndex(1);
-                auto it = OrganismColor.find(ThePlant.name);
-                if (it != OrganismColor.end()) {
-                    rab_color[0] = it->second.x; rab_color[1] = it->second.y;
-                    rab_color[2] = it->second.z; rab_color[3] = it->second.w;
-                }
-                if (ImGui::ColorEdit4("##color", rab_color,
-                    ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel))
-                {
-                    OrganismColor[ThePlant.name] = ImVec4(rab_color[0], rab_color[1],
-                        rab_color[2], rab_color[3]);
-                }
-                ImGui::TableSetColumnIndex(2); ImGui::Text("%f %f %f %f", OrganismColor[ThePlant.name].x, OrganismColor[ThePlant.name].y,
-                    OrganismColor[ThePlant.name].z, OrganismColor[ThePlant.name].w);
-                ImGui::PopID();
-            }
-            ImGui::EndTable();
-        }
-        ImGui::End();
-    }
+    //    static float rab_color[4] = { 1.0f,1.0f,1.0f,1.0f };
+    //    ImGui::Begin("OrganismColor");
+    //    if (ImGui::BeginTable("##Color", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg |
+    //        ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingFixedFit, ImVec2(0, 0))) {
+    //        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, 40);
+    //        ImGui::TableSetupColumn("Color", ImGuiTableColumnFlags_WidthFixed, 40);
+    //        ImGui::TableSetupColumn("Current", ImGuiTableColumnFlags_WidthFixed, 250);
+    //        for (auto TheAnimal : AllAnaimals) {
+    //            ImGui::PushID(TheAnimal.name.c_str());
+    //            ImGui::TableNextRow();
+    //            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", TheAnimal.name.data());
+    //            ImGui::TableSetColumnIndex(1);
+    //            auto it = OrganismColor.find(TheAnimal.name);
+    //            if (it != OrganismColor.end()) {
+    //                rab_color[0] = it->second.x; rab_color[1] = it->second.y;
+    //                rab_color[2] = it->second.z; rab_color[3] = it->second.w;
+    //            }
+    //            if (ImGui::ColorEdit4("##color", rab_color,
+    //                ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel))
+    //            {
+    //                OrganismColor[TheAnimal.name] = ImVec4(rab_color[0], rab_color[1],
+    //                    rab_color[2], rab_color[3]);
+    //            }
+    //            ImGui::TableSetColumnIndex(2); ImGui::Text("%f %f %f %f", OrganismColor[TheAnimal.name].x, OrganismColor[TheAnimal.name].y,
+    //                OrganismColor[TheAnimal.name].z, OrganismColor[TheAnimal.name].w);
+    //            ImGui::PopID();
+    //        }
+    //        for (auto ThePlant : AllPlants) {
+    //            ImGui::PushID(ThePlant.name.c_str());
+    //            ImGui::TableNextRow();
+    //            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", ThePlant.name.data());
+    //            ImGui::TableSetColumnIndex(1);
+    //            auto it = OrganismColor.find(ThePlant.name);
+    //            if (it != OrganismColor.end()) {
+    //                rab_color[0] = it->second.x; rab_color[1] = it->second.y;
+    //                rab_color[2] = it->second.z; rab_color[3] = it->second.w;
+    //            }
+    //            if (ImGui::ColorEdit4("##color", rab_color,
+    //                ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel))
+    //            {
+    //                OrganismColor[ThePlant.name] = ImVec4(rab_color[0], rab_color[1],
+    //                    rab_color[2], rab_color[3]);
+    //            }
+    //            ImGui::TableSetColumnIndex(2); ImGui::Text("%f %f %f %f", OrganismColor[ThePlant.name].x, OrganismColor[ThePlant.name].y,
+    //                OrganismColor[ThePlant.name].z, OrganismColor[ThePlant.name].w);
+    //            ImGui::PopID();
+    //        }
+    //        ImGui::EndTable();
+    //    }
+    //    ImGui::End();
+    //}
 }
 
 // ============================================================
@@ -677,8 +666,6 @@ int main() {
 
     ImGui_ImplWin32_Init(g_hWnd);
     ImGui_ImplOpenGL3_Init();
-
-    g_grassTex = LoadTexture("assets/grass.png");
 
     ImGuiIO& io = ImGui::GetIO();
     io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\msyh.ttc", 16.0f,

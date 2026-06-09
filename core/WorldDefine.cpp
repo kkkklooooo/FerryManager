@@ -228,7 +228,7 @@ void World::Reset()
     int scatterRadius = 6;
 
     auto addPlant = [&](int x, int y) {
-        Reproducas.push_back(MyOperator::GetOp()(x, y, conf.Plant_init_radius, "Gress", Plant_id++));
+        Reproducas.push_back(MyOperator::GetOp()(x, y, conf.Plant_init_radius, "Grass", Plant_id++));
     };
 
     for (int s = 0; s < numSeeds; ++s) {
