@@ -145,8 +145,8 @@ static void RenderBoidsUI() {
     ImGui::Begin("Boids World", nullptr, ImGuiWindowFlags_NoScrollbar);
 
     ImVec2 avail = ImGui::GetContentRegionAvail();
-    float cellSize = min(avail.x / g_worldW, avail.y / g_worldH);
-    cellSize = max(cellSize, 4.0f);
+    float cellSize = std::min(avail.x / g_worldW, avail.y / g_worldH);
+    cellSize = std::max(cellSize, 4.0f);
 
     ImDrawList* dl = ImGui::GetWindowDrawList();
     ImVec2 base = ImGui::GetCursorScreenPos();
